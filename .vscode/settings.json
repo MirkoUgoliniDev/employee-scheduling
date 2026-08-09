@@ -49,6 +49,18 @@
       ]
     },
     {
+      "id": "publish_release",
+      "name": "Publish Release",
+      "text": "$(rocket) Release",
+      "tooltip": "Publish Windows MSI and Raspberry/Linux packages on GitHub",
+      "alignment": "left",
+      "priority": 95,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "Release: Publish Windows and Raspberry packages"
+      ]
+    },
+    {
       "id": "open_app",
       "name": "Open App",
       "text": "$(globe) Open App",

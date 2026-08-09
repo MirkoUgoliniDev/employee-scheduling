@@ -6,6 +6,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "dsznajder.es7-react-js-snippets",
-    "formulahendry.auto-rename-tag"
+    "formulahendry.auto-rename-tag",
+    "anweber.statusbar-commands"
   ]
 }

@@ -21,6 +21,26 @@
       "problemMatcher": []
     },
     {
+      "label": "Release: Publish Windows and Raspberry packages",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\publish-release.ps1",
+        "-Version",
+        "${input:releaseVersion}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Quarkus: Dev Mode (SQLite)",
       "type": "shell",
       "command": "mvn quarkus:dev",
@@ -123,6 +143,13 @@
         "panel": "shared"
       },
       "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "releaseVersion",
+      "type": "promptString",
+      "description": "Release version (for example 1.2.3)"
     }
   ]
 }
