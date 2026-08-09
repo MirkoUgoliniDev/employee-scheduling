@@ -307,14 +307,17 @@ before reporting success. It runs on Debian, Ubuntu and Raspberry Pi OS (`apt`) 
 Fedora and RHEL derivatives (`dnf`).
 
 ```bash
-git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
-cd employee-scheduling
+curl -fLO https://github.com/MirkoUgoliniDev/employee-scheduling/releases/latest/download/employee-scheduling-raspberry-installer.tar.gz
+mkdir employee-scheduling-installer
+tar -xzf employee-scheduling-raspberry-installer.tar.gz -C employee-scheduling-installer
+cd employee-scheduling-installer
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-The installer downloads the latest engine-specific JAR from GitHub Releases; Maven, Node.js,
-Windows and manual file copies are not required on the server. A local JAR can still be selected
-with `--jar`, and `--from-source` remains available for development.
+The small archive contains only the installation and uninstallation scripts. The installer then
+downloads the latest engine-specific JAR from GitHub Releases; the source repository, Maven,
+Node.js, Windows and manual file copies are not required on the server. A local JAR can still be
+selected with `--jar`, and `--from-source` remains available for development.
 
 ---
 

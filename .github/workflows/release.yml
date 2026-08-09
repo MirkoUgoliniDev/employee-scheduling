@@ -44,10 +44,21 @@ jobs:
             -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sqlite
           cp target/*-runner.jar release/employee-scheduling-sqlite-runner.jar
 
+          mkdir -p release/raspberry-installer/scripts
+          install -m 755 scripts/install-linux.sh \
+            release/raspberry-installer/scripts/install-linux.sh
+          install -m 755 scripts/uninstall-linux.sh \
+            release/raspberry-installer/scripts/uninstall-linux.sh
+          tar -C release/raspberry-installer -czf \
+            release/employee-scheduling-raspberry-installer.tar.gz scripts
+          rm -rf release/raspberry-installer
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-packages
-          path: release/*.jar
+          path: |
+            release/*.jar
+            release/*.tar.gz
           if-no-files-found: error
 
   windows-msi:
@@ -115,7 +126,7 @@ jobs:
 
       - name: Generate checksums
         working-directory: release
-        run: sha256sum *.jar *.msi > SHA256SUMS
+        run: sha256sum *.jar *.msi *.tar.gz > SHA256SUMS
 
       - name: Create GitHub Release
         env:

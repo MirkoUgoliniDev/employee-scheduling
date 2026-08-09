@@ -15,16 +15,20 @@ momento in cui farlo è più scomodo.
 # 1. entra nel Raspberry
 ssh pi@raspberrypi.local
 
-# 2. scarica il repository pubblico
-git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
-cd employee-scheduling
+# 2. scarica soltanto il piccolo installer Raspberry della Release
+curl -fLO https://github.com/MirkoUgoliniDev/employee-scheduling/releases/latest/download/employee-scheduling-raspberry-installer.tar.gz
+mkdir employee-scheduling-installer
+tar -xzf employee-scheduling-raspberry-installer.tar.gz -C employee-scheduling-installer
+cd employee-scheduling-installer
 
-# 3. installa PostgreSQL e l'ultima Release dell'applicazione
+# 3. installa PostgreSQL e l'applicazione; il JAR viene scaricato automaticamente
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-Lo script scarica automaticamente da GitHub Releases il JAR compilato per il
-motore selezionato. Non servono Windows, `scp`, Maven o Node.js sul Raspberry.
+L'archivio contiene soltanto gli script di installazione e disinstallazione. Lo
+script scarica automaticamente da GitHub Releases il JAR compilato per il motore
+selezionato. Non servono il repository sorgente, Windows, `scp`, Maven o Node.js
+sul Raspberry.
 
 Per usare il wizard grafico/testuale o un pacchetto compilato manualmente resta
 disponibile la modalità avanzata:

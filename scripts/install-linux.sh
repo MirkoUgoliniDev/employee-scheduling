@@ -6,9 +6,7 @@
 #  installs and configures PostgreSQL, creates the service user, registers the
 #  systemd service, and verifies that the application actually responds.
 #
-#  Typical usage on a freshly prepared Raspberry Pi:
-#      git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
-#      cd employee-scheduling
+#  Typical usage after extracting the Raspberry installer release archive:
 #      sudo ./scripts/install-linux.sh --engine postgresql
 #
 #  All options:
@@ -43,9 +41,11 @@ DB_PASS=""
 SMTP_HOST=""; SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""; SMTP_FROM=""
 RELEASE_REPOSITORY="MirkoUgoliniDev/employee-scheduling"
 DOWNLOAD_DIR=""
-# The script lives in scripts/, but pom.xml, frontend/, and target/ are in its
-# parent directory: that is the project root, not the script directory.
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# The release archive preserves scripts/ so the same layout works both in a
+# source checkout and in the minimal Raspberry installer package.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+UNINSTALLER_SRC="$SCRIPT_DIR/uninstall-linux.sh"
 # Preserve arguments before parsing to reconstruct the command in the "rerun
 # with sudo" message, where options would otherwise already be lost. Passwords
 # are replaced because that message reaches terminal scrollback and session logs.
@@ -58,6 +58,9 @@ die()  { printf '\n[ERROR] %s\n' "$1" >&2; [ $# -gt 1 ] && printf '        %s\n'
 info() { printf '  %s\n' "$1"; }
 step() { printf '\n\033[1;36m%s\033[0m\n' "$1"; }
 warn() { printf '  \033[1;33m[WARNING]\033[0m %s\n' "$1"; }
+
+[ -f "$UNINSTALLER_SRC" ] \
+    || die "The uninstaller is missing from the Raspberry installer package."
 
 # Commands as the postgres user. Prefer runuser: it is part of util-linux and is
 # always present, while sudo may be absent from a minimal image.
@@ -463,6 +466,8 @@ install -d -m 755 -o root -g root "$INSTALL_DIR"
 install -d -m 750 -o "$SERVICE_USER" -g "$SERVICE_USER" "$DATA_DIR"
 install -d -m 750 -o "$SERVICE_USER" -g "$SERVICE_USER" "$DATA_DIR/backups"
 
+install -m 755 -o root -g root "$UNINSTALLER_SRC" "$INSTALL_DIR/uninstall-linux.sh"
+
 # The JAR remains root-owned and read-only for the service: a compromised process
 # must not be able to rewrite its own executable.
 rm -f "$INSTALL_DIR"/*runner.jar
@@ -635,7 +640,7 @@ echo ""
 echo "  Live log      : journalctl -u $SERVICE_NAME -f"
 echo "  Status        : systemctl status $SERVICE_NAME"
 echo "  Restart       : systemctl restart $SERVICE_NAME"
-echo "  Uninstall     : ./scripts/uninstall-linux.sh"
+echo "  Uninstall     : sudo $INSTALL_DIR/uninstall-linux.sh"
 echo ""
 echo "  The first registered account becomes the administrator."
 echo ""
