@@ -25,6 +25,8 @@ import { useAuth } from '../auth/AuthContext'
 
 type Step = 'email' | 'otp' | 'profile' | 'done'
 
+const EMAIL_PATTERN = /^[^\s@]{1,64}@[^\s@]+\.[^\s@]{1,64}$/
+
 const USERNAME_RE = /^[A-Za-z0-9_.-]{3,64}$/
 const RESEND_SECONDS = 60
 
@@ -69,11 +71,15 @@ export default function RegisterPage() {
 
   async function submitEmail(e: FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
+    const normalizedEmail = email.trim()
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setError(t('msg.err.emailInvalid', 'Indirizzo email non valido.'))
+      return
+    }
     setBusy(true)
     setError(null)
     try {
-      await registerApi.requestOtp(email.trim())
+      await registerApi.requestOtp(normalizedEmail)
       setResendIn(RESEND_SECONDS)
       setStep('otp')
       toast.success(t('register.otpSent', 'Codice inviato. Controlla la tua email.'))
@@ -195,6 +201,8 @@ export default function RegisterPage() {
   ]
   const visibleSteps = otpRequired ? steps : steps.slice(2)
   const stepIndex = visibleSteps.findIndex(s => s.id === step)
+  const normalizedEmail = email.trim()
+  const emailIsValid = EMAIL_PATTERN.test(normalizedEmail)
 
   return (
     <div className="d-flex justify-content-center align-items-center py-4" style={{ minHeight: '100vh', background: 'linear-gradient(180deg, var(--bs-primary-bg-subtle) 0%, var(--bs-body-bg) 100%)' }}>
@@ -251,15 +259,24 @@ export default function RegisterPage() {
                   <Form.Control
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={e => {
+                      setEmail(e.target.value)
+                      setError(null)
+                    }}
                     autoComplete="email"
                     autoFocus
                     disabled={busy}
                     placeholder="nome@esempio.it"
                     required
+                    isInvalid={normalizedEmail.length > 0 && !emailIsValid}
                     className="border-start-0"
                   />
                 </div>
+                {normalizedEmail.length > 0 && !emailIsValid && (
+                  <div className="invalid-feedback d-block">
+                    {t('msg.err.emailInvalid', 'Indirizzo email non valido.')}
+                  </div>
+                )}
                 <Form.Text className="text-muted">
                   {t('register.emailHint', 'Ti invieremo un codice di verifica a questo indirizzo.')}
                 </Form.Text>
@@ -267,7 +284,7 @@ export default function RegisterPage() {
 
               {error && <Alert variant="danger" className="py-2 small">{error}</Alert>}
 
-              <Button type="submit" variant="primary" className="w-100" size="lg" disabled={busy || !email.trim()}>
+              <Button type="submit" variant="primary" className="w-100" size="lg" disabled={busy || !emailIsValid}>
                 {busy ? <Spinner size="sm" /> : <><FontAwesomeIcon icon={faPaperPlane} className="me-2" />{t('register.sendOtp', 'Invia codice')}</>}
               </Button>
 
