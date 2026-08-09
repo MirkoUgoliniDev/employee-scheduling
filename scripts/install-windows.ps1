@@ -1,5 +1,5 @@
 # ============================================================================
-#  install-windows.ps1 — Employee Scheduling installation wizard (Windows 11)
+#  install-windows.ps1 - Employee Scheduling installation wizard (Windows 11)
 #  Run:  powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
 # ============================================================================
 param(
@@ -11,18 +11,18 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host ""
 Write-Host "======================================================" -ForegroundColor Cyan
-Write-Host "  Employee Scheduling — Installation Wizard"            -ForegroundColor Cyan
+Write-Host "  Employee Scheduling - Installation Wizard"            -ForegroundColor Cyan
 Write-Host "  Windows 11 | SQLite desktop or PostgreSQL server"      -ForegroundColor Cyan
 Write-Host "======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# The script lives in scripts/, but everything it needs — pom.xml, frontend/,
-# target/, assets/ — is in its parent directory. That is the project root, not
+# The script lives in scripts/, but everything it needs - pom.xml, frontend/,
+# target/, assets/ - is in its parent directory. That is the project root, not
 # the script directory. Without Split-Path, Maven would run inside scripts/ and
 # find nothing.
 $Root = Split-Path $PSScriptRoot -Parent
 
-# ── Helpers (defined BEFORE use: PowerShell does not hoist functions) ─────────
+# -- Helpers (defined BEFORE use: PowerShell does not hoist functions) ----------
 # Run a native command while suppressing stdout+stderr and return $LASTEXITCODE.
 # With $ErrorActionPreference='Stop', PS 5.1 turns native command stderr (for
 # example Vite warnings) into NativeCommandError; lower EAP locally here.
@@ -223,7 +223,7 @@ function New-CryptoString([int]$length) {
     return $s.Substring(0, [Math]::Min($length, $s.Length))
 }
 
-# ── WiX for jpackage --type msi ───────────────────────────────────────────────
+# -- WiX for jpackage --type msi ------------------------------------------------
 function Ensure-Wix {
     # 1) Already in PATH?
     if (Get-Command candle.exe -ErrorAction SilentlyContinue) { return $true }
@@ -257,7 +257,7 @@ function Ensure-Wix {
     return $false
 }
 
-# ── 0. Check prerequisites ───────────────────────────────────────────────────
+# -- 0. Check prerequisites ----------------------------------------------------
 function Test-Tool([string]$name, [string]$pathCheck, [scriptblock]$check) {
     # Fall back to JAVA_HOME/MAVEN_HOME: system PATH may omit java/mvn even when
     # installed, for example when installed for the current user only.
@@ -278,7 +278,7 @@ if (-not $hasMvn)  { Write-Host "  Install Maven: https://maven.apache.org" -For
 if (-not $hasNode) { Write-Host "  Install Node.js LTS: https://nodejs.org" -ForegroundColor Red; exit 1 }
 Write-Host "  Prerequisites OK (Java + Maven + Node.js)" -ForegroundColor Green
 
-# ── 1. Database mode ─────────────────────────────────────────────────────────
+# -- 1. Database mode ----------------------------------------------------------
 Write-Host ""
 Write-Host "Database mode" -ForegroundColor Yellow
 if ($Package) {
@@ -302,7 +302,7 @@ if ($mode -eq "2") {
     $dbUrl = $dbUser = $dbPassPlain = ""
 }
 
-# ── 2. HTTP port ──────────────────────────────────────────────────────────────
+# -- 2. HTTP port --------------------------------------------------------------
 # (No question about the data directory: packaged data lives in
 #  %LOCALAPPDATA%\EmployeeScheduling; development data lives in databases\.)
 Write-Host ""
@@ -314,7 +314,7 @@ if ($Package) {
     if ([string]::IsNullOrWhiteSpace($port)) { $port = "8080" }
 }
 
-# ── 3. SMTP (server mode only) ────────────────────────────────────────────────
+# -- 3. SMTP (server mode only) ------------------------------------------------
 # Standalone mode (SQLite) needs neither OTP nor email notifications: the mock is
 # implicit and the SMTP question is not asked.
 $smtpHost = $smtpPort = $smtpUser = $smtpPass = $smtpFrom = ""
@@ -343,7 +343,7 @@ if ($Package) {
     Write-Host "  Standalone mode: no email required (no OTPs/notifications)." -ForegroundColor Green
 }
 
-# ── 5. Secret keys (cryptographically secure) ─────────────────────────────────
+# -- 5. Secret keys (cryptographically secure) --------------------------------
 Write-Host ""
 Write-Host "Secret keys" -ForegroundColor Yellow
 $sessionKey = New-CryptoString 48
@@ -351,7 +351,7 @@ $backupToken = New-CryptoString 48
 Write-Host "  Session key generated (48 chars, RNGCryptoServiceProvider)."
 Write-Host "  Backup token generated (48 chars)."
 
-# ── 6. Write .env (dev mode ONLY) ─────────────────────────────────────────────
+# -- 6. Write .env (dev mode ONLY) --------------------------------------------
 # The jpackage package uses baked-in system properties ($APPDIR\data).
 # .env is for mvn quarkus:dev, which reads it from the CWD (project root).
 $envFile = Join-Path $Root ".env"
@@ -362,7 +362,7 @@ Write-Host "  Writing configuration (dev mode) to $envFile ..."
 $dataDirFwd = ($Root + "\databases") -replace '\\', '/'
 
 $lines = @()
-$lines += "# Employee Scheduling — configuration generated by the wizard"
+$lines += "# Employee Scheduling - configuration generated by the wizard"
 $lines += "AUTH_SESSION_KEY=$sessionKey"
 $lines += "QUARKUS_HTTP_PORT=$port"
 $lines += "QUARKUS_PROFILE=$dbKind"
@@ -407,7 +407,7 @@ if ($icaclsResult -eq 0) {
     Write-Host "  [WARNING] permissions were not applied (continuing anyway)." -ForegroundColor Yellow
 }
 
-# ── 7. Build ──────────────────────────────────────────────────────────────────
+# -- 7. Build -----------------------------------------------------------------
 Write-Host ""
 Write-Host "Building..." -ForegroundColor Yellow
 $prev = Get-Location
@@ -446,7 +446,7 @@ try {
 $jar = Get-ChildItem "$Root\target\*runner.jar" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $jar) { Write-Host "  JAR not found!" -ForegroundColor Red; exit 1 }
 
-# ── Packaging: ask whether to build the native app ───────────────────────────
+# -- Packaging: ask whether to build the native app ---------------------------
 Write-Host ""
 Write-Host "Native application package (jpackage, bundled JRE):"
 if ($Package) {
@@ -630,7 +630,7 @@ if ($pkg -eq "1" -or $pkg -eq "2") {
     }
 }
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# -- Summary ------------------------------------------------------------------
 Write-Host ""
 Write-Host "======================================================" -ForegroundColor Cyan
 Write-Host "  Installation complete!" -ForegroundColor Green
