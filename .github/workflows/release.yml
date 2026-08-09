@@ -35,6 +35,7 @@ jobs:
       - name: Build PostgreSQL and SQLite packages
         shell: bash
         run: |
+          python3 -m compileall -q setup scripts/test-smtp.py
           mkdir -p release
           mvn -B -ntp clean package -DskipTests \
             -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql
@@ -53,11 +54,12 @@ jobs:
             release/raspberry-installer/scripts/test-smtp.py
           install -m 755 scripts/start-web-setup.sh \
             release/raspberry-installer/scripts/start-web-setup.sh
+          printf '%s\n' "$GITHUB_REF_NAME" > release/raspberry-installer/release-version.txt
           cp -R setup release/raspberry-installer/setup
           find release/raspberry-installer/setup -type d -name __pycache__ -prune -exec rm -rf {} +
           find release/raspberry-installer/setup -type f -name '*.pyc' -delete
           tar -C release/raspberry-installer -czf \
-            release/employee-scheduling-raspberry-installer.tar.gz scripts setup
+            release/employee-scheduling-raspberry-installer.tar.gz scripts setup release-version.txt
           rm -rf release/raspberry-installer
 
       - uses: actions/upload-artifact@v4

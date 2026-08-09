@@ -17,6 +17,7 @@ import ssl
 import threading
 from email.message import EmailMessage
 from email.utils import parseaddr
+from http.cookies import CookieError, SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -190,6 +191,29 @@ document.getElementById("smtp_test").onclick=()=>{
 </script></body></html>
 """
 
+UNLOCK_PAGE = """<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Employee Scheduling — Accesso al setup</title>
+<style>
+ :root{color-scheme:dark} *{box-sizing:border-box} body{margin:0;background:#12141a;color:#e6e8ee;
+ font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:grid;place-items:center;min-height:100vh}
+ main{width:min(420px,calc(100% - 32px));background:#1a1d26;border:1px solid #2a2f3d;border-radius:12px;padding:24px}
+ h1{font-size:20px;margin:0 0 8px} p{color:#aab1c2} label{display:block;margin:18px 0 6px}
+ input{width:100%;padding:12px;background:#0e1017;color:#fff;border:1px solid #39405a;border-radius:8px;
+ font:600 20px/1.2 ui-monospace,Consolas,monospace;text-align:center;letter-spacing:.15em;text-transform:uppercase}
+ button{width:100%;margin-top:14px;padding:12px;background:#7c8cff;color:#fff;border:0;border-radius:8px;font-weight:700}
+ .error{color:#ff8b87}
+</style></head><body><main>
+<h1>Employee Scheduling — setup</h1>
+<p>Inserisci il codice temporaneo mostrato nel terminale del Raspberry.</p>
+__ERROR__
+<form method="post" action="/unlock" autocomplete="off">
+ <label for="code">Codice di accesso</label>
+ <input id="code" name="code" maxlength="9" autofocus required placeholder="ABCD-EFGH">
+ <button type="submit">Apri il wizard</button>
+</form></main></body></html>"""
+
 
 def _valid_email(value: str) -> bool:
     address = parseaddr(value or "")[1]
@@ -233,6 +257,7 @@ def run_webui(steps, runner, sysinfo, config, port: int,
     ip = sysinfo.primary_ip() or "localhost"
     forced_dry_run = runner.dry_run
     token = secrets.token_urlsafe(32) if host not in ("127.0.0.1", "localhost", "::1") else ""
+    access_code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
 
     def steps_json():
         return json.dumps([{ "name": s.name, "description": s.description,
@@ -302,11 +327,41 @@ def run_webui(steps, runner, sysinfo, config, port: int,
             if not token:
                 return True
             supplied = parse_qs(urlsplit(self.path).query).get("token", [""])[0]
-            return secrets.compare_digest(supplied, token)
+            if supplied and secrets.compare_digest(supplied, token):
+                return True
+            try:
+                cookie = SimpleCookie(self.headers.get("Cookie", ""))
+            except CookieError:
+                return False
+            stored = cookie.get("employee_setup_token")
+            return bool(stored and secrets.compare_digest(stored.value, token))
+
+        def _unlock_page(self, error: str = "", status: int = 200):
+            message = f'<p class="error">{error}</p>' if error else ""
+            body = UNLOCK_PAGE.replace("__ERROR__", message).encode("utf-8")
+            self._send(status, body, "text/html; charset=utf-8")
+
+        def _unlock(self):
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                values = parse_qs(self.rfile.read(length).decode("utf-8", errors="replace"))
+                supplied = values.get("code", [""])[0].replace("-", "").strip().upper()
+            except (TypeError, ValueError):
+                supplied = ""
+            if not secrets.compare_digest(supplied, access_code):
+                self._unlock_page("Codice non corretto.", 403)
+                return
+            self.send_response(303)
+            self.send_header("Location", "/")
+            self.send_header("Set-Cookie",
+                             f"employee_setup_token={token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=3600")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
 
         def do_GET(self):
             if not self._authorized():
-                self._send(403, b"chiave temporanea non valida", "text/plain; charset=utf-8")
+                self._unlock_page()
                 return
             path = urlsplit(self.path).path
             if path in ("/", "/index.html"):
@@ -353,11 +408,18 @@ def run_webui(steps, runner, sysinfo, config, port: int,
                         _clients.remove(channel)
 
         def do_POST(self):
+            path = urlsplit(self.path).path
+            if path == "/unlock" and token:
+                self._unlock()
+                return
             if not self._authorized():
+                # Do not read an untrusted request body merely to discard it.
+                # Close the HTTP/1.1 connection so unread bytes cannot become
+                # the method prefix of the next request on the same socket.
+                self.close_connection = True
                 self._send(403, json.dumps({"error": "chiave temporanea non valida"}).encode(),
                            "application/json; charset=utf-8")
                 return
-            path = urlsplit(self.path).path
             if path not in ("/start", "/test-smtp"):
                 self._send(404, b"non trovato", "text/plain; charset=utf-8")
                 return
@@ -395,9 +457,12 @@ def run_webui(steps, runner, sysinfo, config, port: int,
     print("=" * 54)
     if token:
         print("  Wizard temporaneo disponibile sulla rete locale.")
-        print("  Apri dal PC questo indirizzo completo:")
-        print(f"      http://{ip}:{port}/?token={token}")
-        print("  Non condividere l'indirizzo: consente di modificare il sistema.")
+        setup_url = f"http://{ip}:{port}"
+        display_code = f"{access_code[:4]}-{access_code[4:]}"
+        print("  Apri dal PC:")
+        print(f"      \033]8;;{setup_url}\033\\{setup_url}\033]8;;\033\\")
+        print(f"  Codice di accesso: {display_code}")
+        print("  Non condividere il codice: consente di modificare il sistema.")
     else:
         print("  Wizard in ascolto (solo su questa macchina).")
         print("  Dal TUO PC apri un tunnel e poi il browser:")

@@ -19,6 +19,7 @@ ENV_FILE="/etc/employee-scheduling.env"
 DATA_DIR="/var/lib/employee-scheduling"
 DB_NAME="employee_scheduling"
 DB_USER="employee_scheduling"
+CACHE_DIR="/var/cache/employee-scheduling-installer"
 PURGE="no"
 ASSUME_YES="no"
 # Saved before parsing: after the loop, arguments have been consumed and the
@@ -140,6 +141,9 @@ step "[3/4] Data"
 if [ "$PURGE" = "yes" ]; then
     if [ -d "$DATA_DIR" ]; then
         rm -rf "$DATA_DIR"; info "Deleted $DATA_DIR"
+    fi
+    if [ -d "$CACHE_DIR" ]; then
+        rm -rf "$CACHE_DIR"; info "Deleted installer cache $CACHE_DIR"
     fi
     if command -v psql >/dev/null 2>&1; then
         as_postgres dropdb --if-exists "$DB_NAME" 2>/dev/null \

@@ -314,9 +314,11 @@ cd employee-scheduling-installer
 sudo ./scripts/start-web-setup.sh
 ```
 
-The last command downloads the latest PostgreSQL package and prints a temporary, token-protected
-URL. Open it from a browser on the same trusted LAN, test SMTP delivery, choose whether to load
-sample data, and start installation. The privileged setup server stops automatically afterward.
+The last command downloads the PostgreSQL package and prints a short local URL plus a temporary
+access code. Open the URL from a browser on the same trusted LAN, enter the code, test SMTP
+delivery, choose whether to load sample data, and start installation. The privileged setup server
+stops automatically afterward. The versioned JAR is cached, so restarting the wizard does not
+download it again; use `--refresh` only when an explicit redownload is required.
 
 For an isolated test installation, add `--demo-data`. It creates the same portable sample
 structure, locations, staff, skills and unassigned shifts on PostgreSQL and SQLite. The option is

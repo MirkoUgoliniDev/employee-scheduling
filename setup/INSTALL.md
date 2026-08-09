@@ -25,11 +25,16 @@ cd employee-scheduling-installer
 sudo ./scripts/start-web-setup.sh
 ```
 
-Il comando mostra un indirizzo completo simile a
-`http://192.168.1.151:8899/?token=...`: aprilo dal PC collegato alla stessa rete
-locale fidata. La chiave cambia a ogni avvio e il server privilegiato si spegne
-automaticamente quando l'installazione termina. Dalla pagina puoi provare
-l'invio SMTP prima di installare e scegliere i dati dimostrativi.
+Il comando mostra un indirizzo breve come `http://192.168.1.151:8899` e un codice
+temporaneo: apri l'indirizzo dal PC collegato alla stessa rete locale fidata e
+inserisci il codice nella pagina. Il codice cambia a ogni avvio e il server
+privilegiato si spegne automaticamente quando l'installazione termina. Dalla
+pagina puoi provare l'invio SMTP prima di installare e scegliere i dati
+dimostrativi.
+
+Il JAR è conservato in `/var/cache/employee-scheduling-installer` con il numero
+della Release: chiudere e riaprire il wizard non lo scarica nuovamente. Usa
+`sudo ./scripts/start-web-setup.sh --refresh` soltanto per forzare il download.
 
 Per un'installazione di test, gli stessi dati dimostrativi portabili possono
 essere caricati sia su PostgreSQL sia su SQLite aggiungendo `--demo-data`:
@@ -94,8 +99,8 @@ sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.2-SNAPSHOT-ru
 ### Modalità web locale o tramite tunnel SSH
 
 Il launcher consigliato espone temporaneamente la porta `8899` sulla rete locale
-e protegge ogni richiesta con una chiave casuale presente nell'URL. Usalo solo su
-una rete fidata e non condividere l'indirizzo. Per mantenere il wizard accessibile
+e protegge ogni richiesta con un codice temporaneo mostrato nel terminale. Usalo
+solo su una rete fidata e non condividere il codice. Per mantenere il wizard accessibile
 **solo sulla macchina stessa**, avvialo con `--local-only`; dal tuo PC:
 
 ```bash
