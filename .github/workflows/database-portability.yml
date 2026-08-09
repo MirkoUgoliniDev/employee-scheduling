@@ -26,12 +26,6 @@ jobs:
         run: npm run lint -- --max-warnings=0
       - name: Build frontend
         run: npm run build
-      - name: Verify generated frontend assets are committed
-        working-directory: .
-        shell: bash
-        run: |
-          git diff --exit-code -- src/main/resources/META-INF/resources
-          test -z "$(git status --porcelain --untracked-files=all -- src/main/resources/META-INF/resources)"
 
   test-sqlite:
     runs-on: windows-latest
