@@ -41,6 +41,26 @@
       "problemMatcher": []
     },
     {
+      "label": "GitHub: Clean old Actions runs",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\cleanup-github-actions.ps1",
+        "-KeepPerWorkflow",
+        "${input:keepActionRuns}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Quarkus: Dev Mode (SQLite)",
       "type": "shell",
       "command": "mvn quarkus:dev",
@@ -150,6 +170,12 @@
       "id": "releaseVersion",
       "type": "promptString",
       "description": "Release version (for example 1.2.3)"
+    },
+    {
+      "id": "keepActionRuns",
+      "type": "promptString",
+      "description": "Completed Actions runs to keep per workflow",
+      "default": "3"
     }
   ]
 }

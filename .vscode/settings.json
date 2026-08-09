@@ -61,6 +61,18 @@
       ]
     },
     {
+      "id": "cleanup_github_actions",
+      "name": "Clean GitHub Actions",
+      "text": "$(trash) Actions",
+      "tooltip": "Delete old completed GitHub Actions runs after confirmation",
+      "alignment": "left",
+      "priority": 94,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "GitHub: Clean old Actions runs"
+      ]
+    },
+    {
       "id": "open_app",
       "name": "Open App",
       "text": "$(globe) Open App",
