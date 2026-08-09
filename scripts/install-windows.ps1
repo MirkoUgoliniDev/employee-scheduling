@@ -191,7 +191,12 @@ function Invoke-MsiTextPositionPatch([string]$msiPath) {
             'OpenDatabase', 'InvokeMethod', $null, $installer, @($msiPath, 2))
 
         foreach ($controlName in @('Title', 'Description', 'PatchDescription')) {
-            $sql = "UPDATE ``Control`` SET ``X``=20, ``Width``=175 " +
+            $setValues = "``X``=20, ``Width``=175"
+            if ($controlName -eq 'Title') {
+                $titleText = '{\WixUI_Font_Bigger}Welcome to [ProductName] [ProductVersion] Setup Wizard'
+                $setValues += ", ``Text``='$titleText'"
+            }
+            $sql = "UPDATE ``Control`` SET $setValues " +
                 "WHERE ``Dialog_``='WelcomeDlg' AND ``Control``='$controlName'"
             $updateView = $database.GetType().InvokeMember(
                 'OpenView', 'InvokeMethod', $null, $database, @($sql))
@@ -201,7 +206,7 @@ function Invoke-MsiTextPositionPatch([string]$msiPath) {
         $database.GetType().InvokeMember(
             'Commit', 'InvokeMethod', $null, $database, $null) | Out-Null
 
-        $verifySql = "SELECT ``Control``,``X``,``Width`` FROM ``Control`` " +
+        $verifySql = "SELECT ``Control``,``X``,``Width``,``Text`` FROM ``Control`` " +
             "WHERE ``Dialog_``='WelcomeDlg'"
         $verifyView = $database.GetType().InvokeMember(
             'OpenView', 'InvokeMethod', $null, $database, @($verifySql))
@@ -215,6 +220,10 @@ function Invoke-MsiTextPositionPatch([string]$msiPath) {
             if ($record.StringData(1) -in @('Title', 'Description', 'PatchDescription') -and
                 $record.IntegerData(2) -eq 20 -and $record.IntegerData(3) -eq 175) {
                 $verified++
+            }
+            if ($record.StringData(1) -eq 'Title' -and
+                $record.StringData(4) -notlike '*[[]ProductVersion[]]*') {
+                throw 'The WelcomeDlg title does not contain the product version.'
             }
         }
         if ($verified -ne 3) {
