@@ -67,11 +67,28 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Verify Windows toolchain
+        shell: powershell
+        run: |
+          java -version
+          mvn -version
+          node --version
+          npm --version
+          jpackage --version
+
       - name: Build Windows MSI
         shell: powershell
-        run: >-
-          powershell.exe -NoProfile -ExecutionPolicy Bypass
-          -File .\scripts\install-windows.ps1 -Package msi
+        run: |
+          $log = Join-Path $env:RUNNER_TEMP 'windows-msi-build.log'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass `
+            -File .\scripts\install-windows.ps1 -Package msi 2>&1 |
+            Tee-Object -FilePath $log
+          $buildExitCode = $LASTEXITCODE
+          if ($buildExitCode -ne 0) {
+            $details = ((Get-Content -LiteralPath $log -Tail 30) -join '%0A')
+            Write-Host "::error title=Windows MSI build failed::$details"
+            exit $buildExitCode
+          }
 
       - uses: actions/upload-artifact@v4
         with:
