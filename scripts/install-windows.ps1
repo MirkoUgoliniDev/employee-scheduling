@@ -183,31 +183,48 @@ function Invoke-MsiTextPositionPatch([string]$msiPath) {
         Write-Host "  [WARNING] MSI not found: installer text patch skipped." -ForegroundColor Yellow
         return $false
     }
-    $js = Join-Path $env:TEMP "msi-move-text.js"
-    @'
-var path = WScript.Arguments(0);
-var msi = new ActiveXObject("WindowsInstaller.Installer");
-var db = msi.OpenDatabase(path, 2);
-var view = db.OpenView("SELECT * FROM Control WHERE Dialog_ = 'WelcomeDlg' AND (Control = 'Title' OR Control = 'Description' OR Control = 'PatchDescription')");
-view.Execute();
-var rec = view.Fetch();
-var n = 0;
-while (rec) {
-  rec.StringData(4) = "20";
-  rec.StringData(6) = "175";
-  view.Modify(3, rec);
-  n++;
-  rec = view.Fetch();
-}
-db.Commit();
-WScript.Echo("Patched controls: " + n);
-'@ | Set-Content -LiteralPath $js -Encoding UTF8
-    $code = Invoke-Native { cscript //nologo $js $msiPath }
-    if ($code -ne 0) {
-        Write-Host "  [WARNING] installer text patch failed (exit $code): text remains on the right." -ForegroundColor Yellow
+    try {
+        # Update the MSI database directly. The previous cscript-based patch
+        # returned success on some CI runners without persisting its changes.
+        $installer = New-Object -ComObject WindowsInstaller.Installer
+        $database = $installer.GetType().InvokeMember(
+            'OpenDatabase', 'InvokeMethod', $null, $installer, @($msiPath, 2))
+
+        foreach ($controlName in @('Title', 'Description', 'PatchDescription')) {
+            $sql = "UPDATE ``Control`` SET ``X``=20, ``Width``=175 " +
+                "WHERE ``Dialog_``='WelcomeDlg' AND ``Control``='$controlName'"
+            $updateView = $database.GetType().InvokeMember(
+                'OpenView', 'InvokeMethod', $null, $database, @($sql))
+            $updateView.GetType().InvokeMember(
+                'Execute', 'InvokeMethod', $null, $updateView, $null) | Out-Null
+        }
+        $database.GetType().InvokeMember(
+            'Commit', 'InvokeMethod', $null, $database, $null) | Out-Null
+
+        $verifySql = "SELECT ``Control``,``X``,``Width`` FROM ``Control`` " +
+            "WHERE ``Dialog_``='WelcomeDlg'"
+        $verifyView = $database.GetType().InvokeMember(
+            'OpenView', 'InvokeMethod', $null, $database, @($verifySql))
+        $verifyView.GetType().InvokeMember(
+            'Execute', 'InvokeMethod', $null, $verifyView, $null) | Out-Null
+        $verified = 0
+        while ($true) {
+            $record = $verifyView.GetType().InvokeMember(
+                'Fetch', 'InvokeMethod', $null, $verifyView, $null)
+            if ($null -eq $record) { break }
+            if ($record.StringData(1) -in @('Title', 'Description', 'PatchDescription') -and
+                $record.IntegerData(2) -eq 20 -and $record.IntegerData(3) -eq 175) {
+                $verified++
+            }
+        }
+        if ($verified -ne 3) {
+            throw "Only $verified of 3 WelcomeDlg text controls were patched."
+        }
+        return $true
+    } catch {
+        Write-Host "  [WARNING] installer text patch failed: $($_.Exception.Message)" -ForegroundColor Yellow
         return $false
     }
-    return $true
 }
 
 function New-CryptoString([int]$length) {
@@ -622,6 +639,9 @@ if ($pkg -eq "1" -or $pkg -eq "2") {
         $msiFile = Join-Path $dist "EmployeeScheduling-$appVersion.msi"
         if (Invoke-MsiTextPositionPatch -msiPath $msiFile) {
             Write-Host "  Welcome text moved to the left (X=20, inside the image's empty block)." -ForegroundColor Green
+        } else {
+            Write-Host "  MSI layout verification failed; the installer will not be published." -ForegroundColor Red
+            exit 1
         }
         Write-Host ""
         Write-Host "  Installer: $dist\EmployeeScheduling-$appVersion.msi" -ForegroundColor Green
