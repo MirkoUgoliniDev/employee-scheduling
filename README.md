@@ -307,12 +307,14 @@ before reporting success. It runs on Debian, Ubuntu and Raspberry Pi OS (`apt`) 
 Fedora and RHEL derivatives (`dnf`).
 
 ```bash
-# Build for the engine you will use — this is not optional, see setup/INSTALL.md
-mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql
-
-# Preview every command without touching the machine
-sudo python3 setup/wizard.py --dry-run --jar ~/employee-scheduling-*-runner.jar
+git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
+cd employee-scheduling
+sudo ./scripts/install-linux.sh --engine postgresql
 ```
+
+The installer downloads the latest engine-specific JAR from GitHub Releases; Maven, Node.js,
+Windows and manual file copies are not required on the server. A local JAR can still be selected
+with `--jar`, and `--from-source` remains available for development.
 
 ---
 

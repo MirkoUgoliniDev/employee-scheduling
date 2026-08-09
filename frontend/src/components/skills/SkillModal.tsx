@@ -61,7 +61,7 @@ export default function SkillModal({ show, skill, nextOrder, structureId, onClos
         setName(skill?.name ?? '')
       })
       .catch(() => { setLanguages([]); setName(skill?.name ?? '') })
-  }, [show, skill, nextOrder, language])
+  }, [show, skill, nextOrder, language, structureId])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()

@@ -12,36 +12,29 @@ momento in cui farlo è più scomodo.
 ## In breve
 
 ```bash
-# 1. sul PC di sviluppo: compila il pacchetto PER IL MOTORE CHE USERAI
-mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql
-
-# 2. porta sul server il pacchetto E il wizard
-#    Il wizard NON è un file solo: gli servono setup/lib/ e setup/steps/.
-scp target/employee-scheduling-*-runner.jar pi@raspberrypi.local:~/
-scp -r setup scripts pi@raspberrypi.local:~/
-
-# 3. sul server, dalla cartella dove hai copiato
+# 1. entra nel Raspberry
 ssh pi@raspberrypi.local
-cd ~
 
-# 4. prima guarda cosa farebbe, senza toccare niente
-sudo python3 setup/wizard.py --dry-run --jar ~/employee-scheduling-1.2.1-SNAPSHOT-runner.jar
+# 2. scarica il repository pubblico
+git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
+cd employee-scheduling
 
-# 5. poi installa davvero
-sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.1-SNAPSHOT-runner.jar
+# 3. installa PostgreSQL e l'ultima Release dell'applicazione
+sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-In alternativa, se il server ha accesso al repository:
+Lo script scarica automaticamente da GitHub Releases il JAR compilato per il
+motore selezionato. Non servono Windows, `scp`, Maven o Node.js sul Raspberry.
+
+Per usare il wizard grafico/testuale o un pacchetto compilato manualmente resta
+disponibile la modalità avanzata:
 
 ```bash
-git clone <url-del-repository> employee-scheduling
-cd employee-scheduling
 sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.1-SNAPSHOT-runner.jar
 ```
 
-> Tutti i comandi di questa guida presuppongono di trovarsi nella cartella che
-> contiene `setup/` e `scripts/`. Il wizard importa `setup/lib/` e `setup/steps/`:
-> copiare il solo `wizard.py` non funziona.
+> Il wizard manuale richiede l'intera cartella `setup/`, non il solo
+> `wizard.py`. L'installazione consigliata usa invece `install-linux.sh`.
 
 > ### `-Dquarkus.profile` non è opzionale
 >
@@ -351,18 +344,17 @@ va copiato altrove né messo sotto controllo di versione.
 
 ---
 
-## In alternativa: lo script shell
+## Installazione consigliata: script shell
 
 Per un'installazione rapida o automatizzata resta disponibile
 `scripts/install-linux.sh`, che fa le stesse cose in una riga sola:
 
 ```bash
-sudo ./scripts/install-linux.sh --jar ~/employee-scheduling-1.2.1-SNAPSHOT-runner.jar
+sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-Accetta le stesse opzioni del wizard, più `--from-source` (compila sul posto:
-lento su un Raspberry e richiede Node 20+) e `--no-service` (non registra il
-servizio systemd).
+Senza `--jar` scarica automaticamente l'ultima Release compilata per il motore
+scelto. Accetta anche `--from-source` (compila sul posto: lento su un Raspberry
+e richiede Node 20+) e `--no-service` (non registra il servizio systemd).
 
-Il wizard serve quando si vuole vedere cosa succede e decidere strada facendo;
-lo script quando si sa già cosa si vuole.
+Il wizard resta disponibile per installazioni manuali con un JAR locale.

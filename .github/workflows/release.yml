@@ -1,0 +1,60 @@
+name: Publish Linux packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build PostgreSQL and SQLite packages
+        shell: bash
+        run: |
+          mkdir -p release
+          mvn -B -ntp clean package -DskipTests \
+            -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql
+          cp target/*-runner.jar release/employee-scheduling-postgresql-runner.jar
+
+          mvn -B -ntp clean package -DskipTests \
+            -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sqlite
+          cp target/*-runner.jar release/employee-scheduling-sqlite-runner.jar
+
+          cd release
+          sha256sum employee-scheduling-*-runner.jar > SHA256SUMS
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          release/employee-scheduling-postgresql-runner.jar
+          release/employee-scheduling-sqlite-runner.jar
+          release/SHA256SUMS
+          --verify-tag
+          --generate-notes
+          --title "Employee Scheduling $GITHUB_REF_NAME"

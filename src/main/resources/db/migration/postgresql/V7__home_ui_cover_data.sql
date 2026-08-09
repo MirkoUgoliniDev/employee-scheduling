@@ -1,0 +1,1 @@
+ALTER TABLE home_ui_settings ADD COLUMN IF NOT EXISTS cover_data_url TEXT NOT NULL DEFAULT '';

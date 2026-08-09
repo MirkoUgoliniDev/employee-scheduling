@@ -44,8 +44,8 @@ function App() {
 
   return (
     <Routes>
-      {/* Public pages. With an empty user table (standalone), go straight to
-          administrator creation: login does not make sense yet.
+      {/* Public pages. With an empty user table, go straight to administrator
+          creation in both standalone and server mode: login cannot succeed yet.
 
           With a valid session both routes redirect to the application: without this,
           after a successful login the URL remains /login, which takes precedence over the "*" route,

@@ -25,8 +25,8 @@ interface AuthState {
   isAuthenticated: boolean
   isAdmin: boolean
   /**
-   * true when the user table is empty and the mode is standalone: no account exists yet,
-   * so the UI must immediately start administrator creation.
+   * true when the user table is empty: no account exists yet, so login cannot
+   * succeed and the UI must immediately start administrator creation.
    */
   needsFirstAdmin: boolean
   login: (username: string, password: string) => Promise<void>
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         try {
           const status = await registerApi.status()
-          setNeedsFirstAdmin(status.firstUser && status.mode === 'standalone')
+          setNeedsFirstAdmin(status.firstUser)
         } catch {
           setNeedsFirstAdmin(false)
         }
@@ -111,6 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// Provider and hook intentionally share this module so their private context
+// cannot be imported without the matching public API.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthState {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth deve stare dentro AuthProvider')

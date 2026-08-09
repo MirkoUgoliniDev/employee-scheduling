@@ -177,12 +177,16 @@ Al termine crea `.env` (che serve solo a `mvn quarkus:dev`), compila e genera il
 ### Linux
 
 ```bash
-cd /percorso/employee-scheduling
-chmod +x install-linux.sh
-./scripts/install-linux.sh
+git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
+cd employee-scheduling
+sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-Stesse domande, più:
+Lo script scarica automaticamente il JAR PostgreSQL più recente da GitHub
+Releases, installa Java e PostgreSQL e registra il servizio systemd. Non servono
+compilazione o trasferimenti manuali dal PC.
+
+Opzioni principali:
 
 - **Servizio systemd** — se rispondi `s`, viene creato e avviato
   `employee-scheduling.service` (riavvio automatico al boot, log in journald);

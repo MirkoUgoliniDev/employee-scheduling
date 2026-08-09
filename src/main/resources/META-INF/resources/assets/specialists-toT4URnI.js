@@ -1,0 +1,1 @@
+import{t as e}from"./client-BREEskyK.js";var t={list:t=>e.get(`/specialists?structureId=${t}`),get:(t,n)=>e.get(`/specialists/${t}?structureId=${n}`),nextCode:()=>e.get(`/specialists/next-code`),add:(t,n)=>e.post(`/specialists?structureId=${n}`,t),update:(t,n,r)=>e.put(`/specialists/${t}?structureId=${r}`,n),delete:(t,n)=>e.delete(`/specialists/${t}?structureId=${n}`)};export{t};

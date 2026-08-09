@@ -7,11 +7,13 @@
 #  systemd service, and verifies that the application actually responds.
 #
 #  Typical usage on a freshly prepared Raspberry Pi:
-#      sudo ./scripts/install-linux.sh --jar employee-scheduling-runner.jar
+#      git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
+#      cd employee-scheduling
+#      sudo ./scripts/install-linux.sh --engine postgresql
 #
 #  All options:
 #      --engine postgresql|sqlite   data engine (default: postgresql)
-#      --jar PATH                   pre-built JAR to install
+#      --jar PATH                   local pre-built JAR (otherwise latest GitHub Release)
 #      --from-source                build here instead of using a JAR
 #      --port N                     HTTP port (default: 8080)
 #      --data-dir PATH              data, backups, and logs (default: /var/lib/employee-scheduling)
@@ -39,6 +41,8 @@ DB_NAME="employee_scheduling"
 DB_USER="employee_scheduling"
 DB_PASS=""
 SMTP_HOST=""; SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""; SMTP_FROM=""
+RELEASE_REPOSITORY="MirkoUgoliniDev/employee-scheduling"
+DOWNLOAD_DIR=""
 # The script lives in scripts/, but pom.xml, frontend/, and target/ are in its
 # parent directory: that is the project root, not the script directory.
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -142,6 +146,51 @@ echo "======================================================"
 # ── 1. Privileges and system ─────────────────────────────────────────────────
 step "[1/8] System"
 [ "$(id -u)" = "0" ] || die "Root privileges are required." "Run again with: sudo $0 $ORIGINAL_ARGS"
+
+# Preserve SMTP during updates. On a fresh PostgreSQL installation, make the
+# choice explicit: pressing Enter keeps test mode (OTP in journald), while a
+# production installation can configure delivery before the first account.
+env_value() {
+    local value
+    value="$(grep -E "^$1=" "$ENV_FILE" 2>/dev/null | tail -n1 | cut -d= -f2- || true)"
+    value="${value#\"}"; value="${value%\"}"
+    printf '%s' "$value"
+}
+if [ -z "$SMTP_HOST" ] && [ -f "$ENV_FILE" ]; then
+    SMTP_HOST="$(env_value QUARKUS_MAILER_HOST)"
+    if [ -n "$SMTP_HOST" ]; then
+        SMTP_PORT="$(env_value QUARKUS_MAILER_PORT)"; SMTP_PORT="${SMTP_PORT:-587}"
+        SMTP_USER="$(env_value QUARKUS_MAILER_USERNAME)"
+        SMTP_PASS="$(env_value QUARKUS_MAILER_PASSWORD)"
+        SMTP_FROM="$(env_value QUARKUS_MAILER_FROM)"
+        info "Existing SMTP configuration will be preserved."
+    fi
+fi
+if [ "$ENGINE" = "postgresql" ] && [ -z "$SMTP_HOST" ] \
+        && [ "$ASSUME_YES" != "yes" ] && [ -t 0 ]; then
+    echo ""
+    printf '  Configure an SMTP server now? [y/N]: '
+    read -r CONFIGURE_SMTP
+    case "$CONFIGURE_SMTP" in
+        y|Y|yes|YES)
+            printf '  SMTP host: '; read -r SMTP_HOST
+            [ -n "$SMTP_HOST" ] || die "SMTP host cannot be empty after choosing SMTP setup."
+            printf '  SMTP port [587]: '; read -r SMTP_PORT_INPUT
+            SMTP_PORT="${SMTP_PORT_INPUT:-587}"
+            printf '  SMTP username: '; read -r SMTP_USER
+            printf '  SMTP password: '; read -r -s SMTP_PASS; echo ""
+            printf '  Sender [%s]: ' "$SMTP_USER"; read -r SMTP_FROM
+            SMTP_FROM="${SMTP_FROM:-$SMTP_USER}"
+            ;;
+        *)
+            info "SMTP test mode selected: registration OTP will be shown in the service log."
+            ;;
+    esac
+fi
+printf '%s' "$SMTP_PORT" | grep -Eq '^[0-9]+$' \
+    || die "Non-numeric SMTP port: $SMTP_PORT"
+[ "$SMTP_PORT" -ge 1 ] && [ "$SMTP_PORT" -le 65535 ] \
+    || die "SMTP port out of range: $SMTP_PORT"
 
 # A port already occupied by OTHERS must be detected now. Later, the service
 # would fail to bind and final verification would connect to the other program,
@@ -323,9 +372,33 @@ fi
 if [ -z "$JAR_SRC" ]; then
     JAR_SRC="$(ls "$ROOT"/target/*runner.jar 2>/dev/null | head -n1 || true)"
 fi
+
+# A clean clone intentionally contains no 80 MB binary. Releases publish one
+# package per engine with a stable asset name, so a Raspberry can install the
+# application directly from GitHub without Maven, Node, scp, or a Windows PC.
+if [ -z "$JAR_SRC" ]; then
+    ASSET="employee-scheduling-${ENGINE}-runner.jar"
+    RELEASE_URL="https://github.com/${RELEASE_REPOSITORY}/releases/latest/download/${ASSET}"
+    DOWNLOAD_DIR="$(mktemp -d -t employee-scheduling.XXXXXXXX)" \
+        || die "Unable to create a temporary download directory."
+    JAR_SRC="${DOWNLOAD_DIR}/${ASSET}"
+    info "Downloading the latest $ENGINE release from GitHub..."
+    if command -v curl >/dev/null 2>&1; then
+        curl --fail --location --silent --show-error --output "$JAR_SRC" "$RELEASE_URL" \
+            || die "Unable to download the application package." \
+                   "Check the Internet connection and that a GitHub Release exists: $RELEASE_URL"
+    elif command -v wget >/dev/null 2>&1; then
+        wget --quiet --output-document="$JAR_SRC" "$RELEASE_URL" \
+            || die "Unable to download the application package." \
+                   "Check the Internet connection and that a GitHub Release exists: $RELEASE_URL"
+    else
+        die "Neither curl nor wget is installed." \
+            "Install one of them, or pass a local package with --jar."
+    fi
+fi
 [ -n "$JAR_SRC" ] && [ -f "$JAR_SRC" ] \
     || die "No JAR to install." \
-           "Pass --jar path/to/employee-scheduling-runner.jar or use --from-source."
+           "The automatic GitHub download failed; pass --jar or use --from-source."
 
 JAR_NAME="$(basename "$JAR_SRC")"
 info "Package: $JAR_NAME"
@@ -394,6 +467,10 @@ install -d -m 750 -o "$SERVICE_USER" -g "$SERVICE_USER" "$DATA_DIR/backups"
 # must not be able to rewrite its own executable.
 rm -f "$INSTALL_DIR"/*runner.jar
 install -m 644 -o root -g root "$JAR_SRC" "$INSTALL_DIR/$JAR_NAME"
+if [ -n "$DOWNLOAD_DIR" ]; then
+    rm -f -- "$JAR_SRC"
+    rmdir -- "$DOWNLOAD_DIR" 2>/dev/null || true
+fi
 
 # ── 5. Secrets and configuration ─────────────────────────────────────────────
 step "[5/8] Configuration"

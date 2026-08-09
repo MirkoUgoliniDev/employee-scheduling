@@ -1,0 +1,1002 @@
+# Canonical UI label catalog (i18n) - PORTABLE SOURCE OF TRUTH.
+#
+# Applied at startup by UiTranslationSyncService to ANY active database
+# (SQLite and PostgreSQL) through JPA: this mechanism keeps localizations
+# aligned across the two engines.
+#
+# RULE: add every NEW UI key HERE, never in DemoDataRepository's
+# seedLabelTranslations* methods (SQLite-only SQL, not run under the PostgreSQL profile).
+#
+# TSV format, one record per line, with seven TAB-separated fields:
+#   key <TAB> description <TAB> it <TAB> en <TAB> fr <TAB> es <TAB> de
+# All five languages are required and must be non-empty (verified by UiTranslationCatalogTest).
+# Empty lines and lines starting with # are ignored. Values cannot contain TAB characters.
+# Synchronization is ADDITIVE: it never overwrites translations already present in the database
+# (changes made on the Labels page remain intact).
+#
+affinity.avoid	Livello compatibilità: da evitare	Da evitare	Avoid	À éviter	A evitar	Zu vermeiden
+affinity.incompatible	Livello compatibilità: incompatibile	Incompatibile	Incompatible	Incompatible	Incompatible	Unvereinbar
+affinity.selectSpecialist	Placeholder select specialista	Seleziona specialista…	Select specialist…	Sélectionner un spécialiste…	Seleccionar especialista…	Spezialist auswählen…
+backup.autoKeep	Etichetta max numero backup automatici	Max backup automatici	Max automatic backups	Max sauvegardes automatiques	Máx. copias automáticas	Max. automatische Backups
+backup.autoRetentionDays	Etichetta conservazione backup automatici	Conservazione automatici	Automatic backups retention	Conservation des sauvegardes automatiques	Retención de copias automáticas	Aufbewahrung automatischer Backups
+backup.days	Suffisso giorni (impostazioni backup)	giorni	days	jours	días	Tage
+backup.delete	Tooltip elimina singolo backup	Elimina questo backup	Delete this backup	Supprimer cette sauvegarde	Eliminar esta copia de seguridad	Dieses Backup löschen
+backup.deleteConfirm	Pulsante conferma eliminazione backup	Elimina	Delete	Supprimer	Eliminar	Löschen
+backup.deleteMsg	Messaggio conferma eliminazione backup	Eliminare definitivamente questo backup?	Permanently delete this backup?	Supprimer définitivement cette sauvegarde ?	¿Eliminar definitivamente esta copia de seguridad?	Dieses Backup endgültig löschen?
+backup.deleteTitle	Titolo modale elimina backup	Elimina backup	Delete backup	Supprimer la sauvegarde	Eliminar copia de seguridad	Backup löschen
+backup.download	Tooltip download backup	Scarica il backup	Download the backup	Télécharger la sauvegarde	Descargar la copia	Sicherung herunterladen
+backup.empty	Messaggio nessun backup presente	Nessun backup ancora: il primo verrà creato automaticamente.	No backups yet: the first one will be created automatically.	Aucune sauvegarde pour l'instant : la première sera créée automatiquement.	Aún no hay copias: la primera se creará automáticamente.	Noch keine Sicherungen: die erste wird automatisch erstellt.
+backup.file	Intestazione colonna nome file backup	File	File	Fichier	Archivo	Datei
+backup.files	Suffisso file (impostazioni backup)	file	files	fichiers	archivos	Dateien
+backup.hint	Suggerimento sezione Backup	Il backup automatico gira ogni 30 minuti (solo se ci sono modifiche) e prima delle operazioni che sovrascrivono i turni. Il ripristino salva prima lo stato corrente, quindi è reversibile.	Automatic backup runs every 30 minutes (only when there are changes) and before operations that overwrite shifts. Restoring saves the current state first, so it is reversible.	La sauvegarde automatique s'exécute toutes les 30 minutes (uniquement en cas de modifications) et avant les opérations qui écrasent les créneaux. La restauration enregistre d'abord l'état actuel, elle est donc réversible.	La copia automática se ejecuta cada 30 minutos (solo si hay cambios) y antes de las operaciones que sobrescriben turnos. La restauración guarda antes el estado actual, por lo que es reversible.	Die automatische Sicherung läuft alle 30 Minuten (nur bei Änderungen) und vor Vorgängen, die Schichten überschreiben. Die Wiederherstellung speichert zuerst den aktuellen Zustand und ist daher umkehrbar.
+backup.intervalMinutes	Etichetta intervallo backup automatico	Intervallo automatico	Automatic interval	Intervalle automatique	Intervalo automático	Automatisches Intervall
+backup.otherKeep	Etichetta max numero altri backup	Max altri backup	Max other backups	Max autres sauvegardes	Máx. otras copias	Max. andere Backups
+backup.otherRetentionDays	Etichetta conservazione altri backup	Conservazione altri backup	Other backups retention	Conservation des autres sauvegardes	Retención de otras copias	Aufbewahrung sonstiger Backups
+backup.restore	Tooltip ripristino backup	Ripristina questo backup	Restore this backup	Restaurer cette sauvegarde	Restaurar esta copia	Diese Sicherung wiederherstellen
+backup.restoreConfirm	Pulsante conferma ripristino	Ripristina	Restore	Restaurer	Restaurar	Wiederherstellen
+backup.restoreMsg	Messaggio conferma ripristino (prima parte)	Il database verrà riportato allo stato del	The database will be reverted to its state as of	La base de données sera ramenée à son état du	La base de datos volverá a su estado del	Die Datenbank wird auf den Stand vom
+backup.restoreMsg2	Messaggio conferma ripristino (seconda parte)	I dati inseriti dopo quel momento andranno persi (lo stato attuale viene comunque salvato prima). Continuare?	Data entered after that moment will be lost (the current state is saved first anyway). Continue?	Les données saisies après ce moment seront perdues (l'état actuel est d'abord enregistré). Continuer ?	Los datos introducidos después de ese momento se perderán (el estado actual se guarda antes de todos modos). ¿Continuar?	Danach eingegebene Daten gehen verloren (der aktuelle Zustand wird vorher gespeichert). Fortfahren?
+backup.restoreTitle	Titolo conferma ripristino	Ripristina database	Restore database	Restaurer la base de données	Restaurar base de datos	Datenbank wiederherstellen
+backup.rotationHint	Nota rotazione automatica backup	I file più vecchi dei giorni indicati vengono eliminati alla rotazione; restano attivi anche i limiti massimi per numero di backup.	Files older than the specified days are deleted on rotation; the maximum backup count limits also remain active.	Les fichiers plus anciens que le nombre de jours indiqué sont supprimés lors de la rotation ; les limites maximales par nombre de sauvegardes restent également actives.	Los archivos más antiguos que los días indicados se eliminan en la rotación; también siguen activos los límites máximos por número de copias.	Dateien, die älter als die angegebenen Tage sind, werden bei der Rotation gelöscht; die Höchstgrenzen für die Anzahl der Backups bleiben ebenfalls aktiv.
+backup.rotationSettings	Titolo rotazione automatica backup	Rotazione automatica	Automatic rotation	Rotation automatique	Rotación automática	Automatische Rotation
+backup.runNow	Pulsante backup manuale immediato	Backup adesso	Back up now	Sauvegarder maintenant	Hacer copia ahora	Jetzt sichern
+backup.size	Intestazione colonna dimensione backup	Dimensione	Size	Taille	Tamaño	Größe
+backup.tag.auto	Badge backup automatico	Automatico	Automatic	Automatique	Automática	Automatisch
+backup.tag.manual	Badge backup manuale	Manuale	Manual	Manuelle	Manual	Manuell
+backup.tag.preop	Badge backup pre-operazione	Pre-operazione	Pre-operation	Pré-opération	Pre-operación	Vor-Vorgang
+backup.tag.prerestore	Badge backup pre-ripristino	Pre-ripristino	Pre-restore	Pré-restauration	Pre-restauración	Vor-Wiederherstellung
+backup.validation.autoDays	Validazione giorni conservazione automatici	La conservazione degli automatici deve essere compresa tra 1 e 3650 giorni.	Automatic backups retention must be between 1 and 3650 days.	La conservation des sauvegardes automatiques doit être comprise entre 1 et 3650 jours.	La retención de copias automáticas debe estar entre 1 y 3650 días.	Die Aufbewahrung automatischer Backups muss zwischen 1 und 3650 Tagen liegen.
+backup.validation.autoKeep	Validazione max numero backup automatici	Il numero massimo di backup automatici deve essere compreso tra 1 e 100000.	The maximum number of automatic backups must be between 1 and 100000.	Le nombre maximum de sauvegardes automatiques doit être compris entre 1 et 100000.	El número máximo de copias automáticas debe estar entre 1 y 100000.	Die maximale Anzahl automatischer Backups muss zwischen 1 und 100000 liegen.
+backup.validation.coherence	Validazione coerenza intervallo/conservazione	La conservazione degli automatici deve coprire almeno due intervalli completi di backup.	Automatic backups retention must cover at least two full backup intervals.	La conservation des sauvegardes automatiques doit couvrir au moins deux intervalles complets de sauvegarde.	La retención de copias automáticas debe cubrir al menos dos intervalos completos de copia.	Die Aufbewahrung automatischer Backups muss mindestens zwei vollständige Backup-Intervalle abdecken.
+backup.validation.interval	Validazione intervallo backup	L’intervallo deve essere un numero intero compreso tra 1 e 1440 minuti.	The interval must be an integer between 1 and 1440 minutes.	L’intervalle doit être un nombre entier compris entre 1 et 1440 minutes.	El intervalo debe ser un número entero entre 1 y 1440 minutos.	Das Intervall muss eine ganze Zahl zwischen 1 und 1440 Minuten sein.
+backup.validation.otherDays	Validazione giorni conservazione altri backup	La conservazione degli altri backup deve essere compresa tra 1 e 3650 giorni.	Other backups retention must be between 1 and 3650 days.	La conservation des autres sauvegardes doit être comprise entre 1 et 3650 jours.	La retención de otras copias debe estar entre 1 y 3650 días.	Die Aufbewahrung sonstiger Backups muss zwischen 1 und 3650 Tagen liegen.
+backup.validation.otherKeep	Validazione max numero altri backup	Il numero massimo di altri backup deve essere compreso tra 1 e 100000.	The maximum number of other backups must be between 1 and 100000.	Le nombre maximum d'autres sauvegardes doit être compris entre 1 et 100000.	El número máximo de otras copias debe estar entre 1 y 100000.	Die maximale Anzahl anderer Backups muss zwischen 1 und 100000 liegen.
+badge.weekLocked	Badge settimana bloccata	Settimana bloccata	Week locked	Semaine verrouillée	Semana bloqueada	Woche gesperrt
+btn.add	Pulsante Aggiungi	Aggiungi	Add	Ajouter	Añadir	Hinzufügen
+btn.addEmployee	Pulsante Aggiungi Dipendente	Aggiungi Operatore	Add Operator	Ajouter Opérateur	Añadir Operador	Mitarbeiter hinzufügen
+btn.addLocation	Pulsante Aggiungi Sede	Aggiungi Sede	Add Location	Ajouter Lieu	Añadir Ubicación	Ort hinzufügen
+btn.addRange	Pulsante Aggiungi fascia	Aggiungi fascia	Add range	Ajouter une plage	Añadir franja	Bereich hinzufügen
+btn.addShift	Pulsante Aggiungi Turno	Aggiungi Turno	Add Shift	Ajouter Quart	Añadir Turno	Schicht hinzufügen
+btn.addSpecialist	Pulsante Aggiungi Specialista	Aggiungi Specialista	Add Specialist	Ajouter Spécialiste	Añadir Especialista	Spezialist hinzufügen
+btn.analyze	Pulsante Analizza	Analizza	Analyze	Analyser	Analizar	Analysieren
+btn.apply	Pulsante Applica	Applica	Apply	Appliquer	Aplicar	Anwenden
+btn.applyTemplate	Pulsante Popola da template	Popola da template	Fill from template	Remplir depuis le modèle	Rellenar desde plantilla	Aus Vorlage füllen
+btn.cancel	Pulsante Annulla	Annulla	Cancel	Annuler	Cancelar	Abbrechen
+btn.close	Pulsante Chiudi	Chiudi	Close	Fermer	Cerrar	Schließen
+btn.confirm	Pulsante Conferma	Conferma	Confirm	Confirmer	Confirmar	Bestätigen
+btn.copy	Pulsante Copia	Copia	Copy	Copier	Copiar	Kopieren
+btn.delete	Pulsante Elimina	Elimina	Delete	Supprimer	Eliminar	Löschen
+btn.discardSolution	Pulsante Scarta soluzione (modale Risultato Solve)	Scarta	Discard	Ignorer	Descartar	Verwerfen
+btn.edit	Pulsante Modifica	Modifica	Edit	Modifier	Editar	Bearbeiten
+btn.exportJson	Pulsante Esporta JSON	Esporta JSON	Export JSON	Exporter JSON	Exportar JSON	JSON exportieren
+btn.generatePdf	Pulsante Genera PDF	Genera PDF	Generate PDF	Générer PDF	Generar PDF	PDF generieren
+btn.handleSkill	Pulsante Gestisci Skill	Gestisci Skill	Handle Skill	Gérer Compétences	Gestionar Habilidades	Kompetenzen verwalten
+btn.interrupt	Pulsante Interrompi	Interrompi	Stop	Interrompre	Interrumpir	Abbrechen
+btn.preview	Pulsante Anteprima	Anteprima	Preview	Aperçu	Vista previa	Vorschau
+btn.printCoverage	Pulsante Stampa Copertura	Stampa Copertura	Print Coverage	Imprimer Couverture	Imprimir Cobertura	Deckung drucken
+btn.printShifts	Pulsante Stampa Turni	Stampa Turni	Print Shifts	Imprimer Quarts	Imprimir Turnos	Schichten drucken
+btn.remove	Pulsante Rimuovi	Rimuovi	Remove	Retirer	Quitar	Entfernen
+btn.resend	Tooltip pulsante reinvio email (Report)	Reinvia	Resend	Renvoyer	Reenviar	Erneut senden
+btn.save	Pulsante Salva	Salva	Save	Enregistrer	Guardar	Speichern
+btn.saveAll	Pulsante Salva tutto	Salva tutto	Save All	Tout enregistrer	Guardar todo	Alles speichern
+btn.saveAndLock	Pulsante Salva e Blocca	Salva e Blocca	Save and Lock	Enregistrer et Verrouiller	Guardar y Bloquear	Speichern und Sperren
+btn.saveAnyway	Pulsante Salva comunque (conferma soluzione infeasible)	Salva comunque	Save anyway	Enregistrer quand même	Guardar de todos modos	Trotzdem speichern
+btn.saveAssignments	Pulsante Salva assegnazioni (modale Risultato Solve)	Salva assegnazioni	Save assignments	Enregistrer les affectations	Guardar asignaciones	Zuweisungen speichern
+btn.saveToTemplate	Pulsante salva in template	Salva in template	Save to template	Enregistrer dans le modèle	Guardar en plantilla	In Vorlage speichern
+btn.selectSkills	Pulsante Seleziona Skill	Seleziona Skill	Select Skills	Sélectionner Compétences	Seleccionar Habilidades	Kompetenzen auswählen
+btn.sendAllEmails	Pulsante invio massivo email (header colonna Report)	Invia tutte le email	Send all emails	Envoyer tous les e-mails	Enviar todos los emails	Alle E-Mails senden
+btn.sendEmail	Pulsante invio email singola (riga Report)	Invia Email	Send Email	Envoyer l'e-mail	Enviar email	E-Mail senden
+btn.solve	Pulsante Avvia solver	Risolvi	Solve	Résoudre	Resolver	Lösen
+btn.stopSolving	Pulsante Ferma solver	Ferma	Stop solving	Arrêter	Detener	Stoppen
+btn.today	Pulsante Oggi	Oggi	Today	Aujourd'hui	Hoy	Heute
+btn.unlock	Pulsante Sblocca	Sblocca	Unlock	Déverrouiller	Desbloquear	Entsperren
+col.actions	Intestazione colonna Azioni	Azioni	Actions	Actions	Acciones	Aktionen
+col.active	Intestazione colonna Attiva	Attiva	Active	Active	Activa	Aktiv
+col.avoidSpecialists	Colonna specialisti da evitare	Spec. da evitare	Specialists to avoid	Spéc. à éviter	Espec. a evitar	Zu vermeidende Spez.
+col.code	Intestazione colonna Codice	Codice	Code	Code	Código	Code
+col.company	Intestazione colonna Azienda	Azienda	Company	Entreprise	Empresa	Unternehmen
+col.createdAt	Intestazione colonna Creato il	Creato il	Created on	Créé le	Creado el	Erstellt am
+col.dateEnd	Intestazione colonna Data Fine	Data Fine	End Date	Date Fin	Fecha Fin	Enddatum
+col.dateStart	Intestazione colonna Data Inizio	Data Inizio	Start Date	Date Début	Fecha Inicio	Startdatum
+col.day	Intestazione colonna Giorno	Giorno	Day	Jour	Día	Tag
+col.description	Intestazione colonna Descrizione	Descrizione	Description	Description	Descripción	Beschreibung
+col.employee	Intestazione colonna Impiegato	Operatore	Operator	Opérateur	Operador	Mitarbeiter
+col.end	Intestazione colonna Fine	Fine	End	Fin	Fin	Ende
+col.id	Intestazione colonna ID	ID	ID	ID	ID	ID
+col.incompatibleSpecialists	Colonna specialisti incompatibili	Spec. incompatibili	Incompatible specialists	Spéc. incompatibles	Espec. incompatibles	Unvereinbare Spez.
+col.key	Intestazione colonna Chiave	Chiave	Key	Clé	Clave	Schlüssel
+col.location	Intestazione colonna Sede	Sede	Location	Lieu	Ubicación	Ort
+col.name	Intestazione colonna Nome	Nome	Name	Nom	Nombre	Name
+col.optionalSkills	Intestazione colonna Skill Opzionali	Skill Opt.	O.Skills	Comp.Opt.	Hab.Opc.	Opt.Komp.
+col.order	Intestazione colonna Ordine	Ordine	Order	Ordre	Orden	Reihenfolge
+col.requiredSkills	Intestazione colonna Skill Richieste	Skill Ric.	R.Skills	Comp.Req.	Hab.Req.	Erf.Komp.
+col.start	Intestazione colonna Inizio	Inizio	Start	Début	Inicio	Start
+col.type	Intestazione colonna Tipo	Tipo	Type	Type	Tipo	Typ
+common.close	Pulsante Chiudi (generico)	Chiudi	Close	Fermer	Cerrar	Schließen
+common.no	No (generico)	No	No	Non	No	Nein
+common.yes	Sì (generico)	Sì	Yes	Oui	Sí	Ja
+common.none	Etichetta nessuna	Nessuna	None	Aucune	Ninguna	Keine
+config.autoPopulate	Titolo blocco popolamento automatico da template	Popolamento automatico da template	Automatic template population	Remplissage automatique depuis le modèle	Rellenado automático desde la plantilla	Automatische Befüllung aus Vorlage
+config.autoPopulate.hint	Suggerimento popolamento automatico da template	Quando in Gestione Turni passi a un periodo (corrente o futuro) senza turni, questo viene popolato automaticamente dal template della sede. I periodi passati non vengono toccati.	When you move to a period (current or future) with no shifts in Shift Management, it is automatically populated from the location template. Past periods are not affected.	Lorsque vous passez à une période (actuelle ou future) sans créneaux dans la Gestion des créneaux, elle est automatiquement remplie à partir du modèle du site. Les périodes passées ne sont pas modifiées.	Cuando pasas a un periodo (actual o futuro) sin turnos en la Gestión de turnos, se rellena automáticamente desde la plantilla de la sede. Los periodos pasados no se modifican.	Wenn du in der Schichtverwaltung zu einem Zeitraum (aktuell oder zukünftig) ohne Schichten wechselst, wird dieser automatisch aus der Standortvorlage befüllt. Vergangene Zeiträume bleiben unberührt.
+config.autoPopulate.label	Etichetta switch popolamento automatico	Popola automaticamente i periodi vuoti dal template	Automatically populate empty periods from the template	Remplir automatiquement les périodes vides à partir du modèle	Rellenar automáticamente los periodos vacíos desde la plantilla	Leere Zeiträume automatisch aus der Vorlage befüllen
+config.general.col.autoPopulate	Colonna Auto-popolamento tabella Parametri generali	Auto-popolamento	Auto-populate	Remplissage auto	Autocompletado	Auto-Befüllung
+config.general.col.window	Colonna Granularita tabella Parametri generali	Granularità	Granularity	Granularité	Granularidad	Granularität
+config.general.listHint	Suggerimento tabella Parametri generali	I parametri sono contestuali alla struttura. Usa la matita per modificarli.	Settings are per structure. Use the pencil to edit them.	Les paramètres sont propres à chaque structure. Utilisez le crayon pour les modifier.	Los parámetros son propios de cada estructura. Usa el lápiz para editarlos.	Die Parameter sind strukturspezifisch. Zum Bearbeiten das Stift-Symbol verwenden.
+config.info.activeDatabase	Etichetta indicatore database attivo (System Info)	Database attivo	Active database	Base de données active	Base de datos activa	Aktive Datenbank
+config.info.appTitle	Titolo tabella Applicazione (System Info)	Applicazione	Application	Application	Aplicación	Anwendung
+config.info.checkUpdates	Pulsante Verifica aggiornamenti	Verifica aggiornamenti	Check for updates	Vérifier les mises à jour	Buscar actualizaciones	Nach Updates suchen
+config.info.component	Colonna Componente	Componente	Component	Composant	Componente	Komponente
+config.info.description	Descrizione sezione System Info	Versioni dei componenti principali dell'applicazione.	Versions of the application's main components.	Versions des principaux composants de l'application.	Versiones de los componentes principales de la aplicación.	Versionen der Hauptkomponenten der Anwendung.
+config.info.error	Errore caricamento informazioni backend	Impossibile caricare le informazioni del backend.	Unable to load backend information.	Impossible de charger les informations du backend.	No se pudo cargar la información del backend.	Backend-Informationen konnten nicht geladen werden.
+config.info.mainTitle	Titolo tabella componenti principali (System Info)	Componenti principali	Main components	Composants principaux	Componentes principales	Hauptkomponenten
+config.info.secondaryTitle	Titolo librerie e componenti secondari	Librerie e componenti secondari	Secondary libraries and components	Bibliothèques et composants secondaires	Bibliotecas y componentes secundarios	Sekundäre Bibliotheken und Komponenten
+config.info.unavailable	Badge aggiornamento non disponibile	Non disponibile	Unavailable	Non disponible	No disponible	Nicht verfügbar
+config.info.upToDate	Badge componente aggiornato	Aggiornato	Up to date	À jour	Actualizado	Aktuell
+config.info.updateAvailable	Badge aggiornamento disponibile	Disponibile	Available	Disponible	Disponible	Verfügbar
+config.info.updates	Colonna Aggiornamenti	Aggiornamenti	Updates	Mises à jour	Actualizaciones	Aktualisierungen
+config.info.version	Colonna Versione	Versione	Version	Version	Versión	Version
+config.menu.backup	Voce menu configurazione Backup	Backup	Backup	Sauvegarde	Copia de seguridad	Sicherung
+config.menu.backup.tooltip	Tooltip voce Backup	Backup e ripristino del database	Database backup and restore	Sauvegarde et restauration de la base de données	Copia de seguridad y restauración de la base de datos	Sicherung und Wiederherstellung der Datenbank
+config.menu.emailSettings	Voce menu configurazione Parametri Email	Parametri Email	Email Settings	Paramètres e-mail	Parámetros de email	E-Mail-Einstellungen
+config.menu.emailSettings.tooltip	Tooltip voce Parametri Email	Configura il server SMTP per l'invio delle email	Configure the SMTP server for sending emails	Configurer le serveur SMTP pour l'envoi des e-mails	Configura el servidor SMTP para el envío de emails	SMTP-Server für den E-Mail-Versand konfigurieren
+config.menu.emailTemplate	Voce menu configurazione Template Email	Template Email	Email Template	Modèle d'e-mail	Plantilla de email	E-Mail-Vorlage
+config.menu.emailTemplate.tooltip	Tooltip voce menu Template Email	Configura il template delle email	Configure the email template	Configurer le modèle d'e-mail	Configura la plantilla de email	E-Mail-Vorlage konfigurieren
+config.menu.general	Menu configurazione parametri generali	Parametri generali	General settings	Paramètres généraux	Parámetros generales	Allgemeine Einstellungen
+config.menu.general.tooltip	Tooltip parametri generali	Configura i parametri generali	Configure general settings	Configurer les paramètres généraux	Configurar los parámetros generales	Allgemeine Einstellungen konfigurieren
+config.menu.homeUi	Menu configurazione home	Configurazione Generale	General configuration	Configuration générale	Configuración general	Allgemeine Konfiguration
+config.menu.homeUi.tooltip	Tooltip configurazione home	Gestisci copertina e testi della home	Manage home cover and texts	Gérer la couverture et les textes de l'accueil	Gestionar la portada y los textos de inicio	Startseite-Cover und Texte verwalten
+home.ui.title	Titolo sezione home	Home – Contenuti	Home content	Contenu accueil	Contenido de inicio	Home-Inhalte
+home.ui.cover	Etichetta cover home	Copertina home	Home cover	Couverture accueil	Portada inicio	Startseitenbild
+home.ui.coverHint	Suggerimento cover home	Solo file .webp, massimo 2 MB.	Only .webp files, max 2 MB.	Fichiers .webp uniquement, 2 Mo max.	Solo archivos .webp, máximo 2 MB.	Nur .webp-Dateien, max. 2 MB.
+home.ui.texts	Titolo blocco testi home	Testi home	Home texts	Textes accueil	Textos de inicio	Home-Texte
+home.ui.textTitle	Label titolo home	Titolo	Title	Titre	Título	Titel
+home.ui.textBody	Label testo home	Testo principale	Main text	Texte principal	Texto principal	Haupttext
+home.ui.textHint	Label suggerimento home	Suggerimento	Hint	Indice	Sugerencia	Hinweis
+home.title	Titolo home	Benvenuto in Employee Scheduling	Welcome to Employee Scheduling	Bienvenue dans Employee Scheduling	Bienvenido a Employee Scheduling	Willkommen bei Employee Scheduling
+home.body	Testo home	Seleziona una struttura per iniziare a pianificare i turni.	Select a structure to start scheduling shifts.	Sélectionnez une structure pour commencer à planifier les quarts.	Selecciona una estructura para empezar a planificar turnos.	Wähle eine Struktur, um mit der Schichtplanung zu beginnen.
+home.hint	Suggerimento home	Puoi creare sedi e operatori dalla configurazione.	You can create locations and operators from configuration.	Vous pouvez créer des lieux et des opérateurs depuis la configuration.	Puedes crear sedes y operadores desde la configuración.	Du kannst Standorte und Mitarbeiter in der Konfiguration anlegen.
+config.menu.info	Voce menu Config: System Info	System Info	System Info	Infos système	Info del sistema	Systeminfo
+config.menu.info.tooltip	Tooltip voce menu System Info	Versioni e informazioni di sistema	System versions and information	Versions et informations système	Versiones e información del sistema	Systemversionen und -informationen
+config.menu.localizations	Menu configurazione localizzazioni	Localizzazioni	Localizations	Localisations	Localizaciones	Lokalisierungen
+config.menu.localizations.tooltip	Tooltip localizzazioni	Gestisci etichette e traduzioni	Manage labels and translations	Gérer les libellés et les traductions	Gestionar etiquetas y traducciones	Beschriftungen und Übersetzungen verwalten
+config.menu.pdfTemplate	Voce menu Config: Template PDF	Template PDF	PDF templates	Modèles PDF	Plantillas PDF	PDF-Vorlagen
+config.menu.pdfTemplate.tooltip	Tooltip voce menu Template PDF	Configura logo, intestazione e piè di pagina dei PDF	Configure PDF logo, header and footer	Configurer le logo, l’en-tête et le pied de page des PDF	Configurar el logotipo, el encabezado y el pie de página de los PDF	Logo, Kopf- und Fußzeile der PDFs konfigurieren
+config.menu.skills	Menu configurazione competenze	Competenze	Skills	Compétences	Competencias	Kompetenzen
+config.menu.skills.tooltip	Tooltip competenze	Gestisci le competenze	Manage skills	Gérer les compétences	Gestionar las competencias	Kompetenzen verwalten
+config.menu.solverSettings	Menu configurazione parametri Solver	Parametri Solver	Solver Settings	Paramètres du solveur	Parámetros del solver	Solver-Einstellungen
+config.menu.solverSettings.tooltip	Tooltip parametri Solver	Configura i parametri del motore di pianificazione	Configure optimization engine settings	Configurer les paramètres du moteur d’optimisation	Configurar los parámetros del motor de optimización	Einstellungen der Optimierungs-Engine konfigurieren
+config.menu.structures	Menu configurazione strutture	Strutture	Structures	Structures	Estructuras	Strukturen
+config.menu.structures.tooltip	Tooltip strutture	Gestisci le strutture organizzative	Manage organizational structures	Gérer les structures organisationnelles	Gestionar las estructuras organizativas	Organisationsstrukturen verwalten
+config.menu.templates	Menu configurazione template turni	Template turni	Shift templates	Modèles de quarts	Plantillas de turnos	Schichtvorlagen
+config.menu.templates.tooltip	Tooltip template turni	Configura i template dei turni	Configure shift templates	Configurer les modèles de quarts	Configurar las plantillas de turnos	Schichtvorlagen konfigurieren
+config.section.shiftView	Sezione visualizzazione turni	Visualizzazione turni	Shift view	Affichage des quarts	Visualización de turnos	Schichtansicht
+config.section.template	Sezione template turni settimanale	Template turni settimanale	Weekly shift template	Modèle de quarts hebdomadaire	Plantilla de turnos semanal	Wöchentliche Schichtvorlage
+config.shiftWindow	Etichetta granularita finestra turni	Granularità finestra turni	Shift window granularity	Granularité de la fenêtre de quarts	Granularidad de la ventana de turnos	Granularität des Schichtfensters
+config.shiftWindow.hint	Suggerimento granularita finestra turni	Determina l'ampiezza della finestra e il passo delle frecce in Gestione Turni.	Determines the window width and the arrow step in Shift Management.	Détermine la largeur de la fenêtre et le pas des flèches dans la gestion des quarts.	Determina el ancho de la ventana y el paso de las flechas en la gestión de turnos.	Bestimmt die Fensterbreite und die Schrittweite der Pfeile in der Schichtverwaltung.
+config.template.daysWithShifts	Legenda giorni con turni	Giorni con turni	Days with shifts	Jours avec quarts	Días con turnos	Tage mit Schichten
+config.template.hasShifts	Legenda giorno con turni	Giorno con turni	Day with shifts	Jour avec quarts	Día con turnos	Tag mit Schichten
+config.template.hint	Suggerimento editor template settimanale	Schema settimanale ricorrente: click su un'area vuota per aggiungere un turno, su un turno per modificarlo. Verrà usato per prepopolare le nuove finestre.	Recurring weekly schema: click an empty area to add a shift, or a shift to edit it. It will be used to pre-populate new windows.	Schéma hebdomadaire récurrent : cliquez sur une zone vide pour ajouter un quart, ou sur un quart pour le modifier. Il servira à préremplir les nouvelles fenêtres.	Esquema semanal recurrente: haga clic en un área vacía para añadir un turno, o en un turno para editarlo. Se usará para rellenar las nuevas ventanas.	Wiederkehrendes Wochenschema: Klicken Sie auf einen leeren Bereich, um eine Schicht hinzuzufügen, oder auf eine Schicht, um sie zu bearbeiten. Es wird zum Vorbefüllen neuer Fenster verwendet.
+config.template.listHint	Nota lista template salvati	Elenco dei template salvati da Gestione Turni. Usa la matita per modificarne descrizione e turni.	List of templates saved from Shift Management. Use the pencil to edit description and shifts.	Liste des modèles enregistrés depuis la Gestion des quarts. Utilisez le crayon pour modifier la description et les quarts.	Lista de plantillas guardadas desde Gestión de Turnos. Usa el lápiz para editar descripción y turnos.	Liste der aus der Schichtverwaltung gespeicherten Vorlagen. Mit dem Stift Beschreibung und Schichten bearbeiten.
+config.template.prepopulate	Pulsante prepopola da settimana	Prepopola da questa settimana	Pre-populate from this week	Préremplir à partir de cette semaine	Rellenar desde esta semana	Aus dieser Woche vorbefüllen
+config.template.shiftsConfigured	Colonna turni configurati	Turni configurati	Configured shifts	Quarts configurés	Turnos configurados	Konfigurierte Schichten
+config.template.sourceWeek	Etichetta settimana sorgente template	Settimana sorgente	Source week	Semaine source	Semana de origen	Quellwoche
+config.template.window	Etichetta finestra template (sola lettura)	Finestra	Window	Fenêtre	Ventana	Fenster
+config.template.window.hint	Nota origine granularità finestra	Granularità impostata in Parametri generali.	Granularity set in General settings.	Granularité définie dans les Paramètres généraux.	Granularidad definida en Parámetros generales.	Granularität wird in den Allgemeinen Einstellungen festgelegt.
+config.template.workingSchema	Titolo schema settimanale di lavoro	Schema settimanale di lavoro	Working weekly schema	Schéma hebdomadaire de travail	Esquema semanal de trabajo	Wöchentliches Arbeitsschema
+config.title	Titolo pagina Configurazione	Configurazione	Configuration	Configuration	Configuración	Konfiguration
+config.window.month	Opzione finestra Mese	Mese	Month	Mois	Mes	Monat
+config.window.week	Opzione finestra Settimana	Settimana	Week	Semaine	Semana	Woche
+confirm.applyTemplate	Conferma applicazione template	Sostituire i turni del periodo visibile con quelli del template? I turni esistenti nel periodo verranno eliminati.	Replace the shifts in the visible period with those from the template? Existing shifts in the period will be deleted.	Remplacer les quarts de la période visible par ceux du modèle ? Les quarts existants dans la période seront supprimés.	¿Sustituir los turnos del período visible por los de la plantilla? Los turnos existentes en el período se eliminarán.	Die Schichten im sichtbaren Zeitraum durch die aus der Vorlage ersetzen? Vorhandene Schichten im Zeitraum werden gelöscht.
+confirm.deleteDateMessage	Messaggio conferma elimina fascia oraria	Eliminare questa fascia oraria?	Delete this time range?	Supprimer cette plage horaire ?	¿Eliminar esta franja horaria?	Diesen Zeitbereich löschen?
+confirm.deleteDateTitle	Titolo conferma elimina data	Elimina Data	Delete Date	Supprimer la date	Eliminar fecha	Datum löschen
+confirm.deleteEmployee	Conferma eliminazione dipendente	Sei sicuro di voler eliminare questo operatore?	Are you sure you want to delete this operator?	Êtes-vous sûr de vouloir supprimer cet opérateur ?	¿Está seguro de eliminar este operador?	Möchten Sie diesen Mitarbeiter wirklich löschen?
+confirm.deleteEmployeeMessage	Messaggio conferma elimina operatore	Eliminare questo operatore?	Delete this operator?	Supprimer cet opérateur ?	¿Eliminar este operador?	Diesen Mitarbeiter löschen?
+confirm.deleteEmployeeTitle	Titolo conferma elimina dipendente	Elimina Operatore	Delete Operator	Supprimer l'opérateur	Eliminar operador	Mitarbeiter löschen
+confirm.deleteLabel	Conferma eliminazione etichetta	Eliminare questa etichetta e tutte le sue traduzioni?	Delete this label and all its translations?	Supprimer cette étiquette et toutes ses traductions?	¿Eliminar esta etiqueta y todas sus traducciones?	Diese Beschriftung und alle Übersetzungen löschen?
+confirm.deleteLanguage	Conferma eliminazione lingua	Eliminare questa lingua?	Delete this language?	Supprimer cette langue?	¿Eliminar este idioma?	Diese Sprache löschen?
+confirm.deleteLocation	Conferma eliminazione sede	Sei sicuro di voler eliminare questo luogo?	Are you sure you want to delete this location?	Êtes-vous sûr de vouloir supprimer ce lieu?	¿Está seguro de eliminar esta ubicación?	Möchten Sie diesen Ort wirklich löschen?
+confirm.deleteLocationMessage	Messaggio conferma elimina sede	Eliminare questa sede?	Delete this location?	Supprimer ce lieu ?	¿Eliminar esta ubicación?	Diesen Standort löschen?
+confirm.deleteLocationTitle	Titolo conferma elimina sede	Elimina Sede	Delete Location	Supprimer le lieu	Eliminar ubicación	Standort löschen
+confirm.deletePrefix	Prefisso conferma eliminazione con nome	Sei sicuro di voler eliminare	Are you sure you want to delete	Voulez-vous vraiment supprimer	¿Seguro que desea eliminar	Möchten Sie wirklich löschen:
+confirm.deleteSavedTemplate	Conferma eliminazione template salvato	Eliminare questo template salvato?	Delete this saved template?	Supprimer ce modèle enregistré ?	¿Eliminar esta plantilla guardada?	Diese gespeicherte Vorlage löschen?
+confirm.deleteShiftMessage	Messaggio conferma elimina turno	Eliminare questo turno?	Delete this shift?	Supprimer ce quart ?	¿Eliminar este turno?	Diese Schicht löschen?
+confirm.deleteShiftTitle	Titolo conferma elimina turno	Elimina Turno	Delete Shift	Supprimer le quart	Eliminar turno	Schicht löschen
+confirm.deleteSkill	Conferma eliminazione skill	Sei sicuro di voler eliminare questa skill?	Are you sure you want to delete this skill?	Êtes-vous sûr de vouloir supprimer cette compétence?	¿Está seguro de eliminar esta habilidad?	Möchten Sie diese Kompetenz wirklich löschen?
+confirm.deleteSpecialistTitle	Titolo conferma eliminazione Specialista	Elimina Specialista	Delete Specialist	Supprimer Spécialiste	Eliminar Especialista	Spezialist löschen
+confirm.deleteStructure	Conferma eliminazione struttura	Eliminare questa struttura?	Delete this structure?	Supprimer cette structure?	¿Eliminar esta estructura?	Diese Struktur löschen?
+confirm.saveToTemplate	Conferma sostituzione template dalla settimana	Sostituire il template settimanale con i turni della settimana visibile? Vengono salvati solo i turni (senza operatori assegnati).	Replace the weekly template with the visible week's shifts? Only shifts are saved (without assigned operators).	Remplacer le modèle hebdomadaire par les quarts de la semaine visible ? Seuls les quarts sont enregistrés (sans opérateurs affectés).	¿Sustituir la plantilla semanal por los turnos de la semana visible? Solo se guardan los turnos (sin operadores asignados).	Die Wochenvorlage durch die Schichten der sichtbaren Woche ersetzen? Es werden nur die Schichten gespeichert (ohne zugewiesene Operatoren).
+confirm.title	Titolo dialog conferma	Conferma	Confirm	Confirmer	Confirmar	Bestätigen
+constraint.at_least_10_hours_between_2_shifts	Vincolo almeno 10 ore tra 2 turni	Almeno 10 ore tra 2 turni	At least 10 hours between 2 shifts	Au moins 10 heures entre 2 quarts	Al menos 10 horas entre 2 turnos	Mindestens 10 Stunden zwischen 2 Schichten
+constraint.balance_employee_shift_assignments	Vincolo bilanciamento assegnazioni turni	Bilanciamento assegnazioni turni	Balance operator shift assignments	Équilibrage des affectations de quarts	Equilibrio de asignaciones de turnos	Ausgleich der Schichtzuweisungen
+constraint.desired_day_for_employee	Vincolo giorno desiderato per dipendente	Giorno desiderato per operatore	Desired day for operator	Jour souhaité pour l'opérateur	Día deseado para el operador	Gewünschter Tag für Mitarbeiter
+constraint.max_one_shift_per_day	Vincolo massimo un turno al giorno	Massimo un turno al giorno	Max one shift per day	Maximum un quart par jour	Máximo un turno por día	Maximal eine Schicht pro Tag
+constraint.missing_required_skill	Vincolo competenza richiesta mancante	Competenza richiesta mancante	Missing required skill	Compétence requise manquante	Competencia requerida faltante	Erforderliche Fähigkeit fehlt
+constraint.overlapping_shift	Vincolo turni sovrapposti	Turni sovrapposti	Overlapping shift	Quarts qui se chevauchent	Turnos superpuestos	Überlappende Schicht
+constraint.unavailable_employee	Vincolo dipendente non disponibile	Operatore non disponibile	Unavailable operator	Opérateur indisponible	Operador no disponible	Nicht verfügbarer Mitarbeiter
+constraint.undesired_day_for_employee	Vincolo giorno indesiderato per dipendente	Giorno indesiderato per operatore	Undesired day for operator	Jour indésirable pour l'opérateur	Día no deseado para el operador	Unerwünschter Tag für Mitarbeiter
+ctx.addShift	Voce menu contestuale Aggiungi turno	Aggiungi turno	Add shift	Ajouter un quart	Añadir turno	Schicht hinzufügen
+ctx.delete	Voce menu contestuale Elimina	Elimina	Delete	Supprimer	Eliminar	Löschen
+ctx.deleteShift	Voce menu contestuale Elimina turno	Elimina turno	Delete shift	Supprimer le quart	Eliminar turno	Schicht löschen
+ctx.edit	Voce menu contestuale Modifica	Modifica	Edit	Modifier	Editar	Bearbeiten
+ctx.editShift	Voce menu contestuale Modifica turno	Modifica turno	Edit shift	Modifier le quart	Editar turno	Schicht bearbeiten
+dateType.desired	Tab tipo data Preferito	Preferito	Desired	Souhaité	Deseado	Bevorzugt
+dateType.unavailable	Tab tipo data Non Disponibile	Non Disponibile	Unavailable	Non Disponible	No Disponible	Nicht verfügbar
+dateType.undesired	Tab tipo data Non Preferito	Non Preferito	Undesired	Non Souhaité	No Deseado	Nicht bevorzugt
+dates.allDeleted	Toast: tutti i vincoli del dipendente eliminati	Vincoli eliminati.	Constraints deleted.	Contraintes supprimées.	Restricciones eliminadas.	Einschränkungen gelöscht.
+dates.deleteAll	Tooltip: elimina tutti i vincoli del dipendente	Elimina tutti i vincoli	Delete all constraints	Supprimer toutes les contraintes	Eliminar todas las restricciones	Alle Einschränkungen löschen
+dates.deleteAllMsg	Messaggio conferma eliminazione vincoli	Eliminare TUTTI i vincoli di data di	Delete ALL date constraints of	Supprimer TOUTES les contraintes de dates de	¿Eliminar TODAS las restricciones de fechas de	ALLE Datumseinschränkungen löschen von
+dates.deleteAllTitle	Titolo conferma eliminazione vincoli	Elimina vincoli	Delete constraints	Supprimer les contraintes	Eliminar restricciones	Einschränkungen löschen
+dates.noConstraints	Messaggio nessun dipendente con vincoli di data	Nessun operatore ha vincoli di data. Selezionane uno in alto per aggiungerli.	No operator has date constraints. Pick one above to add them.	Aucun opérateur n'a de contraintes de dates. Sélectionnez-en un ci-dessus pour en ajouter.	Ningún operador tiene restricciones de fechas. Selecciona uno arriba para añadirlas.	Kein Mitarbeiter hat Datumseinschränkungen. Wählen Sie oben einen aus, um welche hinzuzufügen.
+dates.pickEmployee	Placeholder selettore dipendente (pagina date)	— Seleziona operatore —	— Select operator —	— Sélectionner un opérateur —	— Selecciona operador —	— Mitarbeiter wählen —
+dates.title	Titolo pagina Preferenze date Dipendenti	Preferenze date Operatori	Operator Date Preferences	Préférences de dates des opérateurs	Preferencias de fechas de los operadores	Datumspräferenzen der Mitarbeiter
+day.fri	Venerdì	Venerdì	Friday	Vendredi	Viernes	Freitag
+day.fri.s	Ven (abbreviazione)	Ven	Fri	Ven	Vie	Fre
+day.mon	Lunedì	Lunedì	Monday	Lundi	Lunes	Montag
+day.mon.s	Lun (abbreviazione)	Lun	Mon	Lun	Lun	Mon
+day.sat	Sabato	Sabato	Saturday	Samedi	Sábado	Samstag
+day.sat.s	Sab (abbreviazione)	Sab	Sat	Sam	Sáb	Sam
+day.sun	Domenica	Domenica	Sunday	Dimanche	Domingo	Sonntag
+day.sun.s	Dom (abbreviazione)	Dom	Sun	Dim	Dom	Son
+day.thu	Giovedì	Giovedì	Thursday	Jeudi	Jueves	Donnerstag
+day.thu.s	Gio (abbreviazione)	Gio	Thu	Jeu	Jue	Don
+day.tue	Martedì	Martedì	Tuesday	Mardi	Martes	Dienstag
+day.tue.s	Mar (abbreviazione)	Mar	Tue	Mar	Mar	Die
+day.wed	Mercoledì	Mercoledì	Wednesday	Mercredi	Miércoles	Mittwoch
+day.wed.s	Mer (abbreviazione)	Mer	Wed	Mer	Mié	Mit
+dowShort.fri	Ven (2 lettere)	Ve	Fr	Ve	Vi	Fr
+dowShort.mon	Lun (2 lettere)	Lu	Mo	Lu	Lu	Mo
+dowShort.sat	Sab (2 lettere)	Sa	Sa	Sa	Sa	Sa
+dowShort.sun	Dom (2 lettere)	Do	Su	Di	Do	So
+dowShort.thu	Gio (2 lettere)	Gi	Th	Je	Ju	Do
+dowShort.tue	Mar (2 lettere)	Ma	Tu	Ma	Ma	Di
+dowShort.wed	Mer (2 lettere)	Me	We	Me	Mi	Mi
+email.smtpNotConfigured	Tooltip busta barrata: invio email disabilitato, SMTP non configurato	Invio email disabilitato: configura il server SMTP in Configurazione → Parametri Email.	Email sending disabled: configure the SMTP server in Configuration → Email Settings.	Envoi d'e-mails désactivé : configurez le serveur SMTP dans Configuration → Paramètres e-mail.	Envío de correos desactivado: configura el servidor SMTP en Configuración → Parámetros de correo.	E-Mail-Versand deaktiviert: SMTP-Server unter Konfiguration → E-Mail-Einstellungen einrichten.
+emailSet.from	Etichetta campo mittente	Mittente	Sender	Expéditeur	Remitente	Absender
+emailSet.fromPlaceholder	Placeholder campo mittente	Nome Visualizzato <indirizzo@esempio.com>	Display Name <address@example.com>	Nom Affiché <adresse@exemple.com>	Nombre Mostrado <direccion@ejemplo.com>	Anzeigename <adresse@beispiel.de>
+emailSet.hint	Suggerimento sezione Parametri Email	Impostazioni del server SMTP per l'invio delle email. Le modifiche hanno effetto immediato; se il server non è configurato qui, viene usata la configurazione di avvio (.env).	SMTP server settings for sending emails. Changes take effect immediately; if no server is configured here, the startup configuration (.env) is used.	Paramètres du serveur SMTP pour l'envoi des e-mails. Les modifications prennent effet immédiatement ; si aucun serveur n'est configuré ici, la configuration de démarrage (.env) est utilisée.	Configuración del servidor SMTP para el envío de emails. Los cambios tienen efecto inmediato; si no se configura aquí, se usa la configuración de arranque (.env).	SMTP-Servereinstellungen für den E-Mail-Versand. Änderungen wirken sofort; ist hier kein Server konfiguriert, wird die Startkonfiguration (.env) verwendet.
+emailSet.host	Etichetta campo server SMTP	Server SMTP	SMTP server	Serveur SMTP	Servidor SMTP	SMTP-Server
+emailSet.password	Etichetta campo password SMTP	Password	Password	Mot de passe	Contraseña	Passwort
+emailSet.passwordKept	Placeholder password salvata (write-only)	•••••• (lascia vuoto per non cambiarla)	•••••• (leave empty to keep it)	•••••• (laisser vide pour la conserver)	•••••• (déjala vacía para no cambiarla)	•••••• (leer lassen, um es zu behalten)
+emailSet.port	Etichetta campo porta SMTP	Porta	Port	Port	Puerto	Port
+emailSet.sendTest	Pulsante invio email di prova	Invia prova	Send test	Envoyer le test	Enviar prueba	Test senden
+emailSet.test	Etichetta blocco email di prova	Email di prova	Test email	E-mail de test	Email de prueba	Test-E-Mail
+emailSet.testHint	Suggerimento email di prova	Invia una email reale con le impostazioni correnti (salva prima le modifiche).	Sends a real email with the current settings (save your changes first).	Envoie un e-mail réel avec les paramètres actuels (enregistrez d'abord les modifications).	Envía un email real con la configuración actual (guarda antes los cambios).	Sendet eine echte E-Mail mit den aktuellen Einstellungen (Änderungen zuerst speichern).
+emailSet.tls	Etichetta switch STARTTLS	STARTTLS	STARTTLS	STARTTLS	STARTTLS	STARTTLS
+emailSet.username	Etichetta campo utente SMTP	Utente	Username	Utilisateur	Usuario	Benutzer
+emailTpl.body	Etichetta campo Corpo del template email	Corpo	Body	Corps	Cuerpo	Text
+emailTpl.insertPlaceholder	Etichetta chip inserimento segnaposto	Segnaposto:	Placeholders:	Espaces réservés :	Marcadores:	Platzhalter:
+emailTpl.placeholdersHint	Suggerimento sui segnaposto del template email	I segnaposto verranno sostituiti con i dati reali al momento dell'invio.	Placeholders will be replaced with real data when the email is sent.	Les espaces réservés seront remplacés par les données réelles lors de l'envoi.	Los marcadores se sustituirán por los datos reales al enviar el correo.	Platzhalter werden beim Versand durch echte Daten ersetzt.
+emailTpl.subject	Etichetta campo Oggetto del template email	Oggetto	Subject	Objet	Asunto	Betreff
+emailTpl.subjectPlaceholder	Placeholder campo Oggetto del template email	Oggetto della mail…	Email subject…	Objet de l'e-mail…	Asunto del correo…	Betreff der E-Mail…
+error.email.auth	Errore invio: credenziali SMTP rifiutate	Il server di posta ha rifiutato le credenziali: verifica utente e password SMTP nella configurazione.	The mail server rejected the credentials: check the SMTP username and password in the configuration.	Le serveur de messagerie a refusé les identifiants : vérifiez l'utilisateur et le mot de passe SMTP dans la configuration.	El servidor de correo rechazó las credenciales: verifica el usuario y la contraseña SMTP en la configuración.	Der Mailserver hat die Zugangsdaten abgelehnt: SMTP-Benutzer und -Passwort in der Konfiguration prüfen.
+error.email.badData	Errore invio: dati non validi	Dati non validi: rigenera i PDF e riprova.	Invalid data: regenerate the PDFs and try again.	Données non valides : régénérez les PDF et réessayez.	Datos no válidos: regenera los PDF e inténtalo de nuevo.	Ungültige Daten: PDFs neu erstellen und erneut versuchen.
+error.email.connection	Errore invio: server di posta non raggiungibile	Impossibile raggiungere il server di posta: controlla la connessione a Internet e riprova.	Cannot reach the mail server: check your Internet connection and try again.	Impossible de joindre le serveur de messagerie : vérifiez la connexion Internet et réessayez.	No se puede contactar con el servidor de correo: comprueba la conexión a Internet e inténtalo de nuevo.	Mailserver nicht erreichbar: Internetverbindung prüfen und erneut versuchen.
+error.email.generic	Errore invio: problema imprevisto del server di posta	Invio non riuscito per un problema del server di posta: riprova più tardi.	Sending failed due to a mail server problem: try again later.	Échec de l'envoi en raison d'un problème du serveur de messagerie : réessayez plus tard.	El envío falló por un problema del servidor de correo: inténtalo más tarde.	Senden wegen eines Mailserver-Problems fehlgeschlagen: versuchen Sie es später erneut.
+error.email.noEmail	Errore invio: dipendente senza indirizzo email	L'operatore non ha un indirizzo email: aggiungilo dalla pagina Operatori.	The operator has no email address: add it from the Operators page.	L'opérateur n'a pas d'adresse e-mail : ajoutez-la depuis la page Opérateurs.	El operador no tiene dirección de email: añádela desde la página Operadores.	Der Mitarbeiter hat keine E-Mail-Adresse: fügen Sie sie auf der Mitarbeiterseite hinzu.
+error.email.notConfigured	Errore invio: server SMTP non configurato	Il server SMTP non è configurato: completa i Parametri Email nella Configurazione.	The SMTP server is not configured: complete the Email Settings in Configuration.	Le serveur SMTP n'est pas configuré : complétez les Paramètres e-mail dans la Configuration.	El servidor SMTP no está configurado: completa los Parámetros de correo en la Configuración.	Der SMTP-Server ist nicht konfiguriert: E-Mail-Einstellungen in der Konfiguration vervollständigen.
+error.email.notFound	Errore invio: dipendente non trovato	Operatore non trovato: aggiorna la pagina e rigenera i PDF.	Operator not found: refresh the page and regenerate the PDFs.	Opérateur introuvable : actualisez la page et régénérez les PDF.	Operador no encontrado: actualiza la página y regenera los PDF.	Mitarbeiter nicht gefunden: Seite aktualisieren und PDFs neu erstellen.
+error.email.quota	Errore invio: limite invii raggiunto	Raggiunto il limite di invii del servizio di posta: riprova più tardi.	The mail service sending limit was reached: try again later.	Limite d'envoi du service de messagerie atteinte : réessayez plus tard.	Se alcanzó el límite de envíos del servicio de correo: inténtalo más tarde.	Sendelimit des Maildienstes erreicht: versuchen Sie es später erneut.
+error.email.recipient	Errore invio: destinatario rifiutato dal server	Il server ha rifiutato il destinatario: controlla che l'indirizzo email dell'operatore sia corretto.	The server rejected the recipient: check that the operator's email address is correct.	Le serveur a refusé le destinataire : vérifiez que l'adresse e-mail de l'opérateur est correcte.	El servidor rechazó el destinatario: comprueba que la dirección de email del operador sea correcta.	Der Server hat den Empfänger abgelehnt: prüfen Sie, ob die E-Mail-Adresse des Mitarbeiters korrekt ist.
+error.email.sender	Errore invio: mittente rifiutato dal server	Il server ha rifiutato il mittente: l'indirizzo mittente non è autorizzato sul servizio di posta.	The server rejected the sender: the sender address is not authorized on the mail service.	Le serveur a refusé l'expéditeur : l'adresse d'expédition n'est pas autorisée sur le service de messagerie.	El servidor rechazó el remitente: la dirección del remitente no está autorizada en el servicio de correo.	Der Server hat den Absender abgelehnt: die Absenderadresse ist beim Maildienst nicht autorisiert.
+hint.clickConstraintForSettings	Nota: clicca un vincolo per aprire i Parametri Solver	Clicca un vincolo per aprire i Parametri Solver in una nuova scheda.	Click a constraint to open Solver Settings in a new tab.	Cliquez sur une contrainte pour ouvrir les paramètres du solveur dans un nouvel onglet.	Haz clic en una restricción para abrir los parámetros del solver en una nueva pestaña.	Klicken Sie auf eine Bedingung, um die Solver-Einstellungen in einem neuen Tab zu öffnen.
+hint.inactiveEmployee	Suggerimento dipendente disattivato	Se disattivato non compare in Gestione Turni e il solver non gli assegna turni.	If deactivated, it no longer appears in Shift Management and the solver won't assign shifts to them.	S'il est désactivé, il n'apparaît plus dans la gestion des quarts et le solveur ne lui attribue aucun quart.	Si está desactivado, no aparece en la gestión de turnos y el solver no le asigna turnos.	Wenn deaktiviert, erscheint er nicht mehr in der Schichtverwaltung und der Solver weist ihm keine Schichten zu.
+hint.inactiveLocation	Suggerimento sede disattivata	Se disattivata non compare in Gestione Turni e il solver non la considera.	If deactivated, it no longer appears in Shift Management and the solver ignores it.	Si elle est désactivée, elle n'apparaît plus dans la gestion des quarts et le solveur l'ignore.	Si está desactivada, no aparece en la gestión de turnos y el solver la ignora.	Wenn deaktiviert, erscheint er nicht mehr in der Schichtverwaltung und der Solver ignoriert ihn.
+hint.incompatibleSpecialist	Avviso rischio turni scoperti	"Incompatibile" vieta l'assegnazione: può lasciare turni scoperti.	"Incompatible" forbids the assignment: shifts may remain uncovered.	« Incompatible » interdit l'affectation : des quarts peuvent rester non couverts.	"Incompatible" prohíbe la asignación: pueden quedar turnos sin cubrir.	"Unvereinbar" verbietet die Zuweisung: Schichten können unbesetzt bleiben.
+hint.loadTemplateReplaces	Nota: applicando un template i turni del periodo vengono sostituiti	Applicando un template, i turni del periodo visibile verranno sostituiti.	Applying a template will replace the shifts in the visible period.	L'application d'un modèle remplacera les quarts de la période visible.	Al aplicar una plantilla se sustituirán los turnos del período visible.	Beim Anwenden einer Vorlage werden die Schichten im sichtbaren Zeitraum ersetzt.
+hint.saveTemplateNoOperators	Nota: salva solo turni senza operatori	Vengono salvati solo i turni per sede, senza gli operatori assegnati.	Only the per-location shifts are saved, without the assigned operators.	Seuls les quarts par site sont enregistrés, sans les opérateurs affectés.	Solo se guardan los turnos por sede, sin los operadores asignados.	Es werden nur die Schichten pro Standort gespeichert, ohne die zugewiesenen Operatoren.
+hint.skillTranslationFallback	Nota fallback traduzioni competenza	Le lingue lasciate vuote useranno il Nome base.	Languages left empty will use the base Name.	Les langues laissées vides utiliseront le Nom de base.	Los idiomas vacíos usarán el Nombre base.	Leere Sprachen verwenden den Basisnamen.
+label.active	Etichetta Attivo	Attivo	Active	Actif	Activo	Aktiv
+label.activeYes	Badge attivo Si	Sì	Yes	Oui	Sí	Ja
+label.address	Etichetta indirizzo	Indirizzo	Address	Adresse	Dirección	Adresse
+label.code	Etichetta Codice	Codice	Code	Code	Código	Code
+label.dayOfWeek	Etichetta Giorno della settimana	Giorno	Day	Jour	Día	Tag
+label.description	Etichetta Descrizione	Descrizione	Description	Description	Descripción	Beschreibung
+label.email	Etichetta Email	Email	Email	E-mail	Correo electrónico	E-Mail
+label.employee	Etichetta Impiegato	Operatore	Operator	Opérateur	Operador	Mitarbeiter
+label.end	Etichetta Fine	Fine	End	Fin	Fin	Ende
+label.endTime	Etichetta Ora Fine	Ora Fine	End Time	Heure Fin	Hora Fin	Endzeit
+label.facility	Etichetta Struttura	Struttura	Facility	Structure	Instalación	Einrichtung
+label.firstName	Etichetta Nome	Nome	First Name	Prénom	Nombre	Vorname
+label.inactive	Badge attivo No	No	No	Non	No	Nein
+label.key	Etichetta Chiave	Chiave	Key	Clé	Clave	Schlüssel
+label.lastName	Etichetta Cognome	Cognome	Last Name	Nom	Apellido	Nachname
+label.location	Etichetta Sede	Sede	Location	Lieu	Ubicación	Ort
+label.locationCode	Etichetta Codice Sede	Codice Sede	Location Code	Code Lieu	Código Ubicación	Ortscode
+label.locationName	Etichetta Nome Sede	Nome Sede	Location Name	Nom du Lieu	Nombre Ubicación	Ortsname
+label.locationOrder	Etichetta Ordine Sede	Ordine Sede	Location Order	Ordre Lieu	Orden Ubicación	Ortsreihenfolge
+label.month	Etichetta Mese	Mese	Month	Mois	Mes	Monat
+label.name	Etichetta Nome	Nome	Name	Nom	Nombre	Name
+label.nurse	Etichetta Infermiera	Infermiera	Nurse	Infirmière	Enfermera	Krankenschwester
+label.operator	Etichetta Operatore	Operatore	Operator	Opérateur	Operador	Mitarbeiter
+label.optionalSkills	Etichetta Skill Opzionali	Skill Opzionali	Optional Skills	Compétences Optionnelles	Habilidades Opcionales	Optionale Kompetenzen
+label.order	Etichetta Ordine	Ordine	Order	Ordre	Orden	Reihenfolge
+label.period	Etichetta campo Periodo (Report)	Periodo	Period	Période	Período	Zeitraum
+label.phone	Etichetta telefono	Telefono	Phone	Téléphone	Teléfono	Telefon
+label.reportPreview	Etichetta anteprima report	Anteprima turni trovati:	Preview shifts found:	Aperçu des quarts trouvés:	Vista previa de turnos encontrados:	Vorschau gefundener Schichten:
+label.requiredSkills	Etichetta Skill Richieste	Skill Richieste	Required Skills	Compétences Requises	Habilidades Requeridas	Erforderliche Kompetenzen
+label.satisfiedConstraints	Etichetta Vincoli rispettati	Vincoli rispettati	Satisfied constraints	Contraintes respectées	Restricciones cumplidas	Erfüllte Bedingungen
+label.score	Etichetta Punteggio	Punteggio	Score	Score	Puntuación	Punktzahl
+label.selectMonthForReport	Etichetta seleziona mese per report	Seleziona il mese per cui generare il report.	Select the month for generating the report.	Sélectionnez le mois pour générer le rapport.	Seleccione el mes para generar el reporte.	Wählen Sie den Monat für den Bericht.
+label.skills	Etichetta Skills	Skills	Skills	Compétences	Habilidades	Kompetenzen
+label.specialist	Etichetta Specialista	Specialista	Specialist	Spécialiste	Especialista	Spezialist
+label.specialistCompatibility	Etichetta sezione compatibilità specialisti	Compatibilità con Specialisti	Specialist Compatibility	Compatibilité avec les spécialistes	Compatibilidad con especialistas	Kompatibilität mit Spezialisten
+label.start	Etichetta Inizio	Inizio	Start	Début	Inicio	Start
+label.startTime	Etichetta Ora Inizio	Ora Inizio	Start Time	Heure Début	Hora Inicio	Startzeit
+label.structureName	Etichetta nome struttura	Nome Struttura	Structure Name	Nom de la Structure	Nombre de la Estructura	Strukturname
+label.translations	Etichetta Traduzioni	Traduzioni	Translations	Traductions	Traducciones	Übersetzungen
+label.type	Etichetta Tipo	Tipo	Type	Type	Tipo	Typ
+label.violatedConstraints	Etichetta Vincoli violati	Vincoli violati	Violated constraints	Contraintes violées	Restricciones incumplidas	Verletzte Bedingungen
+labels.addTooltip	Tooltip aggiunta etichetta	Aggiungi una nuova etichetta	Add a new label	Ajouter un nouveau libellé	Añadir una nueva etiqueta	Neue Beschriftung hinzufügen
+labels.deleteTitle	Titolo eliminazione etichetta	Elimina etichetta	Delete label	Supprimer le libellé	Eliminar etiqueta	Beschriftung löschen
+labels.noResults	Messaggio nessuna etichetta	Nessuna etichetta trovata.	No labels found.	Aucun libellé trouvé.	No se encontraron etiquetas.	Keine Beschriftungen gefunden.
+labels.results	Conteggio risultati etichette	{{count}} risultato/i	{{count}} result(s)	{{count}} résultat(s)	{{count}} resultado(s)	{{count}} Ergebnis(se)
+labels.searchPlaceholder	Placeholder ricerca etichette	Cerca per chiave o descrizione…	Search by key or description…	Rechercher par clé ou description…	Buscar por clave o descripción…	Nach Schlüssel oder Beschreibung suchen…
+labels.showTranslationKeys	Etichetta switch mostra chiavi	Mostra chiavi	Show keys	Afficher les clés	Mostrar claves	Schlüssel anzeigen
+modal.addEmployee	Titolo modal aggiungi dipendente	Aggiungi Operatore	Add Operator	Ajouter Opérateur	Añadir Operador	Mitarbeiter hinzufügen
+modal.addLabel	Titolo modal Aggiungi etichetta	Aggiungi Etichetta	Add Label	Ajouter une étiquette	Añadir etiqueta	Etikett hinzufügen
+modal.addLocation	Titolo modal aggiungi sede	Aggiungi Sede	Add Location	Ajouter Lieu	Añadir Ubicación	Ort hinzufügen
+modal.addShift	Titolo modal Aggiungi turno	Aggiungi Turno	Add Shift	Ajouter un quart	Añadir turno	Schicht hinzufügen
+modal.addSkill	Titolo aggiunta competenza	Aggiungi competenza	Add skill	Ajouter une compétence	Añadir competencia	Kompetenz hinzufügen
+modal.addSpecialist	Titolo modale Aggiungi Specialista	Aggiungi Specialista	Add Specialist	Ajouter Spécialiste	Añadir Especialista	Spezialist hinzufügen
+modal.addStructure	Titolo modal aggiungi struttura	Aggiungi Struttura	Add Structure	Ajouter Structure	Añadir Estructura	Struktur hinzufügen
+modal.addTemplate	Titolo modal Aggiungi turno-template	Aggiungi turno-template	Add template shift	Ajouter un quart-modèle	Añadir turno de plantilla	Vorlagenschicht hinzufügen
+modal.availabilityDetail	Titolo modal dettaglio disponibilità	Dettaglio Disponibilità	Availability Detail	Détail Disponibilité	Detalle Disponibilidad	Verfügbarkeitsdetail
+modal.confirm	Titolo modal conferma	Conferma	Confirm	Confirmer	Confirmar	Bestätigen
+modal.dateDetails	Titolo modal dettaglio data	Dettaglio Disponibilità	Availability Detail	Détail Disponibilité	Detalle Disponibilidad	Verfügbarkeitsdetail
+modal.deleteEmployee	Titolo modal elimina dipendente	Elimina Operatore	Delete Operator	Supprimer Opérateur	Eliminar Operador	Mitarbeiter löschen
+modal.deleteLabel	Titolo modal elimina etichetta	Elimina Etichetta	Delete Label	Supprimer Étiquette	Eliminar Etiqueta	Beschriftung löschen
+modal.deleteLanguage	Titolo modal elimina lingua	Elimina Lingua	Delete Language	Supprimer Langue	Eliminar Idioma	Sprache löschen
+modal.deleteLocation	Titolo modal elimina sede	Elimina Sede	Delete Location	Supprimer Lieu	Eliminar Ubicación	Ort löschen
+modal.editEmployee	Titolo modal modifica dipendente	Modifica Operatore	Edit Operator	Modifier Opérateur	Editar Operador	Mitarbeiter bearbeiten
+modal.editLabel	Titolo modal Modifica etichetta	Modifica Etichetta	Edit Label	Modifier l'étiquette	Editar etiqueta	Etikett bearbeiten
+modal.editLocation	Titolo modal modifica sede	Modifica Sede	Edit Location	Modifier Lieu	Editar Ubicación	Ort bearbeiten
+modal.editSavedTemplate	Titolo modale modifica template salvato	Modifica template	Edit template	Modifier le modèle	Editar plantilla	Vorlage bearbeiten
+modal.editShift	Titolo modal Modifica turno	Modifica Turno	Edit Shift	Modifier le quart	Editar turno	Schicht bearbeiten
+modal.editSkill	Titolo modifica competenza	Modifica competenza	Edit skill	Modifier la compétence	Editar competencia	Kompetenz bearbeiten
+modal.editSpecialist	Titolo modale Modifica Specialista	Modifica Specialista	Edit Specialist	Modifier Spécialiste	Editar Especialista	Spezialist bearbeiten
+modal.editStructure	Titolo modal modifica struttura	Modifica Struttura	Edit Structure	Modifier Structure	Editar Estructura	Struktur bearbeiten
+modal.editTemplate	Titolo modal Modifica turno-template	Modifica turno-template	Edit template shift	Modifier le quart-modèle	Editar turno de plantilla	Vorlagenschicht bearbeiten
+modal.employeeDates	Titolo modal date dipendente	Date Operatore	Operator Dates	Dates Opérateur	Fechas Operador	Mitarbeiterdaten
+modal.employeeDatesList	Titolo modal lista date dipendente	Date Operatore	Operator Dates	Dates Opérateur	Fechas Operador	Mitarbeiterdaten
+modal.handleShift	Titolo modal gestione turno	Gestione Turno	Handle Shift	Gérer Quart	Gestionar Turno	Schicht verwalten
+modal.labelManagement	Titolo modal gestione etichette	Gestione Etichette	Labels Management	Gestion des Étiquettes	Gestión de Etiquetas	Beschriftungsverwaltung
+modal.languageManagement	Titolo modal gestione lingue	Gestione Lingue	Language Management	Gestion des Langues	Gestión de Idiomas	Sprachverwaltung
+modal.loadTemplate	Titolo modale carica template	Carica da template	Load from template	Charger depuis un modèle	Cargar desde plantilla	Aus Vorlage laden
+modal.manageLabels	Titolo modal gestione etichette	Gestione Etichette	Labels Management	Gestion des Étiquettes	Gestión de Etiquetas	Beschriftungsverwaltung
+modal.manageLanguages	Titolo modal gestione lingue	Gestione Lingue	Language Management	Gestion des Langues	Gestión de Idiomas	Sprachverwaltung
+modal.manageStructures	Titolo modal gestione strutture	Gestione Strutture	Manage Structures	Gestion des Structures	Gestión de Estructuras	Strukturen verwalten
+modal.printCoverage	Titolo modal stampa copertura	Stampa Copertura Turni	Print Coverage Shifts	Imprimer Couverture Quarts	Imprimir Cobertura Turnos	Schichtdeckung drucken
+modal.printCoverageShifts	Titolo modal stampa copertura turni	Stampa Copertura Turni	Print Coverage Shifts	Imprimer Couverture Quarts	Imprimir Cobertura Turnos	Schichtdeckung drucken
+modal.printShifts	Titolo modal stampa turni	Stampa Turni Settimanali	Print Weekly Shifts	Imprimer Quarts Hebdomadaires	Imprimir Turnos Semanales	Wöchentliche Schichten drucken
+modal.printWeeklyShifts	Titolo modal stampa turni settimanali	Stampa Turni Settimanali	Print Weekly Shifts	Imprimer Quarts Hebdomadaires	Imprimir Turnos Semanales	Wöchentliche Schichten drucken
+modal.saveTemplate	Titolo modale salva template	Salva in template	Save to template	Enregistrer dans le modèle	Guardar en plantilla	In Vorlage speichern
+modal.scoreAnalysis	Titolo modal analisi score	Analisi Score	Score Analysis	Analyse du Score	Análisis de Puntuación	Score-Analyse
+modal.shiftDetail	Titolo modal dettaglio turno	Dettaglio Turno	Shift Detail	Détail du Quart	Detalle del Turno	Schichtdetail
+modal.shiftDetails	Titolo modal dettaglio turno	Dettaglio Turno	Shift Detail	Détail du Quart	Detalle del Turno	Schichtdetail
+modal.shiftsList	Titolo modal lista turni	Lista Turni	Shifts List	Liste des Quarts	Lista de Turnos	Schichtliste
+modal.skillsForShift	Titolo modal skill turno	Skill del Turno	Skills for Shift	Compétences du Quart	Habilidades del Turno	Schichtkompetenzen
+modal.skillsList	Titolo modal lista skill	Lista Skill	Skills List	Liste des Compétences	Lista de Habilidades	Kompetenzliste
+modal.solveResult	Titolo modal Risultato solve	Risultato Solve	Solve Result	Résultat de la résolution	Resultado de la resolución	Lösungsergebnis
+modal.translations	Titolo modal traduzioni	Traduzioni	Translations	Traductions	Traducciones	Übersetzungen
+month.apr	Aprile	Aprile	April	Avril	Abril	April
+month.apr.s	Apr (abbreviazione)	Apr	Apr	Avr	Abr	Apr
+month.april	Mese Aprile (nome completo)	Aprile	April	Avril	Abril	April
+month.aug	Agosto	Agosto	August	Août	Agosto	August
+month.aug.s	Ago (abbreviazione)	Ago	Aug	Aoû	Ago	Aug
+month.august	Mese Agosto (nome completo)	Agosto	August	Août	Agosto	August
+month.dec	Dicembre	Dicembre	December	Décembre	Diciembre	Dezember
+month.dec.s	Dic (abbreviazione)	Dic	Dec	Déc	Dic	Dez
+month.december	Mese Dicembre (nome completo)	Dicembre	December	Décembre	Diciembre	Dezember
+month.feb	Febbraio	Febbraio	February	Février	Febrero	Februar
+month.feb.s	Feb (abbreviazione)	Feb	Feb	Fév	Feb	Feb
+month.february	Mese Febbraio (nome completo)	Febbraio	February	Février	Febrero	Februar
+month.jan	Gennaio	Gennaio	January	Janvier	Enero	Januar
+month.jan.s	Gen (abbreviazione)	Gen	Jan	Jan	Ene	Jan
+month.january	Mese Gennaio (nome completo)	Gennaio	January	Janvier	Enero	Januar
+month.jul	Luglio	Luglio	July	Juillet	Julio	Juli
+month.jul.s	Lug (abbreviazione)	Lug	Jul	Jul	Jul	Jul
+month.july	Mese Luglio (nome completo)	Luglio	July	Juillet	Julio	Juli
+month.jun	Giugno	Giugno	June	Juin	Junio	Juni
+month.jun.s	Giu (abbreviazione)	Giu	Jun	Jui	Jun	Jun
+month.june	Mese Giugno (nome completo)	Giugno	June	Juin	Junio	Juni
+month.mar	Marzo	Marzo	March	Mars	Marzo	März
+month.mar.s	Mar (abbreviazione)	Mar	Mar	Mar	Mar	Mär
+month.march	Mese Marzo (nome completo)	Marzo	March	Mars	Marzo	März
+month.may	Maggio	Maggio	May	Mai	Mayo	Mai
+month.may.s	Mag (abbreviazione)	Mag	May	Mai	May	Mai
+month.nov	Novembre	Novembre	November	Novembre	Noviembre	November
+month.nov.s	Nov (abbreviazione)	Nov	Nov	Nov	Nov	Nov
+month.november	Mese Novembre (nome completo)	Novembre	November	Novembre	Noviembre	November
+month.oct	Ottobre	Ottobre	October	Octobre	Octubre	Oktober
+month.oct.s	Ott (abbreviazione)	Ott	Oct	Oct	Oct	Okt
+month.october	Mese Ottobre (nome completo)	Ottobre	October	Octobre	Octubre	Oktober
+month.sep	Settembre	Settembre	September	Septembre	Septiembre	September
+month.sep.s	Set (abbreviazione)	Set	Sep	Sep	Sep	Sep
+month.september	Mese Settembre (nome completo)	Settembre	September	Septembre	Septiembre	September
+monthShort.apr	Mese Apr (abbreviazione)	Apr	Apr	Avr.	Abr	Apr
+monthShort.aug	Mese Ago (abbreviazione)	Ago	Aug	Août	Ago	Aug
+monthShort.dec	Mese Dic (abbreviazione)	Dic	Dec	Déc.	Dic	Dez
+monthShort.feb	Mese Feb (abbreviazione)	Feb	Feb	Févr.	Feb	Feb
+monthShort.jan	Mese Gen (abbreviazione)	Gen	Jan	Janv.	Ene	Jan
+monthShort.jul	Mese Lug (abbreviazione)	Lug	Jul	Juil.	Jul	Jul
+monthShort.jun	Mese Giu (abbreviazione)	Giu	Jun	Juin	Jun	Jun
+monthShort.mar	Mese Mar (abbreviazione)	Mar	Mar	Mars	Mar	Mär
+monthShort.may	Mese Mag (abbreviazione)	Mag	May	Mai	May	Mai
+monthShort.nov	Mese Nov (abbreviazione)	Nov	Nov	Nov.	Nov	Nov
+monthShort.oct	Mese Ott (abbreviazione)	Ott	Oct	Oct.	Oct	Okt
+monthShort.sep	Mese Set (abbreviazione)	Set	Sep	Sept.	Sep	Sep
+msg.allConstraintsSatisfied	Messaggio tutti i vincoli rispettati	Tutti i vincoli rispettati ✓	All constraints satisfied ✓	Toutes les contraintes respectées ✓	Todas las restricciones cumplidas ✓	Alle Bedingungen erfüllt ✓
+msg.assigned	Messaggio Assegnato	Assegnato	Assigned	Assigné	Asignado	Zugewiesen
+msg.constraintsViolated	Messaggio vincoli violati	vincolo/i violato/i	constraint(s) violated	contrainte(s) violée(s)	restricción(es) incumplida(s)	Bedingung(en) verletzt
+msg.dataNotAvailable	Messaggio dati non disponibili	Dati non disponibili.	Data not available.	Données non disponibles.	Datos no disponibles.	Daten nicht verfügbar.
+msg.err.employeeCodeInUse	Errore backend codice operatore in uso	Codice operatore già in uso. Scegline uno diverso.	Operator code already in use. Choose a different one.	Code opérateur déjà utilisé. Choisissez-en un autre.	Código de operador ya en uso. Elija otro.	Mitarbeitercode bereits vergeben. Wählen Sie einen anderen.
+msg.err.employeeCodeRequired	Errore backend codice operatore obbligatorio	Il codice dell'operatore è obbligatorio.	The operator code is required.	Le code de l'opérateur est obligatoire.	El código del operador es obligatorio.	Der Mitarbeitercode ist erforderlich.
+msg.err.employeeEmailInvalid	Errore backend email operatore non valida	Indirizzo email dell'operatore non valido.	Invalid operator email address.	Adresse e-mail de l'opérateur invalide.	Dirección de correo del operador no válida.	Ungültige E-Mail-Adresse des Mitarbeiters.
+msg.err.employeeFirstNameRequired	Errore backend nome operatore obbligatorio	Il nome dell'operatore è obbligatorio.	The operator first name is required.	Le prénom de l'opérateur est obligatoire.	El nombre del operador es obligatorio.	Der Vorname des Mitarbeiters ist erforderlich.
+msg.err.employeeLastNameRequired	Errore backend cognome operatore obbligatorio	Il cognome dell'operatore è obbligatorio.	The operator last name is required.	Le nom de l'opérateur est obligatoire.	El apellido del operador es obligatorio.	Der Nachname des Mitarbeiters ist erforderlich.
+msg.err.labelInsertFailed	Errore backend inserimento etichetta	Errore durante l'inserimento dell'etichetta.	Error inserting the label.	Erreur lors de l'insertion de l'étiquette.	Error al insertar la etiqueta.	Fehler beim Einfügen der Beschriftung.
+msg.err.labelNotFound	Errore backend etichetta non trovata	Etichetta non trovata.	Label not found.	Étiquette non trouvée.	Etiqueta no encontrada.	Beschriftung nicht gefunden.
+msg.err.languageActiveCannotDelete	Errore backend lingua attiva non eliminabile	Impossibile eliminare la lingua attiva.	The active language cannot be deleted.	Impossible de supprimer la langue active.	No se puede eliminar el idioma activo.	Die aktive Sprache kann nicht gelöscht werden.
+msg.err.languageInsertFailed	Errore backend inserimento lingua	Errore durante l'inserimento della lingua.	Error inserting the language.	Erreur lors de l'insertion de la langue.	Error al insertar el idioma.	Fehler beim Einfügen der Sprache.
+msg.err.languageNotFound	Errore backend lingua non trovata	Lingua non trovata.	Language not found.	Langue non trouvée.	Idioma no encontrado.	Sprache nicht gefunden.
+msg.err.locationCodeInUse	Errore backend codice sede in uso	Codice sede già in uso. Scegline uno diverso.	Location code already in use. Choose a different one.	Code du lieu déjà utilisé. Choisissez-en un autre.	Código de ubicación ya en uso. Elija otro.	Ortscode bereits vergeben. Wählen Sie einen anderen.
+msg.err.locationInUse	Errore backend sede referenziata	Sede utilizzata da turni o template: non può essere eliminata.	The location is used by shifts or templates and cannot be deleted.	Le lieu est utilisé par des quarts ou des modèles: suppression impossible.	La ubicación se usa en turnos o plantillas: no se puede eliminar.	Der Ort wird von Schichten oder Vorlagen verwendet und kann nicht gelöscht werden.
+msg.err.locationNameRequired	Errore backend nome sede obbligatorio	Il nome della sede è obbligatorio.	The location name is required.	Le nom du lieu est obligatoire.	El nombre de la ubicación es obligatorio.	Der Ortsname ist erforderlich.
+msg.err.locationOrderRequired	Errore backend ordine sede obbligatorio	L'ordine della sede deve essere maggiore di zero.	The location order must be greater than zero.	L'ordre du lieu doit être supérieur à zéro.	El orden de la ubicación debe ser mayor que cero.	Die Ortsreihenfolge muss größer als null sein.
+msg.err.locationSkillsInvalid	Errore backend competenze sede non valide	Competenze non valide per la sede.	Invalid skills for the location.	Compétences invalides pour le lieu.	Habilidades no válidas para la ubicación.	Ungültige Kompetenzen für den Ort.
+msg.err.locationSpecialistInvalid	Errore backend specialista sede non valido	Specialista non valido per questa struttura.	Invalid specialist for this structure.	Spécialiste invalide pour cette structure.	Especialista no válido para esta estructura.	Ungültiger Spezialist für diese Struktur.
+msg.err.specialistCodeInUse	Errore backend codice specialista in uso	Codice specialista già in uso. Scegline uno diverso.	Specialist code already in use. Choose a different one.	Code spécialiste déjà utilisé. Choisissez-en un autre.	Código de especialista ya en uso. Elija otro.	Spezialistencode bereits vergeben. Wählen Sie einen anderen.
+msg.err.specialistCodeRequired	Errore backend codice specialista obbligatorio	Il codice dello specialista è obbligatorio.	The specialist code is required.	Le code du spécialiste est obligatoire.	El código del especialista es obligatorio.	Der Spezialistencode ist erforderlich.
+msg.err.specialistEmailInvalid	Errore backend email specialista non valida	Indirizzo email dello specialista non valido.	Invalid specialist email address.	Adresse e-mail du spécialiste invalide.	Dirección de correo del especialista no válida.	Ungültige E-Mail-Adresse des Spezialisten.
+msg.err.specialistFirstNameRequired	Errore backend nome specialista obbligatorio	Il nome dello specialista è obbligatorio.	The specialist first name is required.	Le prénom du spécialiste est obligatoire.	El nombre del especialista es obligatorio.	Der Vorname des Spezialisten ist erforderlich.
+msg.err.specialistLastNameRequired	Errore backend cognome specialista obbligatorio	Il cognome dello specialista è obbligatorio.	The specialist last name is required.	Le nom du spécialiste est obligatoire.	El apellido del especialista es obligatorio.	Der Nachname des Spezialisten ist erforderlich.
+msg.error.addEmployee	Messaggio errore aggiunta dipendente	Errore durante l'aggiunta dell'operatore.	Error adding operator.	Erreur lors de l'ajout de l'opérateur.	Error al añadir operador.	Fehler beim Hinzufügen des Mitarbeiters.
+msg.error.addLocation	Messaggio errore aggiunta sede	Errore nell'aggiunta della location.	Error adding location.	Erreur lors de l'ajout du lieu.	Error al añadir ubicación.	Fehler beim Hinzufügen des Orts.
+msg.error.addShift	Messaggio errore aggiunta turno	Errore nell'aggiunta del turno.	Error adding shift.	Erreur lors de l'ajout du quart.	Error al añadir turno.	Fehler beim Hinzufügen der Schicht.
+msg.error.addStructure	Errore aggiunta struttura	Errore durante l'aggiunta della struttura.	Error adding structure.	Erreur lors de l'ajout de la structure.	Error al agregar la estructura.	Fehler beim Hinzufügen der Struktur.
+msg.error.delete	Errore eliminazione (generico)	Errore durante l’eliminazione.	Error while deleting.	Erreur lors de la suppression.	Error al eliminar.	Fehler beim Löschen.
+msg.error.deleteDate	Messaggio errore eliminazione data	Errore durante la cancellazione della data.	Error deleting date.	Erreur lors de la suppression de la date.	Error al eliminar fecha.	Fehler beim Löschen des Datums.
+msg.error.deleteEmployee	Messaggio errore eliminazione dipendente	Errore durante l'eliminazione dell'operatore.	Error deleting operator.	Erreur lors de la suppression de l'opérateur.	Error al eliminar operador.	Fehler beim Löschen des Mitarbeiters.
+msg.error.deleteLocation	Messaggio errore eliminazione sede	Errore durante l'eliminazione del luogo.	Error deleting location.	Erreur lors de la suppression du lieu.	Error al eliminar ubicación.	Fehler beim Löschen des Orts.
+msg.error.deleteShift	Messaggio errore eliminazione turno	Errore durante la cancellazione del turno.	Error deleting shift.	Erreur lors de la suppression du quart.	Error al eliminar turno.	Fehler beim Löschen der Schicht.
+msg.error.deleteSkill	Messaggio errore eliminazione skill	Errore durante l'eliminazione della skill.	Error deleting skill.	Erreur lors de la suppression de la compétence.	Error al eliminar habilidad.	Fehler beim Löschen der Kompetenz.
+msg.error.deleteStructure	Errore eliminazione struttura in uso	Impossibile eliminare: la struttura è in uso.	Cannot delete: structure is in use.	Impossible de supprimer: la structure est utilisée.	No se puede eliminar: la estructura está en uso.	Löschen nicht möglich: Struktur wird verwendet.
+msg.error.duplicateEmployeeCode	Messaggio codice dipendente duplicato	Codice operatore già in uso. Scegli un codice diverso.	Operator code already in use. Choose a different code.	Code opérateur déjà utilisé. Choisissez un autre code.	Código de operador ya en uso. Elija otro código.	Mitarbeitercode bereits vergeben. Wählen Sie einen anderen Code.
+msg.error.duplicateLocationCode	Messaggio codice sede duplicato	Codice location già in uso. Scegli un codice diverso.	Location code already in use.	Code lieu déjà utilisé.	Código de ubicación ya en uso.	Ortscode bereits vergeben.
+msg.error.editEmployee	Messaggio errore modifica dipendente	Errore durante la modifica dell'operatore.	Error editing operator.	Erreur lors de la modification de l'opérateur.	Error al editar operador.	Fehler beim Bearbeiten des Mitarbeiters.
+msg.error.editStructure	Errore modifica struttura	Errore durante la modifica della struttura.	Error editing structure.	Erreur lors de la modification de la structure.	Error al editar la estructura.	Fehler beim Bearbeiten der Struktur.
+msg.error.generic	Messaggio errore generico	Errore	Error	Erreur	Error	Fehler
+msg.error.loadData	Messaggio errore caricamento dati	Errore durante il caricamento dei dati.	Error loading data.	Erreur lors du chargement des données.	Error al cargar los datos.	Fehler beim Laden der Daten.
+msg.error.loadEmployee	Messaggio errore caricamento dipendente	Errore nel caricamento dei dati dell'operatore.	Error loading operator data.	Erreur lors du chargement des données opérateur.	Error al cargar datos del operador.	Fehler beim Laden der Mitarbeiterdaten.
+msg.error.loadLabels	Messaggio errore caricamento etichette	Errore durante il caricamento delle etichette.	Error loading labels.	Erreur lors du chargement des étiquettes.	Error al cargar etiquetas.	Fehler beim Laden der Beschriftungen.
+msg.error.loadLanguages	Messaggio errore caricamento lingue	Errore durante il caricamento delle lingue.	Error loading languages.	Erreur lors du chargement des langues.	Error al cargar idiomas.	Fehler beim Laden der Sprachen.
+msg.error.loadLocations	Messaggio errore caricamento sedi	Errore nel caricamento delle location.	Error loading locations.	Erreur lors du chargement des lieux.	Error al cargar ubicaciones.	Fehler beim Laden der Orte.
+msg.error.loadSchedule	Messaggio errore caricamento programmazione	Errore nel caricamento della programmazione.	Error loading schedule.	Erreur lors du chargement du planning.	Error al cargar el horario.	Fehler beim Laden des Zeitplans.
+msg.error.loadSkills	Messaggio errore caricamento skill	Errore durante il caricamento delle skill.	Error loading skills.	Erreur lors du chargement des compétences.	Error al cargar habilidades.	Fehler beim Laden der Kompetenzen.
+msg.error.loadTranslations	Messaggio errore caricamento traduzioni	Errore caricamento traduzioni	Error loading translations	Erreur lors du chargement des traductions	Error al cargar traducciones	Fehler beim Laden der Übersetzungen
+msg.error.retrieveData	Messaggio errore recupero dati	Errore nel recupero dei dati. Riprova più tardi.	Error retrieving data. Please try again.	Erreur lors de la récupération des données.	Error al recuperar datos. Inténtelo de nuevo.	Fehler beim Abrufen der Daten.
+msg.error.save	Messaggio errore salvataggio generico	Errore durante il salvataggio. Riprova più tardi.	Error saving. Please try again.	Erreur lors de l'enregistrement. Veuillez réessayer.	Error al guardar. Inténtelo de nuevo.	Fehler beim Speichern. Bitte erneut versuchen.
+msg.error.saveSkills	Messaggio errore salvataggio skill	Errore durante il salvataggio delle skill.	Error saving skills.	Erreur lors de l'enregistrement des compétences.	Error al guardar habilidades.	Fehler beim Speichern der Kompetenzen.
+msg.error.saveWeek	Messaggio errore salvataggio settimana	Errore durante il salvataggio della settimana.	Error saving week.	Erreur lors de l'enregistrement de la semaine.	Error al guardar la semana.	Fehler beim Speichern der Woche.
+msg.error.updateLocation	Messaggio errore aggiornamento sede	Errore nell'aggiornamento della location.	Error updating location.	Erreur lors de la mise à jour du lieu.	Error al actualizar ubicación.	Fehler beim Aktualisieren des Orts.
+msg.infeasibleSaveWarning	Avviso conferma salvataggio soluzione con violazioni hard	La soluzione viola dei vincoli rigidi: salvandola, le violazioni verranno scritte nei turni. Premi "Salva comunque" per confermare.	The solution violates hard constraints: saving it will write those violations into the shifts. Press "Save anyway" to confirm.	La solution viole des contraintes strictes : en l'enregistrant, ces violations seront écrites dans les quarts. Appuyez sur « Enregistrer quand même » pour confirmer.	La solución viola restricciones estrictas: al guardarla, esas violaciones se escribirán en los turnos. Pulsa "Guardar de todos modos" para confirmar.	Die Lösung verletzt harte Bedingungen: Beim Speichern werden diese Verstöße in die Schichten geschrieben. Zum Bestätigen "Trotzdem speichern" drücken.
+msg.no.score.to.analyze	Messaggio nessun score da analizzare	Nessun score da analizzare. Premere prima il pulsante 'Risolvi'.	No score to analyze yet, please first press the 'Solve' button.	Aucun score à analyser, veuillez d'abord appuyer sur 'Résoudre'.	Sin score para analizar. Pulse primero el botón 'Resolver'.	Kein Score zum Analysieren. Bitte zuerst 'Lösen' drücken.
+msg.noConstraintData	Messaggio nessun dato sui vincoli	Nessun dato sui vincoli disponibile.	No constraint data available.	Aucune donnée de contrainte disponible.	No hay datos de restricciones disponibles.	Keine Bedingungsdaten verfügbar.
+msg.noData	Messaggio dati non disponibili	Dati non disponibili.	No data available.	Données indisponibles.	Datos no disponibles.	Keine Daten verfügbar.
+msg.noDates	Messaggio nessuna data	Nessuna data.	No dates.	Aucune date.	Sin fechas.	Keine Daten.
+msg.noEmployees	Messaggio nessun dipendente	Nessun operatore.	No operators.	Aucun opérateur.	Sin operadores.	Keine Mitarbeiter.
+msg.noLocations	Messaggio nessuna sede	Nessuna sede.	No locations.	Aucun lieu.	Sin ubicaciones.	Keine Standorte.
+msg.noShiftsForLocation	Messaggio nessun turno per la sede	Nessun turno per questa sede.	No shifts for this location.	Aucun quart pour ce lieu.	No hay turnos para esta ubicación.	Keine Schichten für diesen Standort.
+msg.noSpecialists	Messaggio nessuno specialista	Nessuno specialista.	No specialists.	Aucun spécialiste.	Sin especialistas.	Keine Spezialisten.
+msg.noUnassignedShifts	Messaggio nessun turno non assegnato	Nessun turno non assegnato	No unassigned shifts	Aucun quart non assigné	Sin turnos sin asignar	Keine nicht zugewiesenen Schichten
+msg.selectStructure	Messaggio seleziona una struttura	Seleziona una struttura.	Select a structure.	Sélectionnez une structure.	Seleccione una estructura.	Wählen Sie eine Struktur.
+msg.solutionHasViolations	Avviso modale Solve: score hard negativo senza dettaglio vincoli	La soluzione viola dei vincoli: alcuni turni potrebbero essere rimasti non assegnati.	The solution violates constraints: some shifts may have been left unassigned.	La solution viole des contraintes : certains créneaux peuvent être restés non affectés.	La solución viola restricciones: algunos turnos pueden haber quedado sin asignar.	Die Lösung verletzt Einschränkungen: einige Schichten sind möglicherweise unbesetzt geblieben.
+msg.solved	Messaggio risoluzione completata	Risoluzione completata	Solving complete	Résolution terminée	Resolución completada	Lösung abgeschlossen
+msg.solving	Messaggio risoluzione in corso	Risoluzione in corso...	Solving...	Résolution en cours...	Resolviendo...	Wird gelöst...
+msg.solving.banner	Messaggio banner risoluzione in corso	Ottimizzazione turni in corso...	Solving shifts in progress...	Résolution des quarts en cours...	Resolución de turnos en progreso...	Schichtoptimierung läuft...
+msg.solvingInProgress	Messaggio solving in corso	Solving in corso…	Solving in progress…	Résolution en cours…	Resolución en curso…	Lösung läuft…
+msg.success.activateLanguage	Messaggio successo attivazione lingua	Lingua attiva aggiornata.	Active language updated.	Langue active mise à jour.	Idioma activo actualizado.	Aktive Sprache aktualisiert.
+msg.success.addLabel	Messaggio successo aggiunta etichetta	Etichetta aggiunta.	Label added.	Étiquette ajoutée.	Etiqueta añadida.	Beschriftung hinzugefügt.
+msg.success.addLanguage	Messaggio successo aggiunta lingua	Lingua aggiunta con successo.	Language added successfully.	Langue ajoutée avec succès.	Idioma añadido con éxito.	Sprache erfolgreich hinzugefügt.
+msg.success.addStructure	Successo aggiunta struttura	Struttura aggiunta con successo.	Structure added successfully.	Structure ajoutée avec succès.	Estructura añadida con éxito.	Struktur erfolgreich hinzugefügt.
+msg.success.deleteDate	Messaggio data eliminata	Data cancellata con successo.	Date deleted successfully.	Date supprimée avec succès.	Fecha eliminada con éxito.	Datum erfolgreich gelöscht.
+msg.success.deleteEmployee	Messaggio dipendente eliminato	Operatore eliminato con successo!	Operator deleted successfully!	Opérateur supprimé avec succès!	¡Operador eliminado con éxito!	Mitarbeiter erfolgreich gelöscht!
+msg.success.deleteLabel	Messaggio successo eliminazione etichetta	Etichetta eliminata.	Label deleted.	Étiquette supprimée.	Etiqueta eliminada.	Beschriftung gelöscht.
+msg.success.deleteLanguage	Messaggio successo eliminazione lingua	Lingua eliminata.	Language deleted.	Langue supprimée.	Idioma eliminado.	Sprache gelöscht.
+msg.success.deleteLocation	Messaggio sede eliminata	Luogo eliminato con successo!	Location deleted successfully!	Lieu supprimé avec succès!	Ubicación eliminada con éxito!	Ort erfolgreich gelöscht!
+msg.success.deleteStructure	Successo eliminazione struttura	Struttura eliminata.	Structure deleted.	Structure supprimée.	Estructura eliminada.	Struktur gelöscht.
+msg.success.saveTranslations	Messaggio successo salvataggio traduzioni	Traduzioni salvate.	Translations saved.	Traductions enregistrées.	Traducciones guardadas.	Übersetzungen gespeichert.
+msg.success.saved	Messaggio salvataggio riuscito	Salvato!	Saved!	Enregistré!	Guardado!	Gespeichert!
+msg.success.scheduleComplete	Messaggio programmazione completata	La programmazione è completa!	Schedule complete!	Planning terminé!	Programación completa!	Zeitplan abgeschlossen!
+msg.success.updateLabel	Messaggio successo aggiornamento etichetta	Etichetta aggiornata.	Label updated.	Étiquette mise à jour.	Etiqueta actualizada.	Beschriftung aktualisiert.
+msg.success.updateLanguage	Messaggio successo aggiornamento lingua	Lingua aggiornata.	Language updated.	Langue mise à jour.	Idioma actualizado.	Sprache aktualisiert.
+msg.success.updateStructure	Successo aggiornamento struttura	Struttura aggiornata.	Structure updated.	Structure mise à jour.	Estructura actualizada.	Struktur aktualisiert.
+msg.success.weekSaved	Messaggio settimana salvata e bloccata	Settimana salvata e bloccata.	Week saved and locked.	Semaine sauvegardée et verrouillée.	Semana guardada y bloqueada.	Woche gespeichert und gesperrt.
+msg.success.weekUnlocked	Messaggio settimana sbloccata	Settimana sbloccata.	Week unlocked.	Semaine déverrouillée.	Semana desbloqueada.	Woche entsperrt.
+msg.unassigned	Messaggio non assegnato	Non assegnato	Unassigned	Non assigné	Sin asignar	Nicht zugewiesen
+msg.unassignedShifts	Messaggio turni non assegnati con placeholder {0}	Ci sono {0} turni non assegnati.	There are {0} unassigned shifts.	Il y a {0} quarts non assignés.	Hay {0} turnos sin asignar.	Es gibt {0} nicht zugewiesene Schichten.
+msg.unknownLocation	Messaggio sede sconosciuta	Sede sconosciuta	Unknown Location	Lieu inconnu	Ubicación desconocida	Unbekannter Ort
+msg.validation.selectFacilityMonth	Messaggio seleziona struttura e mese	Seleziona sia la struttura sia il mese.	Please select both facility and month.	Veuillez sélectionner la structure et le mois.	Seleccione la instalación y el mes.	Bitte Einrichtung und Monat auswählen.
+msg.validation.selectNurseMonth	Messaggio seleziona infermiera e mese	Seleziona sia l'infermiera sia il mese.	Please select both nurse and month.	Veuillez sélectionner l'infirmière et le mois.	Seleccione la enfermera y el mes.	Bitte Krankenschwester und Monat auswählen.
+msg.warning.endBeforeStart	Messaggio fine prima di inizio	L'orario di fine deve essere successivo all'orario di inizio!	End time must be after start time!	L'heure de fin doit être après l'heure de début!	La hora de fin debe ser posterior al inicio!	Endzeit muss nach Startzeit liegen!
+msg.warning.insufficientResources	Messaggio risorse insufficienti	Risorse non sufficienti per completare la programmazione.	Insufficient resources to complete the schedule.	Ressources insuffisantes pour compléter le planning.	Recursos insuficientes para completar el horario.	Nicht genügend Ressourcen für den Zeitplan.
+msg.warning.invalidDatetime	Messaggio formato data ora non valido	Formato data/ora non valido!	Invalid date/time format!	Format date/heure invalide!	Formato fecha/hora inválido!	Ungültiges Datum/Uhrzeit-Format!
+msg.warning.labelKeyDescRequired	Messaggio avviso chiave e descrizione obbligatorie	Chiave e descrizione obbligatorie.	Key and description are required.	Clé et description sont obligatoires.	Clave y descripción son obligatorias.	Schlüssel und Beschreibung sind erforderlich.
+msg.warning.langCodeDescRequired	Messaggio avviso codice e descrizione obbligatori	Codice e descrizione sono obbligatori.	Code and description are required.	Code et description sont obligatoires.	Código y descripción son obligatorios.	Code und Beschreibung sind erforderlich.
+msg.warning.noShifts	Messaggio nessun turno disponibile	Nessun turno disponibile.	No shifts available.	Aucun quart disponible.	Sin turnos disponibles.	Keine Schichten verfügbar.
+msg.warning.noValidSkills	Messaggio nessuna skill valida	Nessuna skill valida da salvare.	No valid skills to save.	Aucune compétence valide à enregistrer.	Sin habilidades válidas para guardar.	Keine gültigen Kompetenzen zum Speichern.
+msg.warning.requiredFields	Messaggio campi obbligatori	Tutti i campi sono obbligatori!	All fields are required!	Tous les champs sont obligatoires!	Todos los campos son obligatorios!	Alle Felder sind erforderlich!
+msg.warning.shiftNotFound	Messaggio turno non trovato	Turno non trovato.	Shift not found.	Quart non trouvé.	Turno no encontrado.	Schicht nicht gefunden.
+msg.warning.structureNameRequired	Avviso nome struttura obbligatorio	Il nome della struttura è obbligatorio.	Structure name is required.	Le nom de la structure est obligatoire.	El nombre de la estructura es obligatorio.	Strukturname ist erforderlich.
+nav.config	Voce menu Configurazione	Configurazione	Configuration	Configuration	Configuración	Konfiguration
+nav.dates	Voce menu Preferenze date Operatori	Preferenze date Operatori	Operator Date Preferences	Préférences de dates des opérateurs	Preferencias de fechas de operadores	Datumspräferenzen der Mitarbeiter
+nav.employees	Voce menu Dipendenti	Operatori	Operators	Opérateurs	Operadores	Mitarbeiter
+nav.labels	Voce menu Etichette	Etichette	Labels	Étiquettes	Etiquetas	Beschriftungen
+nav.languages	Voce menu Lingue	Lingue	Languages	Langues	Idiomas	Sprachen
+nav.locations	Voce menu Sedi	Sedi	Locations	Lieux	Ubicaciones	Standorte
+nav.nextPeriod	Aria-label freccia periodo successivo	Periodo successivo	Next period	Période suivante	Período siguiente	Nächster Zeitraum
+nav.nextWeek	Navigazione settimana successiva	Settimana successiva	Next week	Semaine suivante	Semana siguiente	Nächste Woche
+nav.nextYear	Navigazione anno successivo	Anno successivo	Next year	Année suivante	Año siguiente	Nächstes Jahr
+nav.prevPeriod	Aria-label freccia periodo precedente	Periodo precedente	Previous period	Période précédente	Período anterior	Vorheriger Zeitraum
+nav.previousWeek	Navigazione settimana precedente	Settimana precedente	Previous week	Semaine précédente	Semana anterior	Vorherige Woche
+nav.previousYear	Navigazione anno precedente	Anno precedente	Previous year	Année précédente	Año anterior	Vorheriges Jahr
+nav.report	Voce menu Report	Report	Report	Rapport	Informe	Bericht
+nav.shiftManagement	Titolo sezione Gestione Turni	Gestione Turni	Shift Management	Gestion des quarts	Gestión de turnos	Schichtverwaltung
+nav.shifts	Voce menu Gestione Turni	Gestione Turni	Shift Management	Gestion des quarts	Gestión de turnos	Schichtverwaltung
+nav.skills	Voce menu Competenze	Competenze	Skills	Compétences	Competencias	Kompetenzen
+nav.specialists	Voce menu Specialisti	Specialisti	Specialists	Spécialistes	Especialistas	Spezialisten
+nav.structure	Voce menu Struttura	Struttura	Structure	Structure	Estructura	Struktur
+nav.structures	Voce menu Strutture	Strutture	Structures	Structures	Estructuras	Strukturen
+nav.title	Titolo applicazione	Gestione Turni	Shift Management	Gestion des Quarts	Gestión de Turnos	Schichtverwaltung
+option.desired	Opzione Preferito	Preferito	Desired	Souhaité	Deseado	Bevorzugt
+option.unavailable	Opzione Non Disponibile	Non Disponibile	Unavailable	Non Disponible	No Disponible	Nicht verfügbar
+option.undesired	Opzione Non Preferito	Non Preferito	Undesired	Non Souhaité	No Deseado	Nicht bevorzugt
+pagination.labels	Testo paginazione etichette	etichette	labels	étiquettes	etiquetas	Beschriftungen
+pagination.page	Testo paginazione pagina	Pag.	Page	Page	Pág.	Seite
+pagination.results	Testo paginazione risultati	risultati	results	résultats	resultados	Ergebnisse
+pdf.filenameCoverage	PDF prefisso filename copertura	Copertura	Coverage	Couverture	Cobertura	Abdeckung
+pdf.filenameShifts	PDF prefisso filename turni	Turni	Shifts	Quarts	Turnos	Schichten
+pdf.titleCoverage	PDF titolo copertura turni	Copertura Turni	Coverage Shifts	Couverture des Quarts	Cobertura de Turnos	Schichtdeckung
+pdf.titleMonthlyShifts	PDF titolo turni mensili	Turni Mensili	Monthly Shifts	Quarts Mensuels	Turnos Mensuales	Monatliche Schichten
+pdf.totalHours	PDF ore totali	Ore totali	Total hours	Heures totales	Horas totales	Gesamtstunden
+pdfTpl.addTitle	Titolo nuovo template PDF	Nuovo template PDF	New PDF template	Nouveau modèle PDF	Nueva plantilla PDF	Neue PDF-Vorlage
+pdfTpl.chooseLogo	Pulsante scegli logo	Scegli logo	Choose logo	Choisir un logo	Elegir logotipo	Logo auswählen
+pdfTpl.color	Etichetta colore principale PDF	Colore principale	Main color	Couleur principale	Color principal	Hauptfarbe
+pdfTpl.deleteConfirm	Messaggio conferma eliminazione template PDF (prefisso)	Eliminare il template PDF di	Delete the PDF template of	Supprimer le modèle PDF de	Eliminar la plantilla PDF de	PDF-Vorlage löschen von
+pdfTpl.deleteTitle	Titolo modale elimina template PDF	Elimina template PDF	Delete PDF template	Supprimer le modèle PDF	Eliminar plantilla PDF	PDF-Vorlage löschen
+pdfTpl.deleted	Toast template PDF eliminato	Template PDF eliminato.	PDF template deleted.	Modèle PDF supprimé.	Plantilla PDF eliminada.	PDF-Vorlage gelöscht.
+pdfTpl.editTitle	Titolo modifica template PDF	Modifica template PDF	Edit PDF template	Modifier le modèle PDF	Editar plantilla PDF	PDF-Vorlage bearbeiten
+pdfTpl.footer	Etichetta testo piè di pagina PDF	Testo piè di pagina	Footer text	Texte de pied de page	Texto del pie de página	Fußzeilentext
+pdfTpl.header	Etichetta testo intestazione PDF	Testo intestazione	Header text	Texte d’en-tête	Texto del encabezado	Kopfzeilentext
+pdfTpl.logo	Etichetta logo PDF	Logo	Logo	Logo	Logotipo	Logo
+pdfTpl.logoHint	Nota formato/dimensione logo PDF	PNG o JPG, massimo 5 MB. Ridimensionamento automatico.	PNG or JPG, up to 5 MB. Automatically resized.	PNG ou JPG, 5 Mo maximum. Redimensionnement automatique.	PNG o JPG, máximo 5 MB. Redimensionado automático.	PNG oder JPG, maximal 5 MB. Automatische Größenanpassung.
+pdfTpl.logoInvalid	Errore logo non valido	Seleziona un’immagine PNG o JPG valida.	Select a valid PNG or JPG image.	Sélectionnez une image PNG ou JPG valide.	Selecciona una imagen PNG o JPG válida.	Wählen Sie ein gültiges PNG- oder JPG-Bild aus.
+pdfTpl.logoTooLarge	Errore logo troppo grande	Il logo non può superare 5 MB.	The logo cannot exceed 5 MB.	Le logo ne peut pas dépasser 5 Mo.	El logotipo no puede superar los 5 MB.	Das Logo darf 5 MB nicht überschreiten.
+pdfTpl.noFormats	Messaggio nessun formato PDF configurato	Nessun formato PDF configurato.	No PDF format configured.	Aucun format PDF configuré.	Ningún formato PDF configurado.	Kein PDF-Format konfiguriert.
+pdfTpl.preview	Etichetta anteprima template PDF	Anteprima	Preview	Aperçu	Vista previa	Vorschau
+pdfTpl.previewFooter	Nota piè di pagina anteprima PDF	Data di generazione e numero pagina	Generation date and page number	Date de génération et numéro de page	Fecha de generación y número de página	Erstellungsdatum und Seitenzahl
+pdfTpl.structure	Etichetta azienda template PDF	Azienda	Company	Entreprise	Empresa	Unternehmen
+pdfTpl.structureLocked	Nota azienda non modificabile in modifica	L’azienda associata non può essere cambiata durante la modifica.	The associated company cannot be changed while editing.	L’entreprise associée ne peut pas être changée pendant la modification.	La empresa asociada no se puede cambiar durante la edición.	Das zugeordnete Unternehmen kann während der Bearbeitung nicht geändert werden.
+placeholder.address	Placeholder indirizzo	Inserisci indirizzo	Enter address	Entrer l'adresse	Ingrese dirección	Adresse eingeben
+placeholder.email	Placeholder Email	nome@esempio.it	name@example.com	nom@exemple.fr	nombre@ejemplo.es	name@beispiel.de
+placeholder.locationCode	Placeholder codice sede	Inserisci codice sede	Enter location code	Entrez le code du lieu	Ingrese código ubicación	Ortscode eingeben
+placeholder.locationName	Placeholder nome sede	Inserisci nome sede	Enter location name	Entrez le nom du lieu	Ingrese nombre ubicación	Ortsname eingeben
+placeholder.locationOrder	Placeholder ordine sede	Inserisci ordine sede	Enter location order	Entrez l'ordre du lieu	Ingrese orden ubicación	Ortsreihenfolge eingeben
+placeholder.phone	Placeholder telefono	Inserisci telefono	Enter phone	Entrer le téléphone	Ingrese teléfono	Telefon eingeben
+placeholder.searchKeyOrDescription	Placeholder cerca chiave o descrizione	Cerca chiave o descrizione...	Search key or description...	Rechercher clé ou description...	Buscar clave o descripción...	Schlüssel oder Beschreibung suchen...
+placeholder.searchLabels	Placeholder cerca etichette	Cerca chiave, descrizione o traduzione...	Search key, description or translation...	Rechercher clé, description ou traduction...	Buscar clave, descripción o traducción...	Schlüssel, Beschreibung oder Übersetzung suchen...
+placeholder.selectFacility	Placeholder seleziona struttura	Seleziona struttura...	Select facility...	Sélectionner structure...	Seleccionar instalación...	Einrichtung auswählen...
+placeholder.selectLocation	Placeholder seleziona sede	Seleziona Sede	Select Location	Sélectionner Lieu	Seleccionar Ubicación	Ort auswählen
+placeholder.selectNurse	Placeholder seleziona infermiera	Seleziona infermiera...	Select nurse...	Sélectionner infirmière...	Seleccionar enfermera...	Krankenschwester auswählen...
+placeholder.skillName	Placeholder nome skill	Nome Skill	Skill Name	Nom Compétence	Nombre Habilidad	Kompetenzname
+placeholder.structureName	Placeholder nome struttura	Inserisci nome struttura	Enter structure name	Nom de la structure	Nombre de la estructura	Strukturname eingeben
+placeholder.templateDescription	Placeholder descrizione template	Descrizione del template…	Template description…	Description du modèle…	Descripción de la plantilla…	Beschreibung der Vorlage…
+report.allEmployees	Opzione filtro tutti i dipendenti (Report)	— Tutti gli operatori —	— All operators —	— Tous les opérateurs —	— Todos los operadores —	— Alle Mitarbeiter —
+report.allLocations	Opzione filtro tutte le sedi (Report)	— Tutte le sedi —	— All locations —	— Tous les sites —	— Todas las sedes —	— Alle Standorte —
+report.allLocationsPlain	Intestazione risultati: tutte le sedi	Tutte le sedi	All locations	Tous les sites	Todas las sedes	Alle Standorte
+report.allShifts	Intestazione anteprima senza filtri (Report)	Tutti i turni	All shifts	Tous les créneaux	Todos los turnos	Alle Schichten
+report.coverageLabel	Prefisso riga copertura sede (Report)	Copertura	Coverage	Couverture	Cobertura	Abdeckung
+report.downloadPdf	Tooltip icona download PDF	Scarica il PDF	Download the PDF	Télécharger le PDF	Descargar el PDF	PDF herunterladen
+report.emailSent	Stato riga: email inviata	Email inviata	Email sent	E-mail envoyé	Email enviado	E-Mail gesendet
+report.generating	Pulsante durante la generazione PDF (Report)	Generazione PDF…	Generating PDFs…	Génération des PDF…	Generando PDF…	PDF-Erstellung…
+report.hours	Etichetta ore totali (Report)	Ore	Hours	Heures	Horas	Stunden
+report.menu.coverage	Voce sidebar Report: Copertura Sedi	Report per Caposala	Head Nurse Report	Rapport infirmière-chef	Informe para enfermera jefe	Bericht für Stationsleitung
+report.menu.coverage.tooltip	Tooltip voce Copertura Sedi	Report di copertura per sede, da stampare	Coverage report by location, ready to print	Rapport de couverture par site, à imprimer	Informe de cobertura por sede, listo para imprimir	Abdeckungsbericht je Standort, druckfertig
+report.menu.send	Voce sidebar Report: Invio Turni	Invio Turni	Send Shifts	Envoi des créneaux	Envío de turnos	Schichtversand
+report.menu.send.tooltip	Tooltip voce Invio Turni	Invia a ogni operatore i suoi turni via email	Email each operator their own shifts	Envoyer à chaque opérateur ses créneaux par e-mail	Envía a cada operador sus turnos por email	Jedem Mitarbeiter seine Schichten per E-Mail senden
+report.noEmail	Errore: dipendente senza indirizzo email	Indirizzo email mancante	Missing email address	Adresse e-mail manquante	Falta la dirección de email	E-Mail-Adresse fehlt
+report.noShiftsFor	Prefisso avviso nessun turno (Report)	Nessun turno per	No shifts for	Aucun créneau pour	No hay turnos para	Keine Schichten für
+report.openPdf	Tooltip link apertura PDF nel browser	Apri il PDF nel browser	Open the PDF in the browser	Ouvrir le PDF dans le navigateur	Abrir el PDF en el navegador	PDF im Browser öffnen
+report.pickDate	Tooltip etichetta periodo cliccabile (Report)	Clicca per scegliere una data (i giorni con turni sono evidenziati)	Click to pick a date (days with shifts are highlighted)	Cliquez pour choisir une date (les jours avec créneaux sont mis en évidence)	Haz clic para elegir una fecha (los días con turnos están resaltados)	Klicken Sie, um ein Datum zu wählen (Tage mit Schichten sind hervorgehoben)
+report.retrySend	Tooltip: invio fallito, riprova	Clicca per riprovare	Click to retry	Cliquez pour réessayer	Haz clic para reintentar	Zum Wiederholen klicken
+report.selectForPdf	Tooltip PDF disabilitato senza filtri (Report)	Seleziona un operatore o una sede per generare il PDF	Select an operator or a location to generate the PDF	Sélectionnez un opérateur ou un site pour générer le PDF	Selecciona un operador o una sede para generar el PDF	Wählen Sie einen Mitarbeiter oder einen Standort, um das PDF zu erstellen
+report.sentOn	Prefisso data ultimo invio email (Report)	Inviata il	Sent on	Envoyé le	Enviado el	Gesendet am
+report.shiftLabel	Suffisso conteggio turni (Report)	turno/i	shift(s)	créneau(x)	turno(s)	Schicht(en)
+rte.bold	Editor HTML: grassetto	Grassetto	Bold	Gras	Negrita	Fett
+rte.clear	Editor HTML: rimuovi formattazione	Rimuovi formattazione	Clear formatting	Effacer la mise en forme	Quitar formato	Formatierung entfernen
+rte.italic	Editor HTML: corsivo	Corsivo	Italic	Italique	Cursiva	Kursiv
+rte.link	Editor HTML: inserisci link	Inserisci link	Insert link	Insérer un lien	Insertar enlace	Link einfügen
+rte.linkPrompt	Editor HTML: prompt URL link	URL del link:	Link URL:	URL du lien :	URL del enlace:	Link-URL:
+rte.ol	Editor HTML: elenco numerato	Elenco numerato	Numbered list	Liste numérotée	Lista numerada	Nummerierte Liste
+rte.source	Editor HTML: vista sorgente HTML	Mostra/Modifica HTML	View/Edit HTML	Afficher/Modifier le HTML	Ver/Editar HTML	HTML anzeigen/bearbeiten
+rte.strike	Editor HTML: barrato	Barrato	Strikethrough	Barré	Tachado	Durchgestrichen
+rte.ul	Editor HTML: elenco puntato	Elenco puntato	Bulleted list	Liste à puces	Lista con viñetas	Aufzählung
+rte.underline	Editor HTML: sottolineato	Sottolineato	Underline	Souligné	Subrayado	Unterstrichen
+savedTemplates.empty	Messaggio nessun template salvato	Nessun template salvato.	No saved templates.	Aucun modèle enregistré.	No hay plantillas guardadas.	Keine gespeicherten Vorlagen.
+select.none	Opzione select nessuno	— Nessuno —	— None —	— Aucun —	— Ninguno —	— Keiner —
+skills.active	Etichetta competenza attiva	Attiva	Active	Active	Activa	Aktiv
+skills.addTooltip	Tooltip aggiunta competenza	Aggiungi una competenza	Add a skill	Ajouter une compétence	Añadir una competencia	Kompetenz hinzufügen
+skills.deleteTitle	Titolo eliminazione competenza	Elimina competenza	Delete skill	Supprimer la compétence	Eliminar competencia	Kompetenz löschen
+skills.deleted	Messaggio competenza eliminata	Competenza eliminata.	Skill deleted.	Compétence supprimée.	Competencia eliminada.	Kompetenz gelöscht.
+skills.inUseTooltip	Tooltip competenza in uso	Competenza in uso — impossibile eliminare	Skill in use — cannot be deleted	Compétence utilisée — suppression impossible	Competencia en uso — no se puede eliminar	Kompetenz wird verwendet — Löschen nicht möglich
+skills.namePlaceholder	Placeholder nome competenza	Nome competenza	Skill name	Nom de la compétence	Nombre de la competencia	Name der Kompetenz
+skills.namesRequired	Validazione nomi competenze	Tutti i nomi devono essere compilati.	All names are required.	Tous les noms sont obligatoires.	Todos los nombres son obligatorios.	Alle Namen müssen ausgefüllt werden.
+skills.new	Pulsante nuova competenza	Nuova	New	Nouvelle	Nueva	Neu
+skills.newRow	Etichetta nuova riga competenza	Nuovo	New	Nouveau	Nuevo	Neu
+skills.noResults	Messaggio nessuna competenza	Nessuna competenza.	No skills.	Aucune compétence.	No hay competencias.	Keine Kompetenzen.
+skills.saved	Messaggio competenze salvate	Competenze salvate!	Skills saved!	Compétences enregistrées !	¡Competencias guardadas!	Kompetenzen gespeichert!
+solver.balance.hours	Etichetta sezione Parametri Solver	Ore	Hours	Heures	Horas	Stunden
+solver.balance.shifts	Etichetta sezione Parametri Solver	Turni	Shifts	Quarts	Turnos	Schichten
+solver.col.balance	Etichetta sezione Parametri Solver	Bilanciamento	Balance	Équilibrage	Equilibrio	Ausgleich
+solver.col.duration	Etichetta sezione Parametri Solver	Durata	Duration	Durée	Duración	Dauer
+solver.col.maxPerDay	Etichetta sezione Parametri Solver	Max turni/giorno	Max shifts/day	Max quarts/jour	Máx turnos/día	Max. Schichten/Tag
+solver.col.minRest	Etichetta sezione Parametri Solver	Riposo minimo	Minimum rest	Repos minimal	Descanso mínimo	Mindestruhezeit
+solver.err.unimproved	Etichetta sezione Parametri Solver	Lo stop senza miglioramenti non può superare la durata massima.	The unimproved stop cannot exceed the maximum duration.	L'arrêt sans amélioration ne peut pas dépasser la durée maximale.	La parada sin mejoras no puede superar la duración máxima.	Der Stopp ohne Verbesserung darf die maximale Dauer nicht überschreiten.
+solver.err.weekly	Etichetta sezione Parametri Solver	I turni minimi settimanali non possono superare i massimi.	Minimum weekly shifts cannot exceed the maximum.	Les quarts hebdomadaires minimum ne peuvent pas dépasser le maximum.	Los turnos semanales mínimos no pueden superar el máximo.	Die wöchentlichen Mindestschichten dürfen das Maximum nicht überschreiten.
+solver.group.dailyWeekly	Etichetta sezione Parametri Solver	Regole giornaliere e settimanali	Daily and weekly rules	Règles quotidiennes et hebdomadaires	Reglas diarias y semanales	Tägliche und wöchentliche Regeln
+solver.group.night	Etichetta sezione Parametri Solver	Fascia notturna	Night range	Plage de nuit	Franja nocturna	Nachtzeitraum
+solver.group.options	Etichetta sezione Parametri Solver	Opzioni	Options	Options	Opciones	Optionen
+solver.group.processing	Etichetta sezione Parametri Solver	Elaborazione	Processing	Traitement	Procesamiento	Verarbeitung
+solver.group.weights	Etichetta sezione Parametri Solver	Pesi di ottimizzazione	Optimization weights	Poids d'optimisation	Pesos de optimización	Optimierungsgewichte
+solver.help.allow_unassigned	Tooltip aiuto parametro solver allow_unassigned	Se attivo il solver può lasciare turni scoperti (con penalità) invece di forzare sempre la copertura.	When on, the solver may leave shifts uncovered (with a penalty) instead of always forcing coverage.	Activé, le solveur peut laisser des quarts non couverts (avec pénalité) au lieu de toujours forcer la couverture.	Si está activo, el solver puede dejar turnos sin cubrir (con penalización) en lugar de forzar siempre la cobertura.	Wenn aktiv, darf der Solver Schichten unbesetzt lassen (mit Strafe), statt immer eine Besetzung zu erzwingen.
+solver.help.avoid_specialist_weight	Tooltip aiuto parametro solver avoid_specialist_weight	Quanto penalizzare l'abbinamento di un operatore a uno specialista marcato 'da evitare' (0–10).	How much to penalize pairing an operator with a specialist marked as 'to avoid' (0–10).	Dans quelle mesure pénaliser l'association d'un opérateur à un spécialiste marqué « à éviter » (0–10).	Cuánto penalizar la asignación de un operador a un especialista marcado como «a evitar» (0–10).	Wie stark die Zuordnung eines Mitarbeiters zu einem als „zu vermeiden“ markierten Spezialisten bestraft wird (0–10).
+solver.help.balance_by_hours	Tooltip aiuto parametro solver balance_by_hours	Se attivo il bilanciamento considera le ore totali lavorate, altrimenti il numero di turni.	When on, workload balancing considers total hours worked; otherwise it considers the number of shifts.	Activé, l'équilibrage de la charge prend en compte le total d'heures travaillées ; sinon le nombre de quarts.	Si está activo, el equilibrado de carga considera el total de horas trabajadas; si no, el número de turnos.	Wenn aktiv, berücksichtigt der Lastausgleich die gesamten Arbeitsstunden; andernfalls die Anzahl der Schichten.
+solver.help.balance_weight	Tooltip aiuto parametro solver balance_weight	Quanto conta l'equità del carico tra operatori (per ore o per numero turni, vedi opzione dedicata); più alto = carichi più uniformi (0–10).	How much fair workload distribution among operators matters (by hours or by shift count, see the dedicated option); higher = more even workloads (0–10).	Importance d'une répartition équitable de la charge entre opérateurs (par heures ou par nombre de quarts, voir l'option dédiée) ; plus élevé = charges plus homogènes (0–10).	Cuánto importa una distribución equitativa de la carga entre operadores (por horas o por número de turnos, ver la opción dedicada); mayor = cargas más uniformes (0–10).	Wie wichtig eine faire Lastverteilung unter den Mitarbeitern ist (nach Stunden oder Schichtanzahl, siehe eigene Option); höher = gleichmäßigere Auslastung (0–10).
+solver.help.consecutive_days_weight	Tooltip aiuto parametro solver consecutive_days_weight	Quanto conta il rispetto del massimo di giorni lavorativi consecutivi impostato; 0 disattiva la penalità (0–10).	How much respecting the configured maximum consecutive working days matters; 0 disables the penalty (0–10).	Importance du respect du maximum de jours travaillés consécutifs configuré ; 0 désactive la pénalité (0–10).	Cuánto importa cumplir el máximo de días laborables consecutivos configurado; 0 desactiva la penalización (0–10).	Wie wichtig die Einhaltung der konfigurierten maximalen aufeinanderfolgenden Arbeitstage ist; 0 deaktiviert die Strafe (0–10).
+solver.help.context_days	Tooltip aiuto parametro solver context_days	Giorni adiacenti alla finestra i cui turni già assegnati sono caricati come contesto bloccato (sovrapposizioni, riposo, ore e giorni consecutivi li vedono ma non li cambiano); 0 = solo finestra.	Days adjacent to the window whose already-assigned shifts are loaded as locked context (overlap, rest, weekly hours and consecutive-day constraints see them but do not change them); 0 = window only.	Jours adjacents à la fenêtre dont les quarts déjà affectés sont chargés comme contexte verrouillé (les contraintes de chevauchement, repos, heures hebdomadaires et jours consécutifs les voient sans les modifier) ; 0 = fenêtre seule.	Días adyacentes a la ventana cuyos turnos ya asignados se cargan como contexto bloqueado (las restricciones de solapamiento, descanso, horas semanales y días consecutivos los ven pero no los cambian); 0 = solo la ventana.	An das Fenster angrenzende Tage, deren bereits zugewiesene Schichten als gesperrter Kontext geladen werden (Überschneidungs-, Ruhe-, Wochenstunden- und Folgetage-Regeln sehen sie, ändern sie aber nicht); 0 = nur Fenster.
+solver.help.days_off_weight	Tooltip aiuto parametro solver days_off_weight	Quanto conta il rispetto dei riposi minimi settimanali impostati; 0 disattiva la penalità (0–10).	How much respecting the configured minimum weekly days off matters; 0 disables the penalty (0–10).	Importance du respect des repos hebdomadaires minimum configurés ; 0 désactive la pénalité (0–10).	Cuánto importa cumplir los descansos semanales mínimos configurados; 0 desactiva la penalización (0–10).	Wie wichtig die Einhaltung der konfigurierten wöchentlichen Mindestruhetage ist; 0 deaktiviert die Strafe (0–10).
+solver.help.desired_date_weight	Tooltip aiuto parametro solver desired_date_weight	Quanto premiare i turni nelle date preferite dall'operatore; più alto = il solver le accontenta di più (0–10).	How much to reward shifts on the operator's preferred dates; higher = the solver satisfies them more (0–10).	Dans quelle mesure récompenser les quarts aux dates préférées de l'opérateur ; plus élevé = le solveur les satisfait davantage (0–10).	Cuánto premiar los turnos en las fechas preferidas del operador; mayor = el solver las satisface más (0–10).	Wie stark Schichten an den Wunschterminen des Mitarbeiters belohnt werden; höher = der Solver erfüllt sie stärker (0–10).
+solver.help.diminished_ratio_pct	Tooltip aiuto parametro solver diminished_ratio_pct	Il solver si ferma quando il ritmo di miglioramento scende sotto questa percentuale del ritmo iniziale (1–100); attivo solo con finestra > 0.	The solver stops when the improvement rate falls below this percentage of the initial rate (1–100); active only when the window is > 0.	Le solveur s'arrête quand le rythme d'amélioration descend sous ce pourcentage du rythme initial (1–100) ; actif seulement si la fenêtre est > 0.	El solver se detiene cuando el ritmo de mejora cae por debajo de este porcentaje del ritmo inicial (1–100); solo activo con ventana > 0.	Der Solver stoppt, wenn die Verbesserungsrate unter diesen Prozentsatz der Anfangsrate fällt (1–100); nur aktiv, wenn das Fenster > 0 ist.
+solver.help.diminished_window_seconds	Tooltip aiuto parametro solver diminished_window_seconds	Finestra (secondi) per lo stop a rendimento decrescente: confronta il ritmo di miglioramento con quello di N secondi prima; 0 disattiva.	Observation window (seconds) for diminishing-returns stop: compares the current improvement rate with that of N seconds earlier; 0 disables it.	Fenêtre d'observation (secondes) pour l'arrêt à rendement décroissant : compare le rythme d'amélioration actuel à celui d'il y a N secondes ; 0 désactive.	Ventana de observación (segundos) para la parada por rendimiento decreciente: compara el ritmo de mejora actual con el de N segundos antes; 0 la desactiva.	Beobachtungsfenster (Sekunden) für den Stopp bei abnehmendem Ertrag: vergleicht die aktuelle Verbesserungsrate mit der von vor N Sekunden; 0 deaktiviert.
+solver.help.max_consecutive_days	Tooltip aiuto parametro solver max_consecutive_days	Giorni lavorativi consecutivi massimi per operatore; 0 disabilita il limite.	Maximum consecutive working days per operator; 0 disables the limit.	Jours de travail consécutifs maximaux par opérateur ; 0 désactive la limite.	Días laborables consecutivos máximos por operador; 0 desactiva el límite.	Maximale aufeinanderfolgende Arbeitstage pro Mitarbeiter; 0 deaktiviert das Limit.
+solver.help.max_shifts_per_day	Tooltip aiuto parametro solver max_shifts_per_day	Numero massimo di turni per lo stesso operatore nello stesso giorno (1–5).	Maximum number of shifts for the same operator on the same day (1–5).	Nombre maximal de quarts pour le même opérateur le même jour (1–5).	Número máximo de turnos para el mismo operador en el mismo día (1–5).	Maximale Anzahl an Schichten für denselben Mitarbeiter am selben Tag (1–5).
+solver.help.max_solve_seconds	Tooltip aiuto parametro solver max_solve_seconds	Tempo massimo di calcolo (5–600 s): oltre il limite viene restituita la miglior soluzione trovata.	Maximum solving time (5–600 s): after the limit the best solution found is returned.	Temps de calcul maximal (5–600 s) : au-delà, la meilleure solution trouvée est renvoyée.	Tiempo máximo de cálculo (5–600 s): superado el límite se devuelve la mejor solución encontrada.	Maximale Rechenzeit (5–600 s): Nach dem Limit wird die beste gefundene Lösung zurückgegeben.
+solver.help.max_weekly_hours	Tooltip aiuto parametro solver max_weekly_hours	Tetto di ore settimanali per operatore; 0 disabilita il limite.	Weekly hours cap per operator; 0 disables the limit.	Plafond d'heures hebdomadaires par opérateur ; 0 désactive la limite.	Tope de horas semanales por operador; 0 desactiva el límite.	Wöchentliche Stundenobergrenze pro Mitarbeiter; 0 deaktiviert das Limit.
+solver.help.max_weekly_shifts	Tooltip aiuto parametro solver max_weekly_shifts	Turni massimi settimanali per operatore; 0 disabilita il massimo.	Maximum weekly shifts per operator; 0 disables the maximum.	Quarts hebdomadaires maximaux par opérateur ; 0 désactive le maximum.	Turnos semanales máximos por operador; 0 desactiva el máximo.	Maximale Anzahl wöchentlicher Schichten pro Mitarbeiter; 0 deaktiviert das Maximum.
+solver.help.min_days_off_per_week	Tooltip aiuto parametro solver min_days_off_per_week	Giorni di riposo minimi per operatore in una settimana (0–7).	Minimum days off per operator in a week (0–7).	Jours de repos minimaux par opérateur sur une semaine (0–7).	Días de descanso mínimos por operador en una semana (0–7).	Mindestanzahl freier Tage pro Mitarbeiter in einer Woche (0–7).
+solver.help.min_weekly_shifts	Tooltip aiuto parametro solver min_weekly_shifts	Turni minimi settimanali per operatore; 0 disabilita il minimo.	Minimum weekly shifts per operator; 0 disables the minimum.	Quarts hebdomadaires minimaux par opérateur ; 0 désactive le minimum.	Turnos semanales mínimos por operador; 0 desactiva el mínimo.	Mindestanzahl wöchentlicher Schichten pro Mitarbeiter; 0 deaktiviert das Minimum.
+solver.help.minimum_rest_hours	Tooltip aiuto parametro solver minimum_rest_hours	Ore minime di riposo tra la fine di un turno e l'inizio del successivo dello stesso operatore (vincolo rigido).	Minimum rest hours between the end of one shift and the start of the next for the same operator (hard constraint).	Heures de repos minimales entre la fin d'un quart et le début du suivant pour le même opérateur (contrainte stricte).	Horas mínimas de descanso entre el fin de un turno y el inicio del siguiente del mismo operador (restricción rígida).	Mindestruhezeit zwischen dem Ende einer Schicht und dem Beginn der nächsten desselben Mitarbeiters (harte Regel).
+solver.help.night_balance_weight	Tooltip aiuto parametro solver night_balance_weight	Quanto conta l'equità nella distribuzione dei turni notturni (fascia definita da Ora inizio/fine notte) (0–10).	How much fair distribution of night shifts among operators matters (night range set by the night start/end hours) (0–10).	Importance d'une répartition équitable des quarts de nuit entre opérateurs (plage de nuit définie par les heures de début/fin de nuit) (0–10).	Cuánto importa una distribución equitativa de los turnos nocturnos entre operadores (franja nocturna definida por las horas de inicio/fin de noche) (0–10).	Wie wichtig eine faire Verteilung der Nachtschichten unter den Mitarbeitern ist (Nachtzeitraum durch die Nachtbeginn-/-endstunden festgelegt) (0–10).
+solver.help.night_end_hour	Tooltip aiuto parametro solver night_end_hour	Ora di fine della fascia notturna (0–23), usata per identificare e bilanciare i turni notturni.	End hour of the night range (0–23), used to identify and balance night shifts.	Heure de fin de la plage de nuit (0–23), utilisée pour identifier et équilibrer les quarts de nuit.	Hora de fin de la franja nocturna (0–23), usada para identificar y equilibrar los turnos nocturnos.	Endstunde des Nachtzeitraums (0–23), zur Identifizierung und zum Ausgleich von Nachtschichten.
+solver.help.night_start_hour	Tooltip aiuto parametro solver night_start_hour	Ora di inizio della fascia notturna (0–23), usata per identificare e bilanciare i turni notturni.	Start hour of the night range (0–23), used to identify and balance night shifts.	Heure de début de la plage de nuit (0–23), utilisée pour identifier et équilibrer les quarts de nuit.	Hora de inicio de la franja nocturna (0–23), usada para identificar y equilibrar los turnos nocturnos.	Startstunde des Nachtzeitraums (0–23), zur Identifizierung und zum Ausgleich von Nachtschichten.
+solver.help.optional_skill_weight	Tooltip aiuto parametro solver optional_skill_weight	Quanto premiare gli operatori che hanno anche le competenze opzionali del turno, oltre a quelle obbligatorie (0–10).	How much to reward operators who also have the shift's optional skills, beyond the mandatory ones (0–10).	Dans quelle mesure récompenser les opérateurs possédant aussi les compétences facultatives du quart, en plus des obligatoires (0–10).	Cuánto premiar a los operadores que también tienen las competencias opcionales del turno, además de las obligatorias (0–10).	Wie stark Mitarbeiter belohnt werden, die zusätzlich zu den Pflichtkompetenzen auch die optionalen Kompetenzen der Schicht besitzen (0–10).
+solver.help.same_location_weight	Tooltip aiuto parametro solver same_location_weight	Quanto premiare la continuità di sede: stessi operatori nella stessa sede in giorni vicini (0–10).	How much to reward location continuity: the same operators at the same location on nearby days (0–10).	Dans quelle mesure récompenser la continuité de site : les mêmes opérateurs sur le même site les jours proches (0–10).	Cuánto premiar la continuidad de sede: los mismos operadores en la misma sede en días cercanos (0–10).	Wie stark Standortkontinuität belohnt wird: dieselben Mitarbeiter am selben Standort an nahen Tagen (0–10).
+solver.help.stop_when_feasible	Tooltip aiuto parametro solver stop_when_feasible	Se attivo il solver si ferma appena tutti i vincoli rigidi sono rispettati, senza ottimizzare ulteriormente i pesi soft (più veloce).	When on, the solver stops as soon as all hard constraints are satisfied, without further optimizing the soft weights (faster).	Activé, le solveur s'arrête dès que toutes les contraintes strictes sont respectées, sans optimiser davantage les poids souples (plus rapide).	Si está activo, el solver se detiene en cuanto se cumplen todas las restricciones rígidas, sin optimizar más los pesos blandos (más rápido).	Wenn aktiv, stoppt der Solver, sobald alle harten Regeln erfüllt sind, ohne die weichen Gewichte weiter zu optimieren (schneller).
+solver.help.unassigned_weight	Tooltip aiuto parametro solver unassigned_weight	Penalità per ogni turno lasciato scoperto; più alta = il solver copre più turni anche a scapito dei pesi soft (1–100).	Penalty for each shift left uncovered; higher = the solver covers more shifts even at the expense of soft weights (1–100).	Pénalité pour chaque quart laissé non couvert ; plus élevé = le solveur couvre davantage de quarts, au détriment des poids souples (1–100).	Penalización por cada turno sin cubrir; mayor = el solver cubre más turnos incluso a costa de los pesos blandos (1–100).	Strafe für jede unbesetzte Schicht; höher = der Solver besetzt mehr Schichten, auch zulasten der weichen Gewichte (1–100).
+solver.help.undesired_date_weight	Tooltip aiuto parametro solver undesired_date_weight	Quanto penalizzare i turni nelle date sgradite dall'operatore; più alto = il solver le evita di più (0–10).	How much to penalize shifts on the operator's unwanted dates; higher = the solver avoids them more (0–10).	Dans quelle mesure pénaliser les quarts aux dates non souhaitées de l'opérateur ; plus élevé = le solveur les évite davantage (0–10).	Cuánto penalizar los turnos en las fechas no deseadas del operador; mayor = el solver las evita más (0–10).	Wie stark Schichten an unerwünschten Terminen des Mitarbeiters bestraft werden; höher = der Solver vermeidet sie stärker (0–10).
+solver.help.unimproved_seconds	Tooltip aiuto parametro solver unimproved_seconds	Ferma il calcolo se non ci sono miglioramenti per questi secondi; 0 disattiva lo stop anticipato.	Stops solving if there is no improvement for this many seconds; 0 disables early stopping.	Arrête le calcul en l'absence d'amélioration pendant ce nombre de secondes ; 0 désactive l'arrêt anticipé.	Detiene el cálculo si no hay mejoras durante estos segundos; 0 desactiva la parada anticipada.	Stoppt die Berechnung, wenn für so viele Sekunden keine Verbesserung erfolgt; 0 deaktiviert den vorzeitigen Stopp.
+solver.help.weekly_shift_weight	Tooltip aiuto parametro solver weekly_shift_weight	Quanto conta il rispetto dei turni settimanali minimi/massimi impostati; 0 disattiva la penalità (0–10).	How much respecting the configured weekly min/max shifts matters; 0 disables the penalty (0–10).	Importance du respect des quarts hebdomadaires min/max configurés ; 0 désactive la pénalité (0–10).	Cuánto importa cumplir los turnos semanales mín/máx configurados; 0 desactiva la penalización (0–10).	Wie wichtig die Einhaltung der konfigurierten wöchentlichen Min-/Max-Schichten ist; 0 deaktiviert die Strafe (0–10).
+solver.hint.avoid_specialist_weight	Hint parametro solver avoid_specialist_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.balance_weight	Hint parametro solver balance_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.consecutive_days_weight	Hint parametro solver consecutive_days_weight	0–10. Peso del rispetto del massimo di giorni consecutivi.	0–10. Weight for respecting the maximum consecutive days.	0–10. Poids du respect des jours consécutifs maximum.	0–10. Peso del cumplimiento de los días consecutivos máximos.	0–10. Gewicht für die Einhaltung der maximalen aufeinanderfolgenden Tage.
+solver.hint.context_days	Hint parametro solver context_days	0–7: turni già assegnati nei giorni adiacenti alla finestra, visti (bloccati) dai vincoli di sovrapposizione, riposo, ore settimanali e giorni consecutivi. 0 = solo finestra.	0–7: shifts already assigned on days adjacent to the window, seen (locked) by the overlap, rest, weekly-hours and consecutive-day constraints. 0 = window only.	0–7 : quarts déjà affectés les jours adjacents à la fenêtre, vus (verrouillés) par les contraintes de chevauchement, repos, heures hebdomadaires et jours consécutifs. 0 = fenêtre seule.	0–7: turnos ya asignados en los días adyacentes a la ventana, vistos (bloqueados) por las restricciones de solapamiento, descanso, horas semanales y días consecutivos. 0 = solo la ventana.	0–7: bereits zugewiesene Schichten an den an das Fenster angrenzenden Tagen, von den Überschneidungs-, Ruhe-, Wochenstunden- und Folgetage-Regeln gesehen (gesperrt). 0 = nur Fenster.
+solver.hint.days_off_weight	Hint parametro solver days_off_weight	0–10. Peso del rispetto dei riposi minimi settimanali.	0–10. Weight for respecting the minimum weekly days off.	0–10. Poids du respect des repos hebdomadaires minimum.	0–10. Peso del cumplimiento de los descansos semanales mínimos.	0–10. Gewicht für die Einhaltung der wöchentlichen Mindestruhetage.
+solver.hint.desired_date_weight	Hint parametro solver desired_date_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.diminished_ratio_pct	Hint parametro solver diminished_ratio_pct	1–100: percentuale del ritmo di miglioramento iniziale sotto cui fermarsi. Usato solo con finestra > 0.	1–100: percentage of the initial improvement rate below which to stop. Used only with window > 0.	1–100 : pourcentage du rythme d'amélioration initial sous lequel s'arrêter. Utilisé uniquement avec fenêtre > 0.	1–100: porcentaje del ritmo de mejora inicial por debajo del cual detenerse. Solo con ventana > 0.	1–100: Prozentsatz der anfänglichen Verbesserungsrate, unter dem gestoppt wird. Nur bei Fenster > 0.
+solver.hint.diminished_window_seconds	Hint parametro solver diminished_window_seconds	0 disabilita. Confronta il miglioramento attuale con quello di N secondi prima e si ferma quando il ritmo cala sotto la soglia.	0 disables it. Compares the current improvement with that of N seconds earlier and stops when the rate falls below the threshold.	0 désactive. Compare l'amélioration actuelle à celle d'il y a N secondes et s'arrête quand le rythme passe sous le seuil.	0 la desactiva. Compara la mejora actual con la de N segundos antes y se detiene cuando el ritmo cae por debajo del umbral.	0 deaktiviert. Vergleicht die aktuelle Verbesserung mit der von vor N Sekunden und stoppt, wenn die Rate unter die Schwelle fällt.
+solver.hint.max_consecutive_days	Hint parametro solver max_consecutive_days	0 disabilita il limite.	0 disables the limit.	0 désactive la limite.	0 desactiva el límite.	0 deaktiviert das Limit.
+solver.hint.max_shifts_per_day	Hint parametro solver max_shifts_per_day	Da 1 a 5.	From 1 to 5.	De 1 à 5.	De 1 a 5.	Von 1 bis 5.
+solver.hint.max_solve_seconds	Hint parametro solver max_solve_seconds	5–600 secondi.	5–600 seconds.	5–600 secondes.	5–600 segundos.	5–600 Sekunden.
+solver.hint.max_weekly_hours	Hint parametro solver max_weekly_hours	0 disabilita il limite.	0 disables the limit.	0 désactive la limite.	0 desactiva el límite.	0 deaktiviert das Limit.
+solver.hint.max_weekly_shifts	Hint parametro solver max_weekly_shifts	0 disabilita il massimo.	0 disables the maximum.	0 désactive le maximum.	0 desactiva el máximo.	0 deaktiviert das Maximum.
+solver.hint.min_days_off_per_week	Hint parametro solver min_days_off_per_week	Da 0 a 7.	From 0 to 7.	De 0 à 7.	De 0 a 7.	Von 0 bis 7.
+solver.hint.min_weekly_shifts	Hint parametro solver min_weekly_shifts	0 disabilita il minimo.	0 disables the minimum.	0 désactive le minimum.	0 desactiva el mínimo.	0 deaktiviert das Minimum.
+solver.hint.minimum_rest_hours	Hint parametro solver minimum_rest_hours	Ore minime tra due turni.	Minimum hours between two shifts.	Heures minimales entre deux quarts.	Horas mínimas entre dos turnos.	Mindeststunden zwischen zwei Schichten.
+solver.hint.night_balance_weight	Hint parametro solver night_balance_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.night_end_hour	Hint parametro solver night_end_hour	0–23.	0–23.	0–23.	0–23.	0–23.
+solver.hint.night_start_hour	Hint parametro solver night_start_hour	0–23.	0–23.	0–23.	0–23.	0–23.
+solver.hint.optional_skill_weight	Hint parametro solver optional_skill_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.same_location_weight	Hint parametro solver same_location_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.unassigned_weight	Hint parametro solver unassigned_weight	1–100.	1–100.	1–100.	1–100.	1–100.
+solver.hint.undesired_date_weight	Hint parametro solver undesired_date_weight	0–10.	0–10.	0–10.	0–10.	0–10.
+solver.hint.unimproved_seconds	Hint parametro solver unimproved_seconds	0 disabilita lo stop anticipato.	0 disables early stopping.	0 désactive l'arrêt anticipé.	0 desactiva la parada anticipada.	0 deaktiviert den vorzeitigen Stopp.
+solver.hint.weekly_shift_weight	Hint parametro solver weekly_shift_weight	0–10. Peso del rispetto dei turni settimanali minimi/massimi.	0–10. Weight for respecting the weekly min/max shifts.	0–10. Poids du respect des quarts hebdomadaires min/max.	0–10. Peso del cumplimiento de los turnos semanales mín/máx.	0–10. Gewicht für die Einhaltung der wöchentlichen Min-/Max-Schichten.
+solver.label.avoid_specialist_weight	Etichetta parametro solver avoid_specialist_weight	Specialista da evitare	Specialist to avoid	Spécialiste à éviter	Especialista a evitar	Zu vermeidender Spezialist
+solver.label.balance_weight	Etichetta parametro solver balance_weight	Bilanciamento carico	Workload balance	Équilibrage de la charge	Equilibrio de carga	Lastausgleich
+solver.label.consecutive_days_weight	Etichetta parametro solver consecutive_days_weight	Giorni consecutivi massimi	Maximum consecutive days	Jours consécutifs maximum	Días consecutivos máximos	Maximale aufeinanderfolgende Tage
+solver.label.context_days	Etichetta parametro solver context_days	Giorni di contesto (bordi finestra)	Context days (window edges)	Jours de contexte (bords de fenêtre)	Días de contexto (bordes de ventana)	Kontexttage (Fensterränder)
+solver.label.days_off_weight	Etichetta parametro solver days_off_weight	Riposi minimi settimanali	Minimum weekly days off	Repos hebdomadaires minimum	Descansos semanales mínimos	Wöchentliche Mindestruhetage
+solver.label.desired_date_weight	Etichetta parametro solver desired_date_weight	Date desiderate	Desired dates	Dates souhaitées	Fechas deseadas	Wunschtermine
+solver.label.diminished_ratio_pct	Etichetta parametro solver diminished_ratio_pct	Stop a rendimento decrescente: soglia (%)	Diminishing-returns stop: threshold (%)	Arrêt à rendement décroissant : seuil (%)	Parada por rendimiento decreciente: umbral (%)	Stopp bei abnehmendem Ertrag: Schwelle (%)
+solver.label.diminished_window_seconds	Etichetta parametro solver diminished_window_seconds	Stop a rendimento decrescente: finestra (s)	Diminishing-returns stop: window (s)	Arrêt à rendement décroissant : fenêtre (s)	Parada por rendimiento decreciente: ventana (s)	Stopp bei abnehmendem Ertrag: Fenster (s)
+solver.label.max_consecutive_days	Etichetta parametro solver max_consecutive_days	Giorni consecutivi massimi	Maximum consecutive days	Jours consécutifs maximaux	Días consecutivos máximos	Maximale aufeinanderfolgende Tage
+solver.label.max_shifts_per_day	Etichetta parametro solver max_shifts_per_day	Turni massimi giornalieri	Maximum daily shifts	Quarts quotidiens maximaux	Turnos diarios máximos	Maximale Schichten pro Tag
+solver.label.max_solve_seconds	Etichetta parametro solver max_solve_seconds	Durata massima (secondi)	Maximum duration (seconds)	Durée maximale (secondes)	Duración máxima (segundos)	Maximale Dauer (Sekunden)
+solver.label.max_weekly_hours	Etichetta parametro solver max_weekly_hours	Ore massime settimanali	Maximum weekly hours	Heures hebdomadaires maximales	Horas semanales máximas	Maximale Wochenstunden
+solver.label.max_weekly_shifts	Etichetta parametro solver max_weekly_shifts	Turni massimi settimanali	Maximum weekly shifts	Quarts hebdomadaires maximaux	Turnos semanales máximos	Maximale Schichten pro Woche
+solver.label.min_days_off_per_week	Etichetta parametro solver min_days_off_per_week	Riposi minimi settimanali	Minimum days off per week	Jours de repos minimaux par semaine	Días de descanso mínimos por semana	Mindestruhetage pro Woche
+solver.label.min_weekly_shifts	Etichetta parametro solver min_weekly_shifts	Turni minimi settimanali	Minimum weekly shifts	Quarts hebdomadaires minimaux	Turnos semanales mínimos	Mindestschichten pro Woche
+solver.label.minimum_rest_hours	Etichetta parametro solver minimum_rest_hours	Riposo minimo (ore)	Minimum rest (hours)	Repos minimal (heures)	Descanso mínimo (horas)	Mindestruhezeit (Stunden)
+solver.label.night_balance_weight	Etichetta parametro solver night_balance_weight	Bilanciamento notturni	Night shift balance	Équilibrage des nuits	Equilibrio de nocturnos	Nachtschichtausgleich
+solver.label.night_end_hour	Etichetta parametro solver night_end_hour	Ora fine notte	Night end hour	Heure de fin de nuit	Hora de fin de noche	Nachtende (Stunde)
+solver.label.night_start_hour	Etichetta parametro solver night_start_hour	Ora inizio notte	Night start hour	Heure de début de nuit	Hora de inicio de noche	Nachtbeginn (Stunde)
+solver.label.optional_skill_weight	Etichetta parametro solver optional_skill_weight	Competenze opzionali	Optional skills	Compétences facultatives	Competencias opcionales	Optionale Kompetenzen
+solver.label.same_location_weight	Etichetta parametro solver same_location_weight	Continuità nella sede	Location continuity	Continuité de site	Continuidad de sede	Standortkontinuität
+solver.label.unassigned_weight	Etichetta parametro solver unassigned_weight	Penalità turno non assegnato	Unassigned shift penalty	Pénalité de quart non affecté	Penalización de turno sin asignar	Strafe für unbesetzte Schicht
+solver.label.undesired_date_weight	Etichetta parametro solver undesired_date_weight	Date indesiderate	Undesired dates	Dates non souhaitées	Fechas no deseadas	Unerwünschte Termine
+solver.label.unimproved_seconds	Etichetta parametro solver unimproved_seconds	Stop senza miglioramenti	Stop without improvement	Arrêt sans amélioration	Parada sin mejoras	Stopp ohne Verbesserung
+solver.label.weekly_shift_weight	Etichetta parametro solver weekly_shift_weight	Turni settimanali (min/max)	Weekly shifts (min/max)	Quarts hebdomadaires (min/max)	Turnos semanales (mín/máx)	Wöchentliche Schichten (Min/Max)
+solver.opt.allow_unassigned	Opzione solver allow_unassigned	Consenti turni non assegnati	Allow unassigned shifts	Autoriser les quarts non affectés	Permitir turnos sin asignar	Unbesetzte Schichten zulassen
+solver.opt.balance_by_hours	Opzione solver balance_by_hours	Bilancia il carico per ore (anziché per numero turni)	Balance workload by hours (instead of by number of shifts)	Équilibrer la charge par heures (au lieu du nombre de quarts)	Equilibrar la carga por horas (en lugar de por número de turnos)	Last nach Stunden ausgleichen (statt nach Schichtanzahl)
+solver.opt.stop_when_feasible	Opzione solver stop_when_feasible	Interrompi alla prima soluzione fattibile	Stop at the first feasible solution	Arrêter à la première solution réalisable	Detener en la primera solución factible	Bei der ersten machbaren Lösung stoppen
+solverSettings.intro	Introduzione parametri Solver	Configurazione dei parametri di ottimizzazione per l’azienda selezionata.	Optimization settings for the selected company.	Paramètres d’optimisation pour l’entreprise sélectionnée.	Parámetros de optimización para la empresa seleccionada.	Optimierungseinstellungen für das ausgewählte Unternehmen.
+structures.active	Badge struttura attiva	Attiva	Active	Active	Activa	Aktiv
+structures.addTooltip	Tooltip aggiunta struttura	Aggiungi una nuova struttura	Add a new structure	Ajouter une nouvelle structure	Añadir una nueva estructura	Neue Struktur hinzufügen
+structures.defaultDeleteTooltip	Tooltip struttura predefinita	La struttura predefinita non può essere eliminata	The default structure cannot be deleted	La structure par défaut ne peut pas être supprimée	La estructura predeterminada no se puede eliminar	Die Standardstruktur kann nicht gelöscht werden
+structures.deleteTitle	Titolo eliminazione struttura	Elimina struttura	Delete structure	Supprimer la structure	Eliminar estructura	Struktur löschen
+structures.loadError	Errore caricamento strutture	Errore nel caricamento delle strutture.	Error loading structures.	Erreur lors du chargement des structures.	Error al cargar las estructuras.	Fehler beim Laden der Strukturen.
+structures.noResults	Messaggio nessuna struttura	Nessuna struttura.	No structures.	Aucune structure.	No hay estructuras.	Keine Strukturen.
+tab.all	Tab Tutti	Tutti	All	Tous	Todos	Alle
+tab.byEmployee	Tab Per dipendente	Per Operatore	By operator	Par opérateur	Por operador	Nach Mitarbeiter
+tab.byLocation	Tab Per sede	Per sede	By location	Par lieu	Por ubicación	Nach Ort
+tab.desired	Tab Preferiti	Preferiti	Desired	Souhaités	Deseados	Bevorzugt
+tab.unavailable	Tab Non disponibili	Non disponibili	Unavailable	Non disponibles	No disponibles	Nicht verfügbar
+tab.undesired	Tab Non preferiti	Non preferiti	Undesired	Non souhaités	No deseados	Nicht bevorzugt
+table.actions	Intestazione colonna Azioni	Azioni	Actions	Actions	Acciones	Aktionen
+table.active	Intestazione colonna Attiva	Attiva	Active	Active	Activa	Aktiv
+table.address	Intestazione colonna indirizzo	Indirizzo	Address	Adresse	Dirección	Adresse
+table.code	Intestazione colonna Codice	Codice	Code	Code	Código	Code
+table.constraint	Intestazione colonna Vincolo analisi score	Vincolo	Constraint	Contrainte	Restricción	Einschränkung
+table.date	Intestazione colonna Data	Data	Date	Date	Fecha	Datum
+table.dateEnd	Intestazione colonna Data Fine	Data Fine	End Date	Date Fin	Fecha Fin	Enddatum
+table.dateStart	Intestazione colonna Data Inizio	Data Inizio	Start Date	Date Début	Fecha Inicio	Startdatum
+table.day	Intestazione colonna Giorno	Giorno	Day	Jour	Día	Tag
+table.description	Intestazione colonna Descrizione	Descrizione	Description	Description	Descripción	Beschreibung
+table.endDate	Intestazione colonna Data Fine Turno	Data Fine	End Date	Date Fin	Fecha Fin	Enddatum
+table.id	Intestazione colonna ID	ID	ID	ID	ID	ID
+table.key	Intestazione colonna Chiave	Chiave	Key	Clé	Clave	Schlüssel
+table.matches	Intestazione colonna Occorrenze analisi score	# Occ.	# Matches	# Occurrences	# Coincidencias	# Treffer
+table.name	Intestazione colonna Nome	Nome	Name	Nom	Nombre	Name
+table.optionalSkills	Intestazione colonna Skill Opzionali	Skill Opt.	O.Skills	Comp.Opt.	Hab.Opc.	Opt.Komp.
+table.order	Intestazione colonna Ordine	Ordine	Order	Ordre	Orden	Reihenfolge
+table.phone	Intestazione colonna telefono	Telefono	Phone	Téléphone	Teléfono	Telefon
+table.requiredSkills	Intestazione colonna Skill Richieste	Skill Ric.	R.Skills	Comp.Req.	Hab.Req.	Erf.Komp.
+table.score	Intestazione colonna Score analisi score	Score	Score	Score	Score	Score
+table.shifts	Intestazione colonna numero turni	Turni	Shifts	Créneaux	Turnos	Schichten
+table.startDate	Intestazione colonna Data Inizio Turno	Data Inizio	Start Date	Date Début	Fecha Inicio	Startdatum
+table.structureName	Intestazione colonna nome struttura	Struttura	Structure	Structure	Estructura	Struktur
+table.total	Intestazione colonna Totale	Totale	Total	Total	Total	Gesamt
+table.translation	Intestazione colonna Traduzione	Traduzione	Translation	Traduction	Traducción	Übersetzung
+table.type	Intestazione colonna Tipo	Tipo	Type	Type	Tipo	Typ
+table.uncovered	Intestazione colonna turni scoperti	Scoperti	Uncovered	Non couverts	Sin cubrir	Unbesetzt
+table.violations	Intestazione colonna Violazioni	Violazioni	Violations	Violations	Violaciones	Verstöße
+table.weight	Intestazione colonna Peso analisi score	Peso	Weight	Poids	Peso	Gewicht
+toast.assignmentsSaved	Toast: assegnazioni solver salvate	Assegnazioni salvate!	Assignments saved!	Affectations enregistrées !	¡Asignaciones guardadas!	Zuweisungen gespeichert!
+toast.autoPopulated	Toast: periodo popolato automaticamente dal template	Periodo popolato automaticamente dal template	Period automatically populated from the template	Période remplie automatiquement à partir du modèle	Periodo rellenado automáticamente desde la plantilla	Zeitraum automatisch aus der Vorlage befüllt
+toast.backupDeleteError	Toast errore cancellazione backup	Errore durante la cancellazione del backup.	Error deleting the backup.	Erreur lors de la suppression de la sauvegarde.	Error al eliminar la copia de seguridad.	Fehler beim Löschen des Backups.
+toast.backupDeleted	Toast backup eliminato	Backup eliminato.	Backup deleted.	Sauvegarde supprimée.	Copia de seguridad eliminada.	Backup gelöscht.
+toast.backupDone	Toast: backup eseguito	Backup eseguito!	Backup completed!	Sauvegarde effectuée !	¡Copia realizada!	Sicherung abgeschlossen!
+toast.backupError	Toast: errore backup	Errore durante il backup.	Error during backup.	Erreur lors de la sauvegarde.	Error durante la copia.	Fehler bei der Sicherung.
+toast.backupSettingsError	Toast errore salvataggio parametri backup	Errore durante il salvataggio dei parametri backup.	Error saving backup settings.	Erreur lors de l’enregistrement des paramètres de sauvegarde.	Error al guardar los parámetros de copia de seguridad.	Fehler beim Speichern der Backup-Einstellungen.
+toast.backupSettingsSaved	Toast parametri backup salvati	Parametri backup salvati.	Backup settings saved.	Paramètres de sauvegarde enregistrés.	Parámetros de copia de seguridad guardados.	Backup-Einstellungen gespeichert.
+toast.codeDuplicate	Toast codice sede duplicato	Codice sede già in uso. Scegline uno diverso.	Location code already in use. Choose a different one.	Code de lieu déjà utilisé. Choisissez-en un autre.	El código de ubicación ya está en uso. Elija uno diferente.	Standortcode wird bereits verwendet. Wählen Sie einen anderen.
+toast.dateDeleted	Toast data eliminata	Data eliminata.	Date deleted.	Date supprimée.	Fecha eliminada.	Datum gelöscht.
+toast.datesSaved	Toast date salvate	Date salvate!	Dates saved!	Dates enregistrées !	¡Fechas guardadas!	Daten gespeichert!
+toast.descriptionRequired	Toast descrizione obbligatoria	La descrizione è obbligatoria.	Description is required.	La description est obligatoire.	La descripción es obligatoria.	Die Beschreibung ist erforderlich.
+toast.emailError	Toast: errore invio email	Errore durante l'invio dell'email.	Error sending the email.	Erreur lors de l'envoi de l'e-mail.	Error al enviar el email.	Fehler beim Senden der E-Mail.
+toast.emailSent	Toast: email inviata	Email inviata!	Email sent!	E-mail envoyé !	¡Email enviado!	E-Mail gesendet!
+toast.emailSettingsSaved	Toast: parametri email salvati	Parametri email salvati: effetto immediato.	Email settings saved: effective immediately.	Paramètres e-mail enregistrés : effet immédiat.	Parámetros de email guardados: efecto inmediato.	E-Mail-Einstellungen gespeichert: sofort wirksam.
+toast.emailTemplateSaved	Toast: template email salvato	Template email salvato.	Email template saved.	Modèle d'e-mail enregistré.	Plantilla de email guardada.	E-Mail-Vorlage gespeichert.
+toast.emailsFailed	Suffisso conteggio email non inviate (bulk)	email non inviate	emails failed	e-mails non envoyés	emails fallidos	E-Mails fehlgeschlagen
+toast.emailsSent	Suffisso conteggio email inviate (bulk)	email inviate	emails sent	e-mails envoyés	emails enviados	E-Mails gesendet
+toast.employeeAdded	Toast dipendente aggiunto	Operatore aggiunto!	Operator added!	Opérateur ajouté !	¡Operador añadido!	Mitarbeiter hinzugefügt!
+toast.employeeCodeDuplicate	Toast codice dipendente duplicato	Codice operatore già in uso. Scegline uno diverso.	Operator code already in use. Choose a different one.	Code d'opérateur déjà utilisé. Choisissez-en un autre.	El código de operador ya está en uso. Elija uno diferente.	Mitarbeitercode wird bereits verwendet. Wählen Sie einen anderen.
+toast.employeeDeleted	Toast dipendente eliminato	Operatore eliminato.	Operator deleted.	Opérateur supprimé.	Operador eliminado.	Mitarbeiter gelöscht.
+toast.employeeUpdated	Toast dipendente aggiornato	Operatore aggiornato!	Operator updated!	Opérateur mis à jour !	¡Operador actualizado!	Mitarbeiter aktualisiert!
+toast.endAfterStart	Toast orario fine dopo inizio	L'orario di fine deve essere dopo l'inizio.	End time must be after start time.	L’heure de fin doit être après le début.	La hora de fin debe ser posterior al inicio.	Die Endzeit muss nach der Startzeit liegen.
+toast.error	Titolo toast Errore	Errore	Error	Erreur	Error	Fehler
+toast.errorAdd	Toast errore aggiunta	Errore durante l'aggiunta.	Error while adding.	Erreur lors de l'ajout.	Error al añadir.	Fehler beim Hinzufügen.
+toast.errorDelete	Toast errore eliminazione	Errore durante l'eliminazione.	Error while deleting.	Erreur lors de la suppression.	Error al eliminar.	Fehler beim Löschen.
+toast.errorEdit	Toast errore modifica	Errore durante la modifica.	Error while editing.	Erreur lors de la modification.	Error durante la edición.	Fehler bei der Bearbeitung.
+toast.errorLoad	Toast errore caricamento	Errore nel caricamento.	Error while loading.	Erreur lors du chargement.	Error al cargar.	Fehler beim Laden.
+toast.errorLoadCalendar	Toast errore caricamento calendario	Errore nel caricamento del calendario.	Error loading the calendar.	Erreur lors du chargement du calendrier.	Error al cargar el calendario.	Fehler beim Laden des Kalenders.
+toast.errorLoadDates	Toast errore caricamento date	Errore nel caricamento delle date.	Error loading the dates.	Erreur lors du chargement des dates.	Error al cargar las fechas.	Fehler beim Laden der Daten.
+toast.errorSave	Toast errore salvataggio	Errore durante il salvataggio.	Error while saving.	Erreur lors de l'enregistrement.	Error al guardar.	Fehler beim Speichern.
+toast.errorSolverPolling	Toast errore polling solver	Errore durante il polling del solver.	Error while polling the solver.	Erreur lors de l'interrogation du solveur.	Error durante el sondeo del solver.	Fehler beim Abfragen des Solvers.
+toast.errorSolverStart	Toast errore avvio solver	Errore durante l'avvio del solver.	Error starting the solver.	Erreur lors du démarrage du solveur.	Error al iniciar el solver.	Fehler beim Starten des Solvers.
+toast.generalSettingsSaved	Toast salvataggio Parametri generali	Parametri generali salvati.	General settings saved.	Paramètres généraux enregistrés.	Parámetros generales guardados.	Allgemeine Einstellungen gespeichert.
+toast.info	Titolo toast Informazione	Informazione	Information	Information	Información	Information
+toast.insertStartEnd	Toast inserisci inizio e fine	Inserisci orario di inizio e fine.	Enter start and end time.	Saisissez l'heure de début et de fin.	Introduzca la hora de inicio y de fin.	Start- und Endzeit eingeben.
+toast.invalidDateFormat	Toast formato data non valido	Formato data/ora non valido.	Invalid date/time format.	Format de date/heure non valide.	Formato de fecha/hora no válido.	Ungültiges Datums-/Zeitformat.
+toast.keyRequired	Toast chiave obbligatoria	La chiave è obbligatoria.	The key is required.	La clé est obligatoire.	La clave es obligatoria.	Der Schlüssel ist erforderlich.
+toast.labelAdded	Toast etichetta aggiunta	Etichetta aggiunta.	Label added.	Étiquette ajoutée.	Etiqueta añadida.	Etikett hinzugefügt.
+toast.labelUpdated	Toast etichetta aggiornata	Etichetta aggiornata.	Label updated.	Étiquette mise à jour.	Etiqueta actualizada.	Etikett aktualisiert.
+toast.locationAdded	Toast sede aggiunta	Sede aggiunta!	Location added!	Lieu ajouté !	¡Ubicación añadida!	Standort hinzugefügt!
+toast.locationDeleted	Toast sede eliminata	Sede eliminata.	Location deleted.	Lieu supprimé.	Ubicación eliminada.	Standort gelöscht.
+toast.locationSkillsLoadFailed	Toast errore caricamento skill sede	Impossibile caricare le skill della sede: verificale prima di salvare.	Could not load the location's skills: check them before saving.	Impossible de charger les compétences du lieu : vérifiez-les avant d'enregistrer.	No se pudieron cargar las competencias de la sede: verifíquelas antes de guardar.	Die Fähigkeiten des Standorts konnten nicht geladen werden: vor dem Speichern prüfen.
+toast.locationUpdated	Toast sede aggiornata	Sede aggiornata!	Location updated!	Lieu mis à jour !	¡Ubicación actualizada!	Standort aktualisiert!
+toast.pdfTemplateSaved	Toast template PDF salvato	Template PDF salvato.	PDF template saved.	Modèle PDF enregistré.	Plantilla PDF guardada.	PDF-Vorlage gespeichert.
+toast.restoreError	Toast: errore ripristino	Errore durante il ripristino.	Error during restore.	Erreur lors de la restauration.	Error durante la restauración.	Fehler bei der Wiederherstellung.
+toast.restored	Toast: database ripristinato	Database ripristinato. Ricarico la pagina…	Database restored. Reloading the page…	Base de données restaurée. Rechargement de la page…	Base de datos restaurada. Recargando la página…	Datenbank wiederhergestellt. Seite wird neu geladen…
+toast.savedTemplateAdded	Messaggio template salvato aggiunto	Template salvato!	Template saved!	Modèle enregistré !	¡Plantilla guardada!	Vorlage gespeichert!
+toast.savedTemplateDeleted	Messaggio template salvato eliminato	Template eliminato.	Template deleted.	Modèle supprimé.	Plantilla eliminada.	Vorlage gelöscht.
+toast.selectLocation	Toast seleziona una sede	Seleziona una sede.	Select a location.	Sélectionnez un lieu.	Seleccione una ubicación.	Wählen Sie einen Standort.
+toast.shiftAdded	Toast turno aggiunto	Turno aggiunto!	Shift added!	Quart ajouté !	¡Turno añadido!	Schicht hinzugefügt!
+toast.shiftDeleted	Toast turno eliminato	Turno eliminato.	Shift deleted.	Quart supprimé.	Turno eliminado.	Schicht gelöscht.
+toast.shiftNoCrossDay	Toast turno non puo coprire due giorni	Il turno non può coprire due giorni.	A shift cannot span two days.	Un quart ne peut pas couvrir deux jours.	Un turno no puede abarcar dos días.	Eine Schicht kann sich nicht über zwei Tage erstrecken.
+toast.shiftUpdated	Toast turno aggiornato	Turno aggiornato!	Shift updated!	Quart mis à jour !	¡Turno actualizado!	Schicht aktualisiert!
+toast.solutionDiscarded	Toast: soluzione solver scartata	Soluzione scartata.	Solution discarded.	Solution ignorée.	Solución descartada.	Lösung verworfen.
+toast.solveCompleted	Toast solve completato	Solve completato!	Solve completed!	Résolution terminée !	¡Resolución completada!	Lösung abgeschlossen!
+toast.solverSettingsSaved	Etichetta sezione Parametri Solver	Parametri Solver salvati.	Solver settings saved.	Paramètres du solveur enregistrés.	Parámetros del solver guardados.	Solver-Einstellungen gespeichert.
+toast.specialistAdded	Toast specialista aggiunto	Specialista aggiunto!	Specialist added!	Spécialiste ajouté !	¡Especialista añadido!	Spezialist hinzugefügt!
+toast.specialistCodeDuplicate	Toast codice specialista duplicato	Codice specialista già in uso. Scegline uno diverso.	Specialist code already in use. Choose a different one.	Code de spécialiste déjà utilisé. Choisissez-en un autre.	El código de especialista ya está en uso. Elija uno diferente.	Spezialistencode wird bereits verwendet. Wählen Sie einen anderen.
+toast.specialistDeleted	Toast specialista eliminato	Specialista eliminato.	Specialist deleted.	Spécialiste supprimé.	Especialista eliminado.	Spezialist gelöscht.
+toast.specialistUpdated	Toast specialista aggiornato	Specialista aggiornato!	Specialist updated!	Spécialiste mis à jour !	¡Especialista actualizado!	Spezialist aktualisiert!
+toast.structureAdded	Toast struttura aggiunta	Struttura aggiunta.	Structure added.	Structure ajoutée.	Estructura añadida.	Struktur hinzugefügt.
+toast.structureUpdated	Toast struttura aggiornata	Struttura aggiornata.	Structure updated.	Structure mise à jour.	Estructura actualizada.	Struktur aktualisiert.
+toast.success	Titolo toast Successo	Successo	Success	Succès	Éxito	Erfolg
+toast.templateAdded	Toast template aggiunto	Template aggiunto!	Template added!	Modèle ajouté !	¡Plantilla añadida!	Vorlage hinzugefügt!
+toast.templateApplied	Toast turni creati dal template	Turni creati dal template	Shifts created from template	Quarts créés à partir du modèle	Turnos creados desde la plantilla	Schichten aus Vorlage erstellt
+toast.templateDeleted	Toast template eliminato	Template eliminato.	Template deleted.	Modèle supprimé.	Plantilla eliminada.	Vorlage gelöscht.
+toast.templateDescSaved	Messaggio descrizione template salvata	Descrizione salvata!	Description saved!	Description enregistrée !	¡Descripción guardada!	Beschreibung gespeichert!
+toast.templatePrepopulated	Toast template prepopolato	Template prepopolato dalla settimana selezionata.	Template pre-populated from the selected week.	Modèle prérempli à partir de la semaine sélectionnée.	Plantilla rellenada desde la semana seleccionada.	Vorlage aus der ausgewählten Woche vorbefüllt.
+toast.templateSaved	Messaggio template salvato dalla settimana	Template aggiornato dalla settimana visibile	Template updated from the visible week	Modèle mis à jour à partir de la semaine visible	Plantilla actualizada desde la semana visible	Vorlage aus der sichtbaren Woche aktualisiert
+toast.templateUpdated	Toast template aggiornato	Template aggiornato!	Template updated!	Modèle mis à jour !	¡Plantilla actualizada!	Vorlage aktualisiert!
+toast.testEmailSent	Toast: email di prova inviata	Email di prova inviata a	Test email sent to	E-mail de test envoyé à	Email de prueba enviado a	Test-E-Mail gesendet an
+toast.warning	Titolo toast Attenzione	Attenzione	Warning	Attention	Atención	Warnung
+tooltip.applyTemplate	Tooltip applica template	Sostituisci i turni del periodo visibile con quelli del template	Replace the shifts in the visible period with those from the template	Remplacer les quarts de la période visible par ceux du modèle	Sustituir los turnos del período visible por los de la plantilla	Die Schichten im sichtbaren Zeitraum durch die aus der Vorlage ersetzen
+tooltip.clearSearch	Tooltip cancella ricerca	Cancella ricerca	Clear search	Effacer la recherche	Limpiar búsqueda	Suche löschen
+tooltip.delete	Tooltip elimina	Elimina	Delete	Supprimer	Eliminar	Löschen
+tooltip.deleteEmployee	Tooltip elimina impiegato	Elimina operatore	Delete operator	Supprimer l'opérateur	Eliminar operador	Mitarbeiter löschen
+tooltip.deleteLocation	Tooltip elimina sede	Elimina posizione	Delete location	Supprimer le lieu	Eliminar ubicación	Ort löschen
+tooltip.edit	Tooltip Modifica (generico)	Modifica	Edit	Modifier	Editar	Bearbeiten
+tooltip.editEmployee	Tooltip modifica impiegato	Modifica operatore	Edit operator	Modifier l'opérateur	Editar operador	Mitarbeiter bearbeiten
+tooltip.editLocation	Tooltip modifica sede	Modifica Location	Edit location	Modifier le lieu	Editar ubicación	Ort bearbeiten
+tooltip.employeeDatesEmpty	Tooltip gestione date dipendente senza date	Gestione date (nessuna data)	Manage dates (no dates)	Gérer les dates (aucune date)	Gestionar fechas (sin fechas)	Daten verwalten (keine Daten)
+tooltip.employeeDatesWithData	Tooltip gestione date dipendente con date	Gestione date (con date assegnate)	Manage dates (with dates assigned)	Gérer les dates (avec dates assignées)	Gestionar fechas (con fechas asignadas)	Daten verwalten (mit zugewiesenen Daten)
+tooltip.employeeHasShifts	Tooltip dipendente con turni non eliminabile	Operatore con turni assegnati — impossibile eliminare	Operator has assigned shifts — cannot be deleted	L'opérateur a des quarts assignés — suppression impossible	El operador tiene turnos asignados — no se puede eliminar	Mitarbeiter hat zugewiesene Schichten — kann nicht gelöscht werden
+tooltip.exportJson	Tooltip esporta JSON	Esporta JSON	Export JSON	Exporter JSON	Exportar JSON	JSON exportieren
+tooltip.hideTranslationKeys	Tooltip nascondi chiavi traduzione	Disattiva modalità chiavi	Hide translation keys	Masquer les clés de traduction	Ocultar claves de traducción	Übersetzungsschlüssel ausblenden
+tooltip.locationHasShifts	Tooltip sede con turni non eliminabile	Sede con turni assegnati — impossibile eliminare	Location has assigned shifts — cannot be deleted	Le lieu a des quarts assignés — suppression impossible	La ubicación tiene turnos asignados — no se puede eliminar	Standort hat zugewiesene Schichten — kann nicht gelöscht werden
+tooltip.locationShiftsEmpty	Tooltip gestione turni sede senza turni	Gestione turni sede (nessun turno)	Manage shift dates (no shifts)	Gérer dates de quart (aucun quart)	Gestionar fechas de turno (sin turnos)	Schichtdaten verwalten (keine Schichten)
+tooltip.locationShiftsWithData	Tooltip gestione turni sede con turni	Gestione turni sede (con turni)	Manage shift dates (with shifts)	Gérer dates de quart (avec quarts)	Gestionar fechas de turno (con turnos)	Schichtdaten verwalten (mit Schichten)
+tooltip.nextPeriod	Tooltip periodo successivo	Periodo successivo	Next period	Période suivante	Período siguiente	Nächster Zeitraum
+tooltip.nextWeek	Tooltip settimana successiva	Settimana successiva	Next week	Semaine suivante	Semana siguiente	Nächste Woche
+tooltip.nextYear	Tooltip anno successivo	Anno successivo	Next year	Année suivante	Año siguiente	Nächstes Jahr
+tooltip.openSolverSettings	Tooltip riga vincolo: apri Parametri Solver	Apri i Parametri Solver in una nuova scheda	Open Solver Settings in a new tab	Ouvrir les paramètres du solveur dans un nouvel onglet	Abrir los parámetros del solver en una nueva pestaña	Solver-Einstellungen in einem neuen Tab öffnen
+tooltip.prevPeriod	Tooltip periodo precedente	Periodo precedente	Previous period	Période précédente	Período anterior	Vorheriger Zeitraum
+tooltip.previousWeek	Tooltip settimana precedente	Settimana precedente	Previous week	Semaine précédente	Semana anterior	Vorherige Woche
+tooltip.previousYear	Tooltip anno precedente	Anno precedente	Previous year	Année précédente	Año anterior	Vorjahr
+tooltip.saveAndLockWeek	Tooltip salva e blocca settimana	Salva e blocca la settimana corrente	Save and lock current week	Enregistrer et verrouiller la semaine	Guardar y bloquear semana actual	Aktuelle Woche speichern und sperren
+tooltip.saveToTemplate	Tooltip salva in template	Salva i turni della settimana visibile come template (senza operatori assegnati)	Save the visible week's shifts as the template (without assigned operators)	Enregistrer les quarts de la semaine visible comme modèle (sans opérateurs affectés)	Guardar los turnos de la semana visible como plantilla (sin operadores asignados)	Die Schichten der sichtbaren Woche als Vorlage speichern (ohne zugewiesene Operatoren)
+tooltip.saveToTemplateWeekOnly	Tooltip salva in template solo vista settimanale	Disponibile solo in vista settimanale	Available only in weekly view	Disponible uniquement en vue hebdomadaire	Disponible solo en vista semanal	Nur in der Wochenansicht verfügbar
+tooltip.showTranslationKeys	Tooltip mostra chiavi traduzione	Mostra chiavi di traduzione	Show translation keys	Afficher les clés de traduction	Mostrar claves de traducción	Übersetzungsschlüssel anzeigen
+tooltip.today	Tooltip vai a oggi	Vai a oggi	Go to today	Aller à aujourd'hui	Ir a hoy	Zu heute springen
+tooltip.unlockWeek	Tooltip sblocca settimana	Sblocca la settimana per modificarla	Unlock week to edit it	Déverrouiller la semaine pour la modifier	Desbloquear la semana para editarla	Woche zum Bearbeiten entsperren
+tooltip.weekLocked	Tooltip settimana bloccata	Settimana bloccata	Week locked	Semaine verrouillée	Semana bloqueada	Woche gesperrt
+validation.emailInvalid	Validazione Email	Inserisci un indirizzo email valido.	Enter a valid email address.	Saisissez une adresse e-mail valide.	Introduce una dirección de correo válida.	Geben Sie eine gültige E-Mail-Adresse ein.
+backup.hintAuto	Suggerimento Backup - parte automatica	Il backup automatico gira a intervalli regolari e prima delle operazioni che sovrascrivono i turni.	Automatic backup runs at regular intervals and before operations that overwrite shifts.	La sauvegarde automatique s'exécute à intervalles réguliers et avant les opérations qui écrasent les créneaux.	La copia automática se ejecuta a intervalos regulares y antes de las operaciones que sobrescriben turnos.	Die automatische Sicherung läuft in regelmäßigen Abständen und vor Vorgängen, die Schichten überschreiben.
+backup.hintRestore	Suggerimento Backup - parte ripristino	Prima del ripristino viene creato uno snapshot di sicurezza per consentire il recupero.	A safety snapshot is created before restore to enable recovery.	Un instantané de sécurité est créé avant la restauration afin de permettre la récupération.	Antes de restaurar se crea una instantánea de seguridad para permitir la recuperación.	Vor der Wiederherstellung wird ein Sicherheitssnapshot erstellt, um eine Wiederherstellung zu ermöglichen.
+backup.emptyUnavailable	Messaggio nessun backup con funzione non disponibile	Nessun backup: la funzione non è al momento disponibile.	No backups: the feature is currently unavailable.	Aucune sauvegarde : la fonction n'est pas disponible actuellement.	Sin copias: la función no está disponible en este momento.	Keine Sicherungen: die Funktion ist derzeit nicht verfügbar.
+msg.err.backupToolsUnavailable	Errore strumenti di backup non disponibili	Backup non disponibile: gli strumenti client del database non sono installati o sono più vecchi del server.	Backup unavailable: the database client tools are not installed or are older than the server.	Sauvegarde indisponible : les outils client de la base de données ne sont pas installés ou sont plus anciens que le serveur.	Copia no disponible: las herramientas cliente de la base de datos no están instaladas o son más antiguas que el servidor.	Sicherung nicht verfügbar: die Client-Tools der Datenbank fehlen oder sind älter als der Server.
+msg.err.restoreNotSupported	Errore ripristino non supportato dal motore	Il ripristino automatico non è disponibile su questo database: scarica il backup e ripristinalo con pg_restore.	Automatic restore is not available on this database: download the backup and restore it with pg_restore.	La restauration automatique n'est pas disponible sur cette base de données : téléchargez la sauvegarde et restaurez-la avec pg_restore.	La restauración automática no está disponible en esta base de datos: descarga la copia y restáurala con pg_restore.	Die automatische Wiederherstellung ist für diese Datenbank nicht verfügbar: Sicherung herunterladen und mit pg_restore wiederherstellen.
+msg.err.databaseBusy	Errore database occupato	Database occupato: riprova fra qualche istante. Nessun dato è stato modificato.	Database busy: try again shortly. No data was changed.	Base de données occupée : réessayez dans un instant. Aucune donnée n'a été modifiée.	Base de datos ocupada: inténtalo de nuevo en unos instantes. No se ha modificado ningún dato.	Datenbank belegt: in Kürze erneut versuchen. Es wurden keine Daten geändert.
+msg.err.backupInProgress	Errore backup in corso	Backup in corso: riprova al termine. Nessun dato è stato modificato.	Backup in progress: try again when it finishes. No data was changed.	Sauvegarde en cours : réessayez une fois terminée. Aucune donnée n'a été modifiée.	Copia en curso: inténtalo de nuevo al finalizar. No se ha modificado ningún dato.	Sicherung läuft: nach Abschluss erneut versuchen. Es wurden keine Daten geändert.
+msg.err.notADatabase	Errore backup database non leggibile	Il file selezionato non è un backup del database leggibile. Nessun dato è stato modificato.	The selected file is not a readable database backup. No data was changed.	Le fichier sélectionné n'est pas une sauvegarde de base de données lisible. Aucune donnée n'a été modifiée.	El archivo seleccionado no es una copia de base de datos legible. No se ha modificado ningún dato.	Die ausgewählte Datei ist keine lesbare Datenbanksicherung. Es wurden keine Daten geändert.
+msg.err.incompatibleDatabase	Errore backup incompatibile	Il backup non contiene lo schema completo di questa applicazione. Nessun dato è stato modificato.	The backup does not contain this application's complete schema. No data was changed.	La sauvegarde ne contient pas le schéma complet de cette application. Aucune donnée n'a été modifiée.	La copia no contiene el esquema completo de esta aplicación. No se ha modificado ningún dato.	Die Sicherung enthält nicht das vollständige Schema dieser Anwendung. Es wurden keine Daten geändert.
+msg.err.noRollbackSnapshot	Errore snapshot di sicurezza	Non è stato possibile creare il backup di sicurezza: ripristino annullato senza modifiche.	The safety backup could not be created: restore was cancelled without changes.	La sauvegarde de sécurité n'a pas pu être créée : restauration annulée sans modification.	No se pudo crear la copia de seguridad: restauración cancelada sin cambios.	Die Sicherheitssicherung konnte nicht erstellt werden: Wiederherstellung ohne Änderungen abgebrochen.
+msg.err.promotionBusy	Errore promozione database occupato	Il database è occupato: ripristino annullato senza modifiche. Riprova fra qualche istante.	The database is busy: restore was cancelled without changes. Try again shortly.	La base de données est occupée : restauration annulée sans modification. Réessayez dans un instant.	La base de datos está ocupada: restauración cancelada sin cambios. Inténtalo de nuevo en unos instantes.	Die Datenbank ist belegt: Wiederherstellung ohne Änderungen abgebrochen. In Kürze erneut versuchen.
+msg.err.promotionIoError	Errore ripristino database	Il ripristino non è riuscito; verifica lo stato indicato dal server.	Restore failed; check the status reported by the server.	La restauration a échoué ; vérifiez l’état indiqué par le serveur.	La restauración falló; comprueba el estado indicado por el servidor.	Die Wiederherstellung ist fehlgeschlagen; prüfen Sie den vom Server gemeldeten Status.
+backup.recoveryFile	Indicazione backup di emergenza	Intervento manuale necessario: usa il backup di emergenza	Manual intervention required: use the emergency backup	Intervention manuelle requise : utilisez la sauvegarde d'urgence	Se requiere intervención manual: utiliza la copia de emergencia	Manueller Eingriff erforderlich: Verwenden Sie die Notfallsicherung
+msg.err.backupAdminAuthRequired	Errore autenticazione amministrativa backup	Token amministrativo dei backup richiesto.	Backup administrator token required.	Jeton administrateur de sauvegarde requis.	Se requiere el token de administrador de copias.	Administrator-Token für Sicherungen erforderlich.
+msg.err.backupAdminTokenNotConfigured	Errore token backup non configurato	API backup disabilitata: configura BACKUP_ADMIN_TOKEN sul server.	Backup API is disabled: configure BACKUP_ADMIN_TOKEN on the server.	L’API de sauvegarde est désactivée : configurez BACKUP_ADMIN_TOKEN sur le serveur.	La API de copias está deshabilitada: configura BACKUP_ADMIN_TOKEN en el servidor.	Die Sicherungs-API ist deaktiviert: Konfigurieren Sie BACKUP_ADMIN_TOKEN auf dem Server.
+backup.adminAuthRequired	Richiesta token amministrativo backup	Questa sezione richiede il token amministrativo dei backup.	This section requires the backup administrator token.	Cette section nécessite le jeton administrateur de sauvegarde.	Esta sección requiere el token de administrador de copias.	Dieser Bereich erfordert das Administrator-Token für Sicherungen.
+backup.adminToken	Campo token amministrativo backup	Token amministrativo	Administrator token	Jeton administrateur	Token de administrador	Administrator-Token
+backup.unlock	Pulsante sblocco backup	Sblocca	Unlock	Déverrouiller	Desbloquear	Entsperren
+toast.errorDownload	Errore download backup	Errore durante il download.	Error while downloading.	Erreur lors du téléchargement.	Error durante la descarga.	Fehler beim Herunterladen.
+backup.lock	Pulsante blocco backup	Blocca	Lock	Verrouiller	Bloquear	Sperren
+msg.err.backupAdminTlsRequired	Errore TLS backup richiesto	Connessione sicura richiesta per amministrare i backup.	A secure connection is required to administer backups.	Une connexion sécurisée est requise pour administrer les sauvegardes.	Se requiere una conexión segura para administrar las copias.	Für die Verwaltung der Sicherungen ist eine sichere Verbindung erforderlich.
+msg.err.backupAdminRateLimited	Errore limite autenticazione backup	Troppi tentativi di autenticazione: attendi un minuto.	Too many authentication attempts: wait one minute.	Trop de tentatives d’authentification : attendez une minute.	Demasiados intentos de autenticación: espera un minuto.	Zu viele Authentifizierungsversuche: Warten Sie eine Minute.
+msg.err.safetyBackupFailed	Errore backup di sicurezza	Operazione annullata: non è stato possibile creare il backup di sicurezza.	Operation cancelled: the safety backup could not be created.	Opération annulée : la sauvegarde de sécurité n’a pas pu être créée.	Operación cancelada: no se pudo crear la copia de seguridad.	Vorgang abgebrochen: Die Sicherheitssicherung konnte nicht erstellt werden.
+login.title	Titolo schermata di accesso	Accedi	Sign in	Connexion	Iniciar sesión	Anmelden
+login.subtitle	Sottotitolo schermata di accesso	Inserisci le credenziali per gestire i turni.	Enter your credentials to manage shifts.	Saisissez vos identifiants pour gérer les créneaux.	Introduce tus credenciales para gestionar los turnos.	Zugangsdaten eingeben, um Schichten zu verwalten.
+login.username	Campo nome utente	Nome utente	Username	Nom d'utilisateur	Nombre de usuario	Benutzername
+login.password	Campo password	Password	Password	Mot de passe	Contraseña	Passwort
+login.submit	Pulsante di accesso	Accedi	Sign in	Se connecter	Acceder	Anmelden
+login.invalid	Errore credenziali non valide	Nome utente o password non corretti.	Incorrect username or password.	Nom d'utilisateur ou mot de passe incorrect.	Nombre de usuario o contraseña incorrectos.	Benutzername oder Passwort falsch.
+login.unreachable	Errore server non raggiungibile	Server non raggiungibile. Riprova fra qualche istante.	Server unreachable. Try again shortly.	Serveur injoignable. Réessayez dans un instant.	Servidor no disponible. Inténtalo de nuevo en unos instantes.	Server nicht erreichbar. In Kürze erneut versuchen.
+user.roleAdmin	Etichetta ruolo amministratore	Amministratore	Administrator	Administrateur	Administrador	Administrator
+user.roleCaposala	Etichetta ruolo gestione turni	Gestione turni	Shift management	Gestion des créneaux	Gestión de turnos	Schichtverwaltung
+user.logout	Voce di menu per uscire	Esci	Sign out	Se déconnecter	Cerrar sesión	Abmelden
+user.exitApp	Voce di menu per chiudere l'app	Chiudi applicazione	Close application	Fermer l’application	Cerrar aplicación	Anwendung schließen
+confirm.exitAppTitle	Titolo conferma uscita app	Chiudere l'applicazione?	Close the application?	Fermer l’application ?	¿Cerrar la aplicación?	Anwendung schließen?
+confirm.exitAppBody	Testo conferma uscita app	L'app verrà chiusa per tutti gli utenti collegati su questo PC.	The app will close for all users on this PC.	L’application sera fermée pour tous les utilisateurs de ce PC.	La app se cerrará para todos los usuarios de este PC.	Die App wird für alle Benutzer auf diesem PC geschlossen.
+confirm.exitAppConfirm	CTA conferma uscita app	Chiudi app	Close app	Fermer l’app	Cerrar app	App schließen
+msg.err.userUsernameRequired	Il nome utente è obbligatorio	Il nome utente è obbligatorio.	Username is required	Nom d'utilisateur obligatoire	Nombre de usuario obligatorio	Benutzername ist erforderlich
+msg.err.userPasswordRequired	La password è obbligatoria	La password è obbligatoria.	Password is required	Mot de passe obligatoire	Contraseña obligatoria	Passwort ist erforderlich
+msg.err.userRoleInvalid	Ruolo non valido	Ruolo non valido.	Invalid role	Rôle non valide	Rol inválido	Ungültige Rolle
+msg.err.userDuplicate	Nome utente già in uso	Nome utente già in uso.	Username already in use	Nom d'utilisateur déjà utilisé	Nombre de usuario ya en uso	Benutzername bereits vergeben
+msg.err.userNotFound	Utente non trovato	Utente non trovato.	User not found	Utilisateur introuvable	Usuario no encontrado	Benutzer nicht gefunden
+msg.err.userCannotSelfDeactivate	Non puoi disattivare il tuo account	Non puoi disattivare il tuo account.	You cannot deactivate your own account	Vous ne pouvez pas désactiver votre propre compte	No puedes desactivar tu propia cuenta	Sie können Ihr eigenes Konto nicht deaktivieren
+nav.users	Navigazione: gestione utenti	Utenti	Users	Utilisateurs	Usuarios	Benutzer
+btn.addUser	Pulsante aggiungi utente	Aggiungi utente	Add user	Ajouter un utilisateur	Añadir usuario	Benutzer hinzufügen
+btn.deactivate	Pulsante disattiva	Disattiva	Deactivate	Désactiver	Desactivar	Deaktivieren
+user.displayName	Etichetta nome visualizzato utente	Nome visualizzato	Display name	Nom affiché	Nombre mostrado	Anzeigename
+user.displayNamePlaceholder	Segnaposto nome visualizzato	Es. Mario Rossi	e.g. Mario Rossi	ex. Mario Rossi	ej. Mario Rossi	z.B. Mario Rossi
+user.role	Etichetta ruolo	Ruolo	Role	Rôle	Rol	Rolle
+user.lastLogin	Etichetta ultimo accesso	Ultimo accesso	Last login	Dernière connexion	Último acceso	Letzter Login
+user.newPassword	Etichetta nuova password	Nuova password (lasciare vuoto per non cambiarla)	New password (leave blank to keep unchanged)	Nouveau mot de passe (laisser vide pour ne pas changer)	Nueva contraseña (dejar vacío para no cambiar)	Neues Passwort (leer lassen um unverändert zu lassen)
+user.deactivateTitle	Titolo modale disattiva utente	Disattiva utente	Deactivate user	Désactiver l'utilisateur	Desactivar usuario	Benutzer deaktivieren
+user.deactivateMsg	Messaggio disattiva (parte 1)	L'utente	The user	L'utilisateur	El usuario	Der Benutzer
+user.deactivateMsg2	Messaggio disattiva (parte 2)	verrà disattivato e non potrà più accedere.	will be deactivated and will no longer be able to sign in.	sera désactivé et ne pourra plus se connecter.	será desactivado y ya no podrá iniciar sesión.	wird deaktiviert und kann sich nicht mehr anmelden.
+modal.addUser	Titolo modale nuovo utente	Nuovo utente	New user	Nouvel utilisateur	Nuevo usuario	Neuer Benutzer
+modal.editUser	Titolo modale modifica utente	Modifica utente	Edit user	Modifier l'utilisateur	Editar usuario	Benutzer bearbeiten
+users.empty	Messaggio nessun utente	Nessun utente.	No users.	Aucun utilisateur.	No hay usuarios.	Keine Benutzer.
+toast.userCreated	Toast utente creato	Utente creato.	User created.	Utilisateur créé.	Usuario creado.	Benutzer erstellt.
+toast.userSaved	Toast utente aggiornato	Utente aggiornato.	User updated.	Utilisateur mis à jour.	Usuario actualizado.	Benutzer aktualisiert.
+toast.userDeactivated	Toast utente disattivato	Utente disattivato.	User deactivated.	Utilisateur désactivé.	Usuario desactivado.	Benutzer deaktiviert.
+msg.err.userEmailDuplicate	Email già in uso	Indirizzo email già in uso.	Email address already in use.	Adresse email déjà utilisée.	La dirección de correo ya está en uso.	E-Mail-Adresse bereits vergeben.
+msg.err.emailInvalid	Email non valida	Indirizzo email non valido.	Invalid email address.	Adresse email invalide.	Dirección de correo no válida.	Ungültige E-Mail-Adresse.
+msg.err.emailAlreadyRegistered	Email già registrata	Questa email è già registrata.	This email is already registered.	Cette adresse email est déjà enregistrée.	Esta dirección de correo ya está registrada.	Diese E-Mail-Adresse ist bereits registriert.
+msg.err.otpInvalid	OTP non valido o scaduto	Codice non valido o scaduto.	Invalid or expired code.	Code invalide ou expiré.	Código no válido o caducado.	Ungültiger oder abgelaufener Code.
+msg.err.otpAlreadyUsed	OTP già usato	Codice già utilizzato. Richiedine uno nuovo.	Code already used. Request a new one.	Code déjà utilisé. Demandez-en un nouveau.	Código ya utilizado. Solicite uno nuevo.	Code bereits verwendet. Fordern Sie einen neuen an.
+msg.err.otpTooMany	Troppi tentativi OTP	Troppi tentativi. Riprova fra qualche minuto.	Too many attempts. Try again in a few minutes.	Trop de tentatives. Réessayez dans quelques minutes.	Demasiados intentos. Inténtelo de nuevo en unos minutos.	Zu viele Versuche. Versuchen Sie es in einigen Minuten erneut.
+msg.err.otpSendFailed	Invio OTP fallito	Invio del codice non riuscito. Riprova.	Failed to send the code. Try again.	Échec de l'envoi du code. Réessayez.	No se pudo enviar el código. Inténtelo de nuevo.	Fehler beim Senden des Codes. Versuchen Sie es erneut.
+msg.err.otpNotRequired	OTP non richiesto	La verifica email non è richiesta in questa installazione.	Email verification is not required in this installation.	La vérification par email n'est pas requise dans cette installation.	La verificación por correo no es necesaria en esta instalación.	Die E-Mail-Verifizierung ist bei dieser Installation nicht erforderlich.
+login.noAccount	Non hai un account?	Non hai un account?	Don't have an account?	Vous n'avez pas de compte ?	¿No tienes una cuenta?	Kein Konto?
+login.register	Pulsante registrati	Registrati	Register	S'inscrire	Registrarse	Registrieren
+login.inactive	Account inattivo	Account in attesa di approvazione o disattivato. Contatta un amministratore.	Account pending approval or disabled. Contact an administrator.	Compte en attente d'approbation ou désactivé. Contactez un administrateur.	Cuenta pendiente de aprobación o desactivada. Contacte a un administrador.	Konto wartet auf Genehmigung oder ist deaktiviert. Kontaktieren Sie einen Administrator.
+register.title	Titolo registrazione	Registrazione	Registration	Inscription	Registro	Registrierung
+register.subtitle	Sottotitolo registrazione	Verifica la tua email e crea l'account di gestione turni.	Verify your email and create the shift management account.	Vérifiez votre email et créez le compte de gestion des horaires.	Verifique su correo y cree la cuenta de gestión de turnos.	Bestätigen Sie Ihre E-Mail und erstellen Sie das Schichtverwaltungskonto.
+register.email	Etichetta email	Indirizzo email	Email address	Adresse email	Dirección de correo	E-Mail-Adresse
+register.sendOtp	Pulsante invia codice	Invia codice	Send code	Envoyer le code	Enviar código	Code senden
+register.otp	Etichetta codice	Codice di verifica	Verification code	Code de vérification	Código de verificación	Verifizierungscode
+register.otpSentTo	Testo codice inviato a	Inviato a	Sent to	Envoyé à	Enviado a	Gesendet an
+register.verifyOtp	Pulsante verifica codice	Verifica codice	Verify code	Vérifier le code	Verificar código	Code überprüfen
+register.passwordHint	Suggerimento password	Almeno 8 caratteri.	At least 8 characters.	Au moins 8 caractères.	Al menos 8 caracteres.	Mindestens 8 Zeichen.
+register.complete	Pulsante crea account	Crea account	Create account	Créer le compte	Crear cuenta	Konto erstellen
+register.doneTitle	Titolo registrazione inviata	Registrazione inviata!	Registration submitted!	Inscription envoyée !	¡Registro enviado!	Registrierung übermittelt!
+register.doneBody	Testo attesa approvazione	Un amministratore deve approvare il tuo account prima che tu possa accedere. Riceverai conferma al momento dell'attivazione.	An administrator must approve your account before you can sign in. You will be notified upon activation.	Un administrateur doit approuver votre compte avant que vous puissiez vous connecter. Vous serez prévenu lors de l'activation.	Un administrador debe aprobar su cuenta antes de que pueda iniciar sesión. Se le notificará al activarse.	Ein Administrator muss Ihr Konto genehmigen, bevor Sie sich anmelden können. Sie werden bei der Aktivierung benachrichtigt.
+register.backToLogin	Torna al login	Torna al login	Back to login	Retour à la connexion	Volver al inicio de sesión	Zurück zur Anmeldung
+register.back	Pulsante indietro	Indietro	Back	Retour	Atrás	Zurück
+register.otpSent	Toast codice inviato	Codice inviato. Controlla la tua email.	Code sent. Check your email.	Code envoyé. Vérifiez votre email.	Código enviado. Revise su correo.	Code gesendet. Prüfen Sie Ihre E-Mail.
+register.errorGeneric	Errore generico registrazione	Errore durante l'operazione.	An error occurred.	Une erreur est survenue.	Se produjo un error.	Ein Fehler ist aufgetreten.
+user.email	Etichetta email utente	Email	Email	Email	Correo	E-Mail
+user.pending	Badge in attesa	In attesa	Pending	En attente	Pendiente	Ausstehend
+user.activateTitle	Titolo modale approva utente	Approva utente	Approve user	Approuver l'utilisateur	Aprobar usuario	Benutzer genehmigen
+user.activateMsg	Messaggio approva (parte 1)	L'utente	The user	L'utilisateur	El usuario	Der Benutzer
+user.activateMsg2	Messaggio approva (parte 2)	verrà attivato e potrà accedere all'applicazione.	will be activated and will be able to sign in.	sera activé et pourra se connecter.	será activado y podrá iniciar sesión.	wird aktiviert und kann sich anmelden.
+btn.approve	Pulsante approva	Approva / attiva	Approve / activate	Approuver / activer	Aprobar / activar	Genehmigen / aktivieren
+toast.userActivated	Toast utente attivato	Utente attivato.	User activated.	Utilisateur activé.	Usuario activado.	Benutzer aktiviert.
+msg.err.userLastAdmin	Ultimo amministratore	Non puoi rimuovere l'ultimo amministratore attivo.	You cannot remove the last active administrator.	Vous ne pouvez pas supprimer le dernier administrateur actif.	No puede eliminar al último administrador activo.	Sie können den letzten aktiven Administrator nicht entfernen.
+msg.err.accountInactive	Account inattivo	Account in attesa di approvazione o disattivato.	Account pending approval or disabled.	Compte en attente d'approbation ou désactivé.	Cuenta pendiente de aprobación o desactivada.	Konto wartet auf Genehmigung oder ist deaktiviert.
+register.firstAdminTitle	Titolo crea amministratore iniziale	Crea l'amministratore iniziale	Create the initial administrator	Créer l'administrateur initial	Crear el administrador inicial	Ersten Administrator erstellen
+register.firstAdminSubtitle	Sottotitolo primo amministratore	Sei la prima persona a usare l'applicazione: verifica la tua email e crea l'account amministratore.	You are the first person to use the application: verify your email and create the administrator account.	Vous êtes la première personne à utiliser l'application : vérifiez votre email et créez le compte administrateur.	Eres la primera persona en usar la aplicación: verifica tu correo y crea la cuenta de administrador.	Sie sind die erste Person, die die Anwendung nutzt: Bestätigen Sie Ihre E-Mail und erstellen Sie das Administratorkonto.
+register.firstAdminDoneTitle	Titolo amministratore creato	Amministratore creato!	Administrator created!	Administrateur créé !	¡Administrador creado!	Administrator erstellt!
+register.firstAdminDoneBody	Testo amministratore creato	Il tuo account amministratore è attivo: puoi accedere subito.	Your administrator account is active: you can sign in now.	Votre compte administrateur est actif : vous pouvez vous connecter dès maintenant.	Su cuenta de administrador está activa: puede iniciar sesión ahora.	Ihr Administratorkonto ist aktiv: Sie können sich jetzt anmelden.
+register.firstAdminStandaloneSubtitle	Sottotitolo primo admin standalone	Sei la prima persona a usare l'applicazione: crea le credenziali dell'account amministratore.	You are the first person to use the application: create the administrator account credentials.	Vous êtes la première personne à utiliser l'application : créez les identifiants du compte administrateur.	Eres la primera persona en usar la aplicación: crea las credenciales de la cuenta de administrador.	Sie sind die erste Person, die die Anwendung nutzt: Erstellen Sie die Anmeldedaten des Administratorkontos.
+register.standaloneSubtitle	Sottotitolo registrazione standalone	Crea le credenziali del tuo account di gestione turni.	Create the credentials for your shift management account.	Créez les identifiants de votre compte de gestion des horaires.	Cree las credenciales de su cuenta de gestión de turnos.	Erstellen Sie die Anmeldedaten für Ihr Schichtverwaltungskonto.
+register.stepEmail	Passo 1 stepper	Email	Email	Email	Correo	E-Mail
+register.stepOtp	Passo 2 stepper	Codice	Code	Code	Código	Code
+register.stepProfile	Passo 3 stepper	Profilo	Profile	Profil	Perfil	Profil
+register.emailHint	Suggerimento email	Ti invieremo un codice di verifica a questo indirizzo.	We will send you a verification code to this address.	Nous vous enverrons un code de vérification à cette adresse.	Le enviaremos un código de verificación a esta dirección.	Wir senden Ihnen einen Verifizierungscode an diese Adresse.
+register.resendIn	Testo ri-invio countdown	ri-invio tra	resend in	renvoi dans	reenvío en	erneuter Versand in
+register.resendOtp	Pulsante reinvia codice	Reinvia il codice	Resend the code	Renvoyer le code	Reenviar el código	Code erneut senden
+register.cambiaEmail	Pulsante cambia email	Cambia email	Change email	Changer d'email	Cambiar correo	E-Mail ändern
+register.usernameHint	Validazione username	3-64 caratteri: lettere, numeri, punti, trattini o underscore.	3-64 characters: letters, numbers, dots, dashes or underscores.	3 à 64 caractères : lettres, chiffres, points, tirets ou tirets bas.	3-64 caracteres: letras, números, puntos, guiones o guiones bajos.	3-64 Zeichen: Buchstaben, Zahlen, Punkte, Bindestriche oder Unterstriche.
+register.passwordStrength	Etichetta robustezza	Robustezza	Strength	Robustesse	Fortaleza	Stärke
+register.pwWeak	Forza debole	Debole	Weak	Faible	Débil	Schwach
+register.pwFair	Forza discreta	Discreta	Fair	Moyenne	Aceptable	Mittelmäßig
+register.pwGood	Forza buona	Buona	Good	Bonne	Buena	Gut
+register.pwStrong	Forza forte	Forte	Strong	Forte	Fuerte	Stark
+register.securityNote	Nota sicurezza footer	La tua email viene verificata con un codice monouso. Nessun dato viene condiviso.	Your email is verified with a one-time code. No data is shared.	Votre email est vérifié avec un code à usage unique. Aucune donnée n'est partagée.	Su correo se verifica con un código de un solo uso. No se comparte ningún dato.	Ihre E-Mail wird mit einem Einmalcode verifiziert. Es werden keine Daten geteilt.
+config.skills.listHint	Suggerimento tabella Competenze	Le competenze sono contestuali alla struttura. Usa la matita per gestirle.	Skills belong to each structure. Use the pencil to manage them.	Les compétences sont propres à chaque structure. Utilisez le crayon pour les gérer.	Las competencias son propias de cada estructura. Usa el lápiz para gestionarlas.	Die Kompetenzen gehören zur jeweiligen Struktur. Zum Verwalten das Stift-Symbol verwenden.
+config.skills.col.count	Colonna numero competenze	Competenze	Skills	Compétences	Competencias	Kompetenzen
+config.skills.backToStructures	Ritorno all'elenco aziende dalle competenze	Torna alle aziende	Back to companies	Retour aux sociétés	Volver a las empresas	Zurück zu den Firmen
+update.title	Titolo avviso nuova versione	È disponibile una nuova versione	A new version is available	Une nouvelle version est disponible	Hay una nueva versión disponible	Eine neue Version ist verfügbar
+update.body	Corpo avviso nuova versione	La versione installata è la {{current}}, mentre l'ultima pubblicata è la {{latest}}.	The installed version is {{current}}, while the latest published one is {{latest}}.	La version installée est la {{current}}, tandis que la dernière publiée est la {{latest}}.	La versión instalada es la {{current}}, mientras que la última publicada es la {{latest}}.	Die installierte Version ist {{current}}, die zuletzt veröffentlichte ist {{latest}}.
+update.howTo	Istruzioni per aggiornare	Per aggiornare: scarica il nuovo installatore, disinstalla la versione attuale e installa quella nuova. I tuoi dati — database, backup e configurazione — restano dove sono e li ritrovi al primo avvio.	To update: download the new installer, uninstall the current version and install the new one. Your data — database, backups and settings — stays where it is and is there at first start.	Pour mettre à jour : téléchargez le nouvel installateur, désinstallez la version actuelle et installez la nouvelle. Vos données — base, sauvegardes et configuration — restent en place.	Para actualizar: descarga el nuevo instalador, desinstala la versión actual e instala la nueva. Tus datos — base de datos, copias y configuración — permanecen donde están.	Zum Aktualisieren: das neue Installationsprogramm herunterladen, die aktuelle Version deinstallieren und die neue installieren. Ihre Daten — Datenbank, Sicherungen und Konfiguration — bleiben erhalten.
+update.dismissForever	Non mostrare piu per questa versione	Non ricordarmelo per questa versione	Don't remind me for this version	Ne plus me le rappeler pour cette version	No recordármelo para esta versión	Für diese Version nicht mehr erinnern
+update.later	Rimanda avviso versione	Più tardi	Later	Plus tard	Más tarde	Später
+update.download	Vai al download della nuova versione	Vai al download	Go to download	Aller au téléchargement	Ir a la descarga	Zum Download
+toast.shiftsChanged	Toast turni modificati dopo il calcolo	I turni sono stati modificati dopo il calcolo: niente è stato salvato. Ricarica e rilancia il calcolo.	The shifts changed after the solve: nothing was saved. Reload and run the solve again.	Les créneaux ont changé après le calcul : rien n'a été enregistré. Rechargez et relancez le calcul.	Los turnos cambiaron después del cálculo: no se guardó nada. Recarga y vuelve a lanzar el cálculo.	Die Schichten wurden nach der Berechnung geändert: nichts wurde gespeichert. Neu laden und Berechnung erneut starten.
