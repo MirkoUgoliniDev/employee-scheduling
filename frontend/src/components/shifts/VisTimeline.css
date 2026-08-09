@@ -1,0 +1,76 @@
+.vis-time-axis .vis-text.vis-minor {
+  font-weight: 700;
+}
+
+/* ── Professional tooltip ───────────────────────────────────────────────────
+   vis-timeline injects the item's `title` field as innerHTML inside
+   `.vis-tooltip`. Neutralize the default style (yellowish background, border,
+   harsh shadow) by making the container transparent, then draw a modern dark
+   card (`.tl-tip`) with content built by tipCard(). */
+div.vis-tooltip {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  white-space: normal !important;
+  font-family: inherit !important;
+  color: inherit !important;
+  overflow: visible !important;
+  z-index: 1000;
+}
+
+.tl-tip {
+  min-width: 110px;
+  max-width: 260px;
+  padding: 8px 11px 9px;
+  border-radius: 10px;
+  border-left: 3px solid #34d399;
+  background: #1f2937;
+  color: #f3f4f6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30), 0 2px 6px rgba(0, 0, 0, 0.22);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.tl-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tl-tip-ico {
+  display: inline-flex;
+  opacity: 0.95;
+}
+
+.tl-tip-title {
+  font-weight: 600;
+  font-size: 0.83rem;
+  letter-spacing: 0.1px;
+}
+
+.tl-tip-sub {
+  margin-top: 2px;
+  font-size: 0.71rem;
+  opacity: 0.62;
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-tip-badges {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tl-tip-badge {
+  font-size: 0.66rem;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #e5e7eb;
+  white-space: nowrap;
+}

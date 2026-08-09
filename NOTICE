@@ -1,0 +1,65 @@
+Employee Scheduling
+Copyright 2024-2026 Mirko Ugolini
+
+This product includes software developed as part of the Timefold Quickstarts
+project (https://github.com/TimefoldAI/timefold-quickstarts), specifically the
+"employee-scheduling" quickstart, licensed under the Apache License 2.0.
+
+This work is a derivative of that quickstart and has been substantially
+modified. Changes include, among others: a React/TypeScript front end, a
+persistence layer based on Hibernate ORM with support for both SQLite and
+PostgreSQL, user authentication and registration, backup and restore, PDF and
+e-mail reporting, multi-structure and multi-language support, and Windows and
+Linux installers.
+
+Timefold Quickstarts was forked on 20 April 2023 from OptaPlanner Quickstarts,
+Copyright Red Hat, Inc. and contributors, also licensed under the Apache
+License 2.0.
+
+--------------------------------------------------------------------------------
+THIRD-PARTY COMPONENTS
+--------------------------------------------------------------------------------
+
+This product depends on, and redistributes, the following third-party
+components. Each remains under its own license.
+
+Apache License 2.0
+  Timefold Solver (Community Edition)   https://github.com/TimefoldAI/timefold-solver
+  Quarkus                               https://quarkus.io
+  Hibernate ORM                         https://hibernate.org
+  Flyway                                https://flywaydb.org
+  vis-timeline, vis-data                https://visjs.org      (Apache-2.0 OR MIT)
+
+MIT License
+  React, React DOM                      https://react.dev
+  React Router                          https://reactrouter.com
+  React Bootstrap, Bootstrap            https://getbootstrap.com
+  i18next, react-i18next                https://www.i18next.com
+  Zustand, react-hot-toast, jsPDF, Moment.js
+
+Mozilla Public License 2.0 (or Apache-2.0)
+  DOMPurify                             https://github.com/cure53/DOMPurify
+
+Font Awesome Free                       https://fontawesome.com
+  Icons:  CC BY 4.0 License   (https://creativecommons.org/licenses/by/4.0/)
+  Fonts:  SIL OFL 1.1 License (https://scripts.sil.org/OFL)
+  Code:   MIT License
+
+  ATTRIBUTION REQUIRED. The CC BY 4.0 license covering the Font Awesome icons
+  requires that credit be given to Font Awesome. This NOTICE file, shipped and
+  displayed with the application, serves that purpose; if the icons are reused
+  elsewhere, the attribution must travel with them.
+
+--------------------------------------------------------------------------------
+
+SQLite (https://sqlite.org) is in the public domain.
+
+PostgreSQL (https://www.postgresql.org) is distributed under the PostgreSQL
+License, a liberal Open Source license similar to BSD or MIT. It is not
+redistributed with this product: it is installed separately by the operating
+system's package manager.
+
+The OpenJDK runtime bundled in the Windows installer by jpackage is distributed
+under the GNU General Public License version 2 with the Classpath Exception
+(https://openjdk.org/legal/gplv2+ce.html), which permits linking with software
+under other licenses.

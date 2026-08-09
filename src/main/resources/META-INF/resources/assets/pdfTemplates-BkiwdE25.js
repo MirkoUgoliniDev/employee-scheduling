@@ -1,0 +1,1 @@
+import{t as e}from"./client-BREEskyK.js";var t={header_text:``,footer_text:``,logo_data_url:``,primary_color:`#2980B9`},n={get:t=>e.get(`/demo-data/pdf-template?structureId=${t}`),save:(t,n)=>e.put(`/demo-data/pdf-template?structureId=${t}`,n),delete:t=>e.delete(`/demo-data/pdf-template?structureId=${t}`)};export{n,t};

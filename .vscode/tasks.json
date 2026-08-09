@@ -1,0 +1,128 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Packaging: MSI (rebuild)",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\install-windows.ps1",
+        "-Package",
+        "msi"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Quarkus: Dev Mode (SQLite)",
+      "type": "shell",
+      "command": "mvn quarkus:dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Quarkus: Dev Mode (PostgreSQL)",
+      "type": "process",
+      "command": "mvn.cmd",
+      "args": [
+        "quarkus:dev",
+        "-Dquarkus.profile=postgresql"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Quarkus: Dev Mode (Debug, SQLite)",
+      "type": "shell",
+      "command": "mvn quarkus:dev -Dsuspend",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Server: Libera porta 8080",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": [
+        "/d",
+        "/c",
+        "${workspaceFolder}\\scripts\\kill-port.bat",
+        "8080"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "App: Kill EmployeeScheduling",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "Get-Process -Name EmployeeScheduling -ErrorAction SilentlyContinue | Stop-Process -Force"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Build",
+      "type": "shell",
+      "command": "mvn package -DskipTests",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": "$javac"
+    },
+    {
+      "label": "Maven: Test",
+      "type": "shell",
+      "command": "mvn test",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": "$javac"
+    },
+    {
+      "label": "Maven: Clean",
+      "type": "shell",
+      "command": "mvn clean",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

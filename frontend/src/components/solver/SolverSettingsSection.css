@@ -1,0 +1,8 @@
+/* Solver Settings help tooltip: wider than the default (~200px), with left-aligned text
+   to accommodate detailed setting explanations. */
+.solver-help-tooltip .tooltip-inner {
+  max-width: 340px;
+  text-align: left;
+  padding: 8px 10px;
+  line-height: 1.4;
+}

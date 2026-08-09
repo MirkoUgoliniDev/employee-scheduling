@@ -1,0 +1,81 @@
+{
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.5.11-hotspot",
+      "default": true
+    }
+  ],
+  "java.compile.nullAnalysis.mode": "disabled",
+  "editor.formatOnSave": true,
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java"
+  },
+  "statusbar_command.commands": [
+    {
+      "id": "quarkus_dev",
+      "name": "Quarkus SQLite Dev Mode",
+      "text": "$(database) SQLite Dev",
+      "tooltip": "Avvia Quarkus in Dev Mode con SQLite",
+      "alignment": "left",
+      "priority": 100,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "Quarkus: Dev Mode (SQLite)"
+      ]
+    },
+    {
+      "id": "quarkus_dev_postgresql",
+      "name": "Quarkus PostgreSQL Dev Mode",
+      "text": "$(database) PostgreSQL Dev",
+      "tooltip": "Avvia Quarkus in Dev Mode con PostgreSQL",
+      "alignment": "left",
+      "priority": 99,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "Quarkus: Dev Mode (PostgreSQL)"
+      ]
+    },
+    {
+      "id": "package_msi",
+      "name": "Packaging MSI",
+      "text": "$(package) MSI",
+      "tooltip": "Compila frontend/backend e genera l'MSI",
+      "alignment": "left",
+      "priority": 96,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "Packaging: MSI (rebuild)"
+      ]
+    },
+    {
+      "id": "open_app",
+      "name": "Open App",
+      "text": "$(globe) Open App",
+      "tooltip": "Apri l'app su http://localhost:8080",
+      "alignment": "left",
+      "priority": 97,
+      "command": "vscode.open",
+      "arguments": [
+        "http://localhost:8080"
+      ]
+    },
+    {
+      "id": "free_port_8080",
+      "name": "Libera porta 8080",
+      "text": "$(debug-disconnect) Libera 8080",
+      "tooltip": "Termina il processo che occupa la porta 8080",
+      "alignment": "left",
+      "priority": 98,
+      "command": "workbench.action.tasks.runTask",
+      "arguments": [
+        "Server: Libera porta 8080"
+      ]
+    }
+  ],
+  "idf.currentSetup": "C:\\Users\\mirko\\esp\\v5.5.2\\esp-idf",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "microprofile.tools.validation.unknown.excluded": [
+    "quarkus.flyway.connect-retries"
+  ]
+}

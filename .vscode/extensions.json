@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-quarkus",
+    "redhat.vscode-xml",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "dsznajder.es7-react-js-snippets",
+    "formulahendry.auto-rename-tag"
+  ]
+}

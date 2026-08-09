@@ -1,0 +1,65 @@
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+*.swp
+*.swo
+nbproject/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# SQLite transient files
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Database e configurazione DB Browser locali: i dati reali non appartengono
+# al repository pubblico. Lo schema portabile resta in databases/schema.sql.
+databases/*.db
+databases/*.sqbpro
+
+# Backup automatici del DB
+databases/backups/
+
+# Snapshot manuali del DB e impostazioni backup scritte a runtime
+databases/*_pre-*.db
+databases/backup-settings.properties
+databases/app.log*
+
+# Environment (credenziali locali, non committare)
+.env
+.runtime-backups/
+raspberry-setup.zip
+raspberry-setup.tar.gz
+.public-export/
+
+# Claude Code
+.claude/
+
+dist/
+databases/standalone-test.db
+databases/*pre-standalone*
+
+employee-scheduling-datalarge_data.db
+
+# Cache di Python del wizard di installazione
+__pycache__/
+*.pyc
+
+# Configurazione locale degli assistenti di codice: e' roba della macchina di
+# chi sviluppa, non del progetto. .kilo in particolare contiene migliaia di file
+# di cache e senza questa regola un "git add -A" distratto se li porterebbe tutti
+# dentro.
+.kilo/
+.agents/
+
+# Diario di lavoro personale: utile a chi sviluppa, rumore per chi legge il
+# repository. Resta sul disco, fuori dal controllo di versione.
+MEMORY.md

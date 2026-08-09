@@ -1,0 +1,25 @@
+.localization-controls {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 8px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.translation-keys-switch {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.translation-keys-switch .form-check-input {
+  width: 2.6em;
+  height: 1.3em;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.translation-keys-switch .form-check-label {
+  cursor: pointer;
+}

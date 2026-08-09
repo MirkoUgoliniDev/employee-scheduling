@@ -1,0 +1,26 @@
+/**
+ * @file RichTextEditor.css
+ * @brief Styles for the lightweight HTML editor (toolbar + editable area).
+ */
+
+.rte {
+  background: #fff;
+}
+
+.rte-toolbar {
+  background: #f8f9fa;
+}
+
+.rte-area {
+  outline: none;
+  overflow-y: auto;
+}
+
+.rte-area:focus {
+  box-shadow: inset 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.rte-source {
+  resize: vertical;
+  font-size: 0.85em;
+}

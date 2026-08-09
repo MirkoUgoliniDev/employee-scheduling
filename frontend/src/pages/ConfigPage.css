@@ -1,0 +1,45 @@
+.config-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.config-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #dee2e6;
+  background: transparent;
+  color: #495057;
+  font-weight: 600;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.config-sidebar-item:last-child {
+  border-bottom: 0;
+}
+
+.config-sidebar-item:hover {
+  background: #e9ecef;
+  color: #212529;
+}
+
+.config-sidebar-item.active {
+  box-shadow: inset 4px 0 0 #343a40;
+  background: #fff;
+  color: #212529;
+}
+
+.config-sidebar-item:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid rgba(73, 80, 87, 0.25);
+  outline-offset: -3px;
+}

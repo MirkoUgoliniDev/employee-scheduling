@@ -1,0 +1,25 @@
+# Gli script di shell devono avere fine riga Unix anche quando il repository
+# viene usato da Windows. Con i terminatori CRLF la prima riga diventa
+# "#!/usr/bin/env bash\r" e Linux risponde "bad interpreter": lo script non
+# parte, e il messaggio non lascia capire il perche'.
+*.sh text eol=lf
+
+# Stessa ragione per il wizard: wizard.py e' eseguibile e con i terminatori
+# Windows lo shebang diventerebbe inservibile lanciandolo come ./wizard.py.
+*.py text eol=lf
+
+# Gli script PowerShell restano con fine riga Windows, dove vengono eseguiti.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+# I file batch vanno riposizionati per offset di byte da cmd.exe: con i
+# terminatori Unix i salti (goto, call :etichetta) finiscono nel posto sbagliato.
+*.bat text eol=crlf
+
+# Binari: nessuna conversione e nessun tentativo di fondere le differenze.
+*.db binary
+*.dump binary
+*.msi binary
+*.ico binary
+*.png binary
+*.jpg binary
+*.pdf binary
