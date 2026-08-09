@@ -49,6 +49,8 @@ jobs:
             release/raspberry-installer/scripts/install-linux.sh
           install -m 755 scripts/uninstall-linux.sh \
             release/raspberry-installer/scripts/uninstall-linux.sh
+          install -m 755 scripts/test-smtp.py \
+            release/raspberry-installer/scripts/test-smtp.py
           tar -C release/raspberry-installer -czf \
             release/employee-scheduling-raspberry-installer.tar.gz scripts
           rm -rf release/raspberry-installer
