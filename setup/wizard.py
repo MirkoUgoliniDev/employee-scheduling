@@ -61,11 +61,15 @@ def parse_args(argv=None):
     parser.add_argument("--data-dir", default=None,
                         help=f"dati, backup e database (predefinito: {DATA_DIR})")
     parser.add_argument("--web-port", type=int, default=WEB_PORT)
+    parser.add_argument("--web-host", default="127.0.0.1",
+                        help="indirizzo del wizard (predefinito: solo localhost)")
     parser.add_argument("--smtp-host", default="")
     parser.add_argument("--smtp-port", type=int, default=587)
     parser.add_argument("--smtp-user", default="")
     parser.add_argument("--smtp-pass", default="")
     parser.add_argument("--smtp-from", default="")
+    parser.add_argument("--demo-data", action="store_const", const=True, default=None,
+                        help="carica il dataset dimostrativo al primo avvio")
     parser.add_argument("--yes", "-y", action="store_true",
                         help="non chiedere conferma (per l'automazione)")
     return parser.parse_args(argv)
@@ -91,6 +95,8 @@ def resolve_existing() -> dict:
                 found["data_dir"] = value
             elif key == "QUARKUS_HTTP_PORT" and value.isdigit():
                 found["port"] = int(value)
+            elif key == "APP_DEMO_DATA":
+                found["demo_data"] = value.lower() in ("true", "yes", "1")
     except OSError:
         pass  # no previous installation: use defaults
     return found
@@ -113,6 +119,8 @@ def config_from_args(args) -> dict:
         "smtp_user": args.smtp_user,
         "smtp_pass": args.smtp_pass,
         "smtp_from": args.smtp_from,
+        "demo_data": (args.demo_data if args.demo_data is not None
+                      else existing.get("demo_data", False)),
     }
 
 
@@ -263,7 +271,8 @@ def main(argv=None) -> int:
         steps = build_steps()
         if args.web:
             from webui import run_webui
-            return run_webui(steps, runner, sysinfo, config, port=args.web_port)
+            return run_webui(steps, runner, sysinfo, config, port=args.web_port,
+                             host=args.web_host)
         return run_tui(steps, runner, sysinfo, config, assume_yes=args.yes)
     except KeyboardInterrupt:
         get_abort_event().set()

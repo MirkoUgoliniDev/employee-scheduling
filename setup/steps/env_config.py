@@ -78,6 +78,7 @@ class EnvConfigStep(Step):
             f"APP_DATA_DIR={data_dir}",
             f"AUTH_SESSION_KEY={session_key}",
             f"BACKUP_ADMIN_TOKEN={backup_token}",
+            f"APP_DEMO_DATA={'true' if config.get('demo_data') else 'false'}",
         ]
 
         if engine == "postgresql":
@@ -98,10 +99,10 @@ class EnvConfigStep(Step):
         smtp_host = config.get("smtp_host") or existing.get("QUARKUS_MAILER_HOST", "")
         if smtp_host and not config.get("smtp_host"):
             runner.log("    configurazione email ripresa dall'installazione esistente")
-            config.setdefault("smtp_user", existing.get("QUARKUS_MAILER_USERNAME", ""))
-            config.setdefault("smtp_pass", existing.get("QUARKUS_MAILER_PASSWORD", ""))
-            config.setdefault("smtp_port", existing.get("QUARKUS_MAILER_PORT", 587))
-            config.setdefault("smtp_from", existing.get("QUARKUS_MAILER_FROM", ""))
+            config["smtp_user"] = existing.get("QUARKUS_MAILER_USERNAME", "")
+            config["smtp_pass"] = existing.get("QUARKUS_MAILER_PASSWORD", "")
+            config["smtp_port"] = existing.get("QUARKUS_MAILER_PORT", 587)
+            config["smtp_from"] = existing.get("QUARKUS_MAILER_FROM", "")
         if smtp_host:
             # Quotes are mandatory: a sender such as "Shifts <shifts@example.com>"
             # contains spaces, and systemd would truncate an unquoted value.

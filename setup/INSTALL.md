@@ -21,9 +21,15 @@ mkdir employee-scheduling-installer
 tar -xzf employee-scheduling-raspberry-installer.tar.gz -C employee-scheduling-installer
 cd employee-scheduling-installer
 
-# 3. installa PostgreSQL e l'applicazione; il JAR viene scaricato automaticamente
-sudo ./scripts/install-linux.sh --engine postgresql
+# 3. avvia il setup temporaneo; il JAR viene scaricato automaticamente
+sudo ./scripts/start-web-setup.sh
 ```
+
+Il comando mostra un indirizzo completo simile a
+`http://192.168.1.151:8899/?token=...`: aprilo dal PC collegato alla stessa rete
+locale fidata. La chiave cambia a ogni avvio e il server privilegiato si spegne
+automaticamente quando l'installazione termina. Dalla pagina puoi provare
+l'invio SMTP prima di installare e scegliere i dati dimostrativi.
 
 Per un'installazione di test, gli stessi dati dimostrativi portabili possono
 essere caricati sia su PostgreSQL sia su SQLite aggiungendo `--demo-data`:
@@ -36,12 +42,12 @@ L'opzione crea sedi, operatori, specialisti, competenze e turni non assegnati,
 ma non crea utenti, password o configurazioni SMTP. È idempotente e nelle
 installazioni di produzione resta disattivata per impostazione predefinita.
 
-L'archivio contiene soltanto gli script di installazione e disinstallazione. Lo
-script scarica automaticamente da GitHub Releases il JAR compilato per il motore
+L'archivio contiene gli script e il wizard web, ma non il codice applicativo. Il
+launcher scarica automaticamente da GitHub Releases il JAR compilato per il motore
 selezionato. Non servono il repository sorgente, Windows, `scp`, Maven o Node.js
 sul Raspberry.
 
-Per usare il wizard grafico/testuale o un pacchetto compilato manualmente resta
+Per usare il wizard testuale o un pacchetto compilato manualmente resta
 disponibile la modalità avanzata:
 
 ```bash
@@ -49,7 +55,7 @@ sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.2-SNAPSHOT-ru
 ```
 
 > Il wizard manuale richiede l'intera cartella `setup/`, non il solo
-> `wizard.py`. L'installazione consigliata usa invece `install-linux.sh`.
+> `wizard.py`. L'archivio Raspberry ora la include già.
 
 > ### `-Dquarkus.profile` non è opzionale
 >
@@ -85,25 +91,25 @@ sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.2-SNAPSHOT-ru
 | `sudo python3 setup/wizard.py --tui --jar …` | Installazione da terminale. È la modalità predefinita quando non si passa `--web`. |
 | `sudo python3 setup/wizard.py --web --jar …` | Interfaccia da browser, con i passi che avanzano in tempo reale. |
 
-### La modalità web richiede un tunnel SSH
+### Modalità web locale o tramite tunnel SSH
 
-Il wizard ascolta **solo sulla macchina stessa**, sulla porta `8899`. Il terminale
-stampa il comando esatto; dal tuo PC:
+Il launcher consigliato espone temporaneamente la porta `8899` sulla rete locale
+e protegge ogni richiesta con una chiave casuale presente nell'URL. Usalo solo su
+una rete fidata e non condividere l'indirizzo. Per mantenere il wizard accessibile
+**solo sulla macchina stessa**, avvialo con `--local-only`; dal tuo PC:
 
 ```bash
 ssh -L 8899:localhost:8899 pi@raspberrypi.local
 # poi apri http://localhost:8899
 ```
 
-Non è una complicazione gratuita. Quella pagina esegue comandi **come root e non
-ha password**: esposta sulla rete, chiunque — compreso chi è collegato al Wi-Fi
-ospiti — potrebbe reinstallare o riconfigurare la macchina. Al Raspberry ci si
-arriva già via SSH, quindi il tunnel non aggiunge un passaggio, lo sposta.
+La pagina esegue comandi **come root**. La chiave temporanea impedisce richieste
+casuali, ma il traffico resta HTTP: su una rete non fidata usa sempre il tunnel.
 
 Nella pagina il form raccoglie motore dati, porta, percorso del pacchetto,
-cartella dati e le tre voci SMTP principali (server, utente, password). Le
-opzioni `--smtp-port` e `--smtp-from` esistono **solo** da riga di comando: dal
-browser valgono i predefiniti, cioè porta 587 e mittente uguale all'utente SMTP.
+cartella dati, dati dimostrativi e configurazione SMTP completa. Il pulsante di
+prova verifica DNS, connessione, STARTTLS, autenticazione e invio prima di
+modificare il servizio.
 
 Lanciando `--web` insieme a `--dry-run`, la pagina **non può** avviare
 un'installazione vera: entrambi i pulsanti restano in simulazione.

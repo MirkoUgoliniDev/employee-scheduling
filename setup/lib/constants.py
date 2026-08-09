@@ -8,7 +8,7 @@ service looking for data where nobody wrote it.
 
 from pathlib import Path
 
-WIZARD_VERSION = "1.0"
+WIZARD_VERSION = "1.1"
 
 # ── Installation identity ───────────────────────────────────────────────────
 SERVICE_NAME = "employee-scheduling"

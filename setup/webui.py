@@ -11,8 +11,14 @@ circular dependency. ``http.server`` plus server-sent events are sufficient.
 import json
 import os
 import queue
+import secrets
+import smtplib
+import ssl
 import threading
+from email.message import EmailMessage
+from email.utils import parseaddr
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit
 
 from lib.constants import SERVICE_NAME, WIZARD_VERSION
 from lib.runner import get_abort_event
@@ -72,8 +78,9 @@ PAGE = """<!doctype html>
  .DONE .ico{color:var(--ok)} .FAILED .ico{color:var(--err)}
  .RUNNING .ico{color:var(--run)} .SKIPPED .ico{color:var(--mut)}
  label{display:block;margin:10px 0 4px;font-size:13px;color:var(--mut)}
- input,select{width:100%;padding:9px 10px;background:#0e1017;color:var(--fg);
-   border:1px solid var(--line);border-radius:7px;font-size:14px}
+  input,select{width:100%;padding:9px 10px;background:#0e1017;color:var(--fg);
+    border:1px solid var(--line);border-radius:7px;font-size:14px}
+  input[type=checkbox]{width:auto;margin-right:7px}
  .row{display:flex;gap:12px;flex-wrap:wrap} .row>div{flex:1 1 160px}
  button{margin-top:16px;padding:11px 18px;background:var(--acc);color:#fff;border:0;
    border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
@@ -98,18 +105,32 @@ PAGE = """<!doctype html>
   <input id="jar" value="__JAR__" placeholder="/home/pi/employee-scheduling-runner.jar">
   <label>Cartella dati, backup e registro</label>
   <input id="data_dir" value="__DATA__">
-  <div class="row">
-   <div><label>Server SMTP (facoltativo)</label><input id="smtp_host" placeholder="smtp.esempio.it"></div>
-   <div><label>Utente SMTP</label><input id="smtp_user"></div>
-   <div><label>Password SMTP</label><input id="smtp_pass" type="password"></div>
-  </div>
-  <div class="note">Senza SMTP il codice di registrazione compare solo nel registro del servizio.</div>
+   <div class="row">
+    <div><label>Server SMTP (facoltativo)</label><input id="smtp_host" placeholder="smtp-relay.brevo.com"></div>
+    <div><label>Porta SMTP</label><input id="smtp_port" type="number" value="587"></div>
+   </div>
+   <div class="row">
+    <div><label>Utente SMTP</label><input id="smtp_user"></div>
+    <div><label>Password SMTP</label><input id="smtp_pass" type="password"></div>
+   </div>
+   <div class="row">
+    <div><label>Mittente</label><input id="smtp_from" type="email" placeholder="nome@dominio.it"></div>
+    <div><label>Email per il test</label><input id="smtp_recipient" type="email" placeholder="nome@dominio.it"></div>
+   </div>
+   <button id="smtp_test" type="button" style="background:#39405a">Prova invio email</button>
+   <div id="smtp_result" class="note"></div>
+   <div class="note">Senza SMTP il codice di registrazione compare solo nel registro del servizio.</div>
+   <label><input id="demo_data" type="checkbox">Installa i dati dimostrativi</label>
   <button id="go">Installa</button>
   <button id="dry" style="background:#39405a">Simula soltanto</button>
   <pre id="log">In attesa…</pre>
  </div></div>
 <script>
 const STEPS = __STEPS__;
+const TOKEN = __TOKEN__;
+const endpoint = (path)=>path + "?token=" + encodeURIComponent(TOKEN);
+document.getElementById("engine").value=__ENGINE__;
+document.getElementById("demo_data").checked=__DEMO__;
 const ICON = {PENDING:"○",RUNNING:"◎",DONE:"✓",FAILED:"✗",SKIPPED:"⊘"};
 function draw(){
   document.getElementById("steps").innerHTML = STEPS.map((s,i)=>
@@ -121,7 +142,7 @@ draw();
 const logEl = document.getElementById("log");
 function append(t){ if(logEl.textContent==="In attesa…") logEl.textContent="";
   logEl.textContent += t + "\\n"; logEl.scrollTop = logEl.scrollHeight; }
-const es = new EventSource("/stream");
+const es = new EventSource(endpoint("/stream"));
 es.onmessage = (e)=>{ const d = JSON.parse(e.data);
   if(d.type==="log") append(d.line);
   else if(d.type==="step"){ const s=STEPS[d.index]; if(s){s.status=d.status; s.message=d.message||"";} draw(); }
@@ -133,27 +154,85 @@ es.onmessage = (e)=>{ const d = JSON.parse(e.data);
 function start(dry){
   document.getElementById("go").disabled=true; document.getElementById("dry").disabled=true;
   logEl.textContent="";
-  fetch("/start",{method:"POST",headers:{"Content-Type":"application/json"},
+  fetch(endpoint("/start"),{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({dry_run:dry,
       engine:document.getElementById("engine").value,
       port:parseInt(document.getElementById("port").value,10),
       jar:document.getElementById("jar").value,
       data_dir:document.getElementById("data_dir").value,
       smtp_host:document.getElementById("smtp_host").value,
+      smtp_port:parseInt(document.getElementById("smtp_port").value,10),
       smtp_user:document.getElementById("smtp_user").value,
-      smtp_pass:document.getElementById("smtp_pass").value})})
+      smtp_pass:document.getElementById("smtp_pass").value,
+      smtp_from:document.getElementById("smtp_from").value,
+      demo_data:document.getElementById("demo_data").checked})})
    .then(r=>r.json()).then(d=>{ if(d.error){ append("Errore: "+d.error);
       document.getElementById("go").disabled=false; document.getElementById("dry").disabled=false; }});
 }
 document.getElementById("go").onclick =()=>start(false);
 document.getElementById("dry").onclick=()=>start(true);
+document.getElementById("smtp_test").onclick=()=>{
+  const out=document.getElementById("smtp_result");
+  const button=document.getElementById("smtp_test");
+  button.disabled=true; out.textContent="Connessione e invio in corso…";
+  fetch(endpoint("/test-smtp"),{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({smtp_host:document.getElementById("smtp_host").value,
+      smtp_port:parseInt(document.getElementById("smtp_port").value,10),
+      smtp_user:document.getElementById("smtp_user").value,
+      smtp_pass:document.getElementById("smtp_pass").value,
+      smtp_from:document.getElementById("smtp_from").value,
+      smtp_recipient:document.getElementById("smtp_recipient").value})})
+    .then(async r=>({status:r.status,data:await r.json()}))
+    .then(({status,data})=>{out.textContent=data.message||data.error||("Errore HTTP "+status);})
+    .catch(e=>{out.textContent="Test non riuscito: "+e;})
+    .finally(()=>{button.disabled=false;});
+};
 </script></body></html>
 """
 
 
-def run_webui(steps, runner, sysinfo, config, port: int) -> int:
+def _valid_email(value: str) -> bool:
+    address = parseaddr(value or "")[1]
+    return bool(address and "@" in address and address.rsplit("@", 1)[1])
+
+
+def _smtp_test(payload: dict) -> str:
+    host = str(payload.get("smtp_host") or "").strip()
+    username = str(payload.get("smtp_user") or "").strip()
+    password = str(payload.get("smtp_pass") or "")
+    sender = str(payload.get("smtp_from") or username).strip()
+    recipient = str(payload.get("smtp_recipient") or sender).strip()
+    try:
+        port = int(payload.get("smtp_port") or 587)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("La porta SMTP non e' valida.") from exc
+    if not host or not username or not password:
+        raise ValueError("Inserisci server, utente e password SMTP.")
+    if not 1 <= port <= 65535:
+        raise ValueError("La porta SMTP deve essere compresa tra 1 e 65535.")
+    if not _valid_email(sender) or not _valid_email(recipient):
+        raise ValueError("Mittente e destinatario del test devono essere email valide.")
+
+    message = EmailMessage()
+    message["From"] = sender
+    message["To"] = recipient
+    message["Subject"] = "Employee Scheduling SMTP test"
+    message.set_content("SMTP configuration test completed successfully.")
+    context = ssl.create_default_context()
+    with smtplib.SMTP(host, port, timeout=20) as client:
+        client.ehlo()
+        client.starttls(context=context)
+        client.ehlo()
+        client.login(username, password)
+        client.send_message(message)
+    return f"Email di prova accettata dal server SMTP e inviata a {recipient}."
+
+
+def run_webui(steps, runner, sysinfo, config, port: int,
+              host: str = "127.0.0.1") -> int:
     ip = sysinfo.primary_ip() or "localhost"
     forced_dry_run = runner.dry_run
+    token = secrets.token_urlsafe(32) if host not in ("127.0.0.1", "localhost", "::1") else ""
 
     def steps_json():
         return json.dumps([{ "name": s.name, "description": s.description,
@@ -176,10 +255,11 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
             # real installation: someone using --dry-run expects no changes,
             # regardless of which button they press.
             runner.dry_run = forced_dry_run or bool(payload.get("dry_run"))
-            for key in ("engine", "port", "jar", "data_dir",
-                        "smtp_host", "smtp_user", "smtp_pass"):
+            for key in ("engine", "port", "jar", "data_dir", "smtp_host",
+                        "smtp_port", "smtp_user", "smtp_pass", "smtp_from"):
                 if payload.get(key) not in (None, ""):
                     config[key] = payload[key]
+            config["demo_data"] = bool(payload.get("demo_data"))
             # Reset step states: otherwise a second run would show the previous
             # run's green checks and obscure the current run's progress.
             for step in steps:
@@ -198,6 +278,10 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
             _broadcast({"type": "end", "ok": ok,
                         "url": f"http://{ip}:{config.get('port')}"
                                if ok and not runner.dry_run else ""})
+            if ok and not runner.dry_run:
+                # Leave enough time for the final SSE event to reach the page,
+                # then remove the privileged temporary server automatically.
+                threading.Timer(3, server.shutdown).start()
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -209,19 +293,34 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
             self.send_response(code)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Referrer-Policy", "no-referrer")
             self.end_headers()
             self.wfile.write(body)
 
+        def _authorized(self) -> bool:
+            if not token:
+                return True
+            supplied = parse_qs(urlsplit(self.path).query).get("token", [""])[0]
+            return secrets.compare_digest(supplied, token)
+
         def do_GET(self):
-            if self.path in ("/", "/index.html"):
+            if not self._authorized():
+                self._send(403, b"chiave temporanea non valida", "text/plain; charset=utf-8")
+                return
+            path = urlsplit(self.path).path
+            if path in ("/", "/index.html"):
                 page = (PAGE.replace("__STEPS__", steps_json())
+                            .replace("__TOKEN__", json.dumps(token))
+                            .replace("__ENGINE__", json.dumps(config.get("engine", "postgresql")))
+                            .replace("__DEMO__", json.dumps(bool(config.get("demo_data"))))
                             .replace("__VER__", WIZARD_VERSION)
                             .replace("__HOST__", f"{sysinfo.model} · {sysinfo.os_name}")
                             .replace("__PORT__", str(config.get("port", 8080)))
                             .replace("__JAR__", str(config.get("jar", "")))
                             .replace("__DATA__", str(config.get("data_dir", ""))))
                 self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
-            elif self.path == "/stream":
+            elif path == "/stream":
                 self._stream()
             else:
                 self._send(404, b"non trovato", "text/plain; charset=utf-8")
@@ -254,7 +353,12 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
                         _clients.remove(channel)
 
         def do_POST(self):
-            if self.path != "/start":
+            if not self._authorized():
+                self._send(403, json.dumps({"error": "chiave temporanea non valida"}).encode(),
+                           "application/json; charset=utf-8")
+                return
+            path = urlsplit(self.path).path
+            if path not in ("/start", "/test-smtp"):
                 self._send(404, b"non trovato", "text/plain; charset=utf-8")
                 return
             try:
@@ -263,6 +367,15 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
             except (ValueError, json.JSONDecodeError):
                 self._send(400, json.dumps({"error": "richiesta non valida"}).encode(),
                            "application/json; charset=utf-8")
+                return
+            if path == "/test-smtp":
+                try:
+                    message = _smtp_test(payload)
+                    body = {"ok": True, "message": message}
+                    self._send(200, json.dumps(body).encode(), "application/json; charset=utf-8")
+                except (ValueError, OSError, smtplib.SMTPException) as exc:
+                    body = {"ok": False, "error": f"Test SMTP non riuscito: {exc}"}
+                    self._send(400, json.dumps(body).encode(), "application/json; charset=utf-8")
                 return
             # Claim the run here, not inside the thread: between responding to
             # the browser and starting the thread, a second request would
@@ -274,21 +387,25 @@ def run_webui(steps, runner, sysinfo, config, port: int) -> int:
             threading.Thread(target=worker, args=(payload,), daemon=True).start()
             self._send(200, json.dumps({"ok": True}).encode(), "application/json; charset=utf-8")
 
-    # Listen only on loopback. This page runs commands as root and has no
-    # authentication: if exposed to the network, anyone — including guest Wi-Fi
-    # users — could reinstall or reconfigure the machine. The use case loses
-    # nothing because the Raspberry Pi is already reached over SSH; simply ask
-    # SSH to forward the port to the local PC.
-    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    # LAN mode is protected by an unguessable per-process token. It is still
+    # plain HTTP, so it must only be used on a trusted local network and the
+    # process must be stopped as soon as setup is complete.
+    server = ThreadingHTTPServer((host, port), Handler)
     print("")
     print("=" * 54)
-    print("  Wizard in ascolto (solo su questa macchina).")
-    print("")
-    print("  Dal TUO PC apri un tunnel e poi il browser:")
-    print(f"      ssh -L {port}:localhost:{port} {os.environ.get('SUDO_USER', 'pi')}@{ip}")
-    print(f"      http://localhost:{port}")
+    if token:
+        print("  Wizard temporaneo disponibile sulla rete locale.")
+        print("  Apri dal PC questo indirizzo completo:")
+        print(f"      http://{ip}:{port}/?token={token}")
+        print("  Non condividere l'indirizzo: consente di modificare il sistema.")
+    else:
+        print("  Wizard in ascolto (solo su questa macchina).")
+        print("  Dal TUO PC apri un tunnel e poi il browser:")
+        print(f"      ssh -L {port}:localhost:{port} {os.environ.get('SUDO_USER', 'pi')}@{ip}")
+        print(f"      http://localhost:{port}")
     print("=" * 54)
-    print("  Ctrl-C per chiudere.")
+    print("  Il wizard si chiude automaticamente dopo l'installazione.")
+    print("  Ctrl-C per chiuderlo prima.")
     print("")
     try:
         server.serve_forever()

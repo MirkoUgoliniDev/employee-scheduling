@@ -162,6 +162,18 @@ env_value() {
     value="${value#\"}"; value="${value%\"}"
     printf '%s' "$value"
 }
+
+# Encode a value for systemd EnvironmentFile quoted syntax. Backslashes and
+# quotes must be escaped; line breaks are replaced so one value cannot inject a
+# second environment variable or systemd directive.
+env_quote() {
+    local value="$1"
+    value="${value//$'\n'/ }"
+    value="${value//$'\r'/ }"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    printf '"%s"' "$value"
+}
 if [ -z "$SMTP_HOST" ] && [ -f "$ENV_FILE" ]; then
     SMTP_HOST="$(env_value QUARKUS_MAILER_HOST)"
     if [ -n "$SMTP_HOST" ]; then
@@ -542,11 +554,11 @@ umask 077
         # Quotes are mandatory: a sender such as "Shifts <shifts@example.com>"
         # contains spaces, and systemd would truncate an unquoted value.
         echo "QUARKUS_MAILER_MOCK=false"
-        echo "QUARKUS_MAILER_HOST=\"${SMTP_HOST}\""
+        printf 'QUARKUS_MAILER_HOST=%s\n' "$(env_quote "$SMTP_HOST")"
         echo "QUARKUS_MAILER_PORT=${SMTP_PORT}"
-        echo "QUARKUS_MAILER_USERNAME=\"${SMTP_USER}\""
-        echo "QUARKUS_MAILER_PASSWORD=\"${SMTP_PASS}\""
-        echo "QUARKUS_MAILER_FROM=\"${SMTP_FROM:-$SMTP_USER}\""
+        printf 'QUARKUS_MAILER_USERNAME=%s\n' "$(env_quote "$SMTP_USER")"
+        printf 'QUARKUS_MAILER_PASSWORD=%s\n' "$(env_quote "$SMTP_PASS")"
+        printf 'QUARKUS_MAILER_FROM=%s\n' "$(env_quote "${SMTP_FROM:-$SMTP_USER}")"
         echo "QUARKUS_MAILER_START_TLS=REQUIRED"
     else
         echo "QUARKUS_MAILER_MOCK=true"

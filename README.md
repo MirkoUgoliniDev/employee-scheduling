@@ -311,8 +311,12 @@ curl -fLO https://github.com/MirkoUgoliniDev/employee-scheduling/releases/latest
 mkdir employee-scheduling-installer
 tar -xzf employee-scheduling-raspberry-installer.tar.gz -C employee-scheduling-installer
 cd employee-scheduling-installer
-sudo ./scripts/install-linux.sh --engine postgresql
+sudo ./scripts/start-web-setup.sh
 ```
+
+The last command downloads the latest PostgreSQL package and prints a temporary, token-protected
+URL. Open it from a browser on the same trusted LAN, test SMTP delivery, choose whether to load
+sample data, and start installation. The privileged setup server stops automatically afterward.
 
 For an isolated test installation, add `--demo-data`. It creates the same portable sample
 structure, locations, staff, skills and unassigned shifts on PostgreSQL and SQLite. The option is
@@ -322,8 +326,8 @@ idempotent, never creates users or credentials, and is disabled by default for p
 sudo ./scripts/install-linux.sh --engine postgresql --demo-data
 ```
 
-The small archive contains only the installation and uninstallation scripts. The installer then
-downloads the latest engine-specific JAR from GitHub Releases; the source repository, Maven,
+The small archive contains the installer and its browser wizard. It downloads the latest
+engine-specific JAR from GitHub Releases; the source repository, Maven,
 Node.js, Windows and manual file copies are not required on the server. A local JAR can still be
 selected with `--jar`, and `--from-source` remains available for development.
 
