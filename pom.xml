@@ -5,7 +5,7 @@
 
   <groupId>org.acme</groupId>
   <artifactId>employee-scheduling</artifactId>
-  <version>1.2.7-SNAPSHOT</version>
+  <version>1.2.8-SNAPSHOT</version>
 
   <!-- Same license as the project this work derives from (Timefold Quickstarts): using a
        different one would require a compatibility review, while Apache-2.0 on Apache-2.0 is
