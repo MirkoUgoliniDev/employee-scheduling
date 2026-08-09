@@ -69,7 +69,9 @@ jobs:
 
       - name: Build Windows MSI
         shell: powershell
-        run: .\scripts\install-windows.ps1 -Package msi
+        run: >-
+          powershell.exe -NoProfile -ExecutionPolicy Bypass
+          -File .\scripts\install-windows.ps1 -Package msi
 
       - uses: actions/upload-artifact@v4
         with:
