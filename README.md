@@ -314,6 +314,14 @@ cd employee-scheduling-installer
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
+For an isolated test installation, add `--demo-data`. It creates the same portable sample
+structure, locations, staff, skills and unassigned shifts on PostgreSQL and SQLite. The option is
+idempotent, never creates users or credentials, and is disabled by default for production:
+
+```bash
+sudo ./scripts/install-linux.sh --engine postgresql --demo-data
+```
+
 The small archive contains only the installation and uninstallation scripts. The installer then
 downloads the latest engine-specific JAR from GitHub Releases; the source repository, Maven,
 Node.js, Windows and manual file copies are not required on the server. A local JAR can still be

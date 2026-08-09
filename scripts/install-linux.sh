@@ -17,6 +17,7 @@
 #      --data-dir PATH              data, backups, and logs (default: /var/lib/employee-scheduling)
 #      --db-password SECRET         PostgreSQL password (default: generated)
 #      --smtp-host H --smtp-port N --smtp-user U --smtp-pass P --smtp-from F
+#      --demo-data                  install the optional sample business dataset
 #      --no-service                 do not create the systemd service
 #      --yes                        ask no questions; use defaults
 #
@@ -39,6 +40,7 @@ DB_NAME="employee_scheduling"
 DB_USER="employee_scheduling"
 DB_PASS=""
 SMTP_HOST=""; SMTP_PORT="587"; SMTP_USER=""; SMTP_PASS=""; SMTP_FROM=""
+DEMO_DATA=""
 RELEASE_REPOSITORY="MirkoUgoliniDev/employee-scheduling"
 DOWNLOAD_DIR=""
 # The release archive preserves scripts/ so the same layout works both in a
@@ -94,6 +96,7 @@ while [ $# -gt 0 ]; do
         --smtp-user)   need_value "$@"; SMTP_USER="$2"; shift 2 ;;
         --smtp-pass)   need_value "$@"; SMTP_PASS="$2"; shift 2 ;;
         --smtp-from)   need_value "$@"; SMTP_FROM="$2"; shift 2 ;;
+        --demo-data)   DEMO_DATA="yes"; shift ;;
         --no-service)  CREATE_SERVICE="no"; shift ;;
         --yes|-y)      ASSUME_YES="yes"; shift ;;
         -h|--help)     sed -n '2,25p' "$0"; exit 0 ;;
@@ -190,6 +193,26 @@ if [ "$ENGINE" = "postgresql" ] && [ -z "$SMTP_HOST" ] \
             ;;
     esac
 fi
+
+# Preserve the choice during updates. On a fresh interactive installation, ask
+# explicitly because production installations must remain free of sample data.
+if [ -z "$DEMO_DATA" ] && [ -f "$ENV_FILE" ]; then
+    EXISTING_DEMO_DATA="$(env_value APP_DEMO_DATA)"
+    case "$EXISTING_DEMO_DATA" in
+        true|TRUE|yes|YES|1) DEMO_DATA="yes"; info "Existing demo dataset setting will be preserved." ;;
+        false|FALSE|no|NO|0) DEMO_DATA="no"; info "Existing production-clean dataset setting will be preserved." ;;
+    esac
+fi
+if [ -z "$DEMO_DATA" ] && [ "$ASSUME_YES" != "yes" ] && [ -t 0 ]; then
+    echo ""
+    printf '  Install sample business data for testing? [y/N]: '
+    read -r INSTALL_DEMO_DATA
+    case "$INSTALL_DEMO_DATA" in
+        y|Y|yes|YES) DEMO_DATA="yes" ;;
+        *) DEMO_DATA="no" ;;
+    esac
+fi
+DEMO_DATA="${DEMO_DATA:-no}"
 printf '%s' "$SMTP_PORT" | grep -Eq '^[0-9]+$' \
     || die "Non-numeric SMTP port: $SMTP_PORT"
 [ "$SMTP_PORT" -ge 1 ] && [ "$SMTP_PORT" -le 65535 ] \
@@ -505,6 +528,11 @@ umask 077
     echo "APP_DATA_DIR=${DATA_DIR}"
     echo "AUTH_SESSION_KEY=${SESSION_KEY}"
     echo "BACKUP_ADMIN_TOKEN=${BACKUP_TOKEN}"
+    if [ "$DEMO_DATA" = "yes" ]; then
+        echo "APP_DEMO_DATA=true"
+    else
+        echo "APP_DEMO_DATA=false"
+    fi
     if [ "$ENGINE" = "postgresql" ]; then
         echo "DATABASE_URL=${DB_URL}"
         echo "DATABASE_USERNAME=${DB_USER}"

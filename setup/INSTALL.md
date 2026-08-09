@@ -25,6 +25,17 @@ cd employee-scheduling-installer
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
+Per un'installazione di test, gli stessi dati dimostrativi portabili possono
+essere caricati sia su PostgreSQL sia su SQLite aggiungendo `--demo-data`:
+
+```bash
+sudo ./scripts/install-linux.sh --engine postgresql --demo-data
+```
+
+L'opzione crea sedi, operatori, specialisti, competenze e turni non assegnati,
+ma non crea utenti, password o configurazioni SMTP. È idempotente e nelle
+installazioni di produzione resta disattivata per impostazione predefinita.
+
 L'archivio contiene soltanto gli script di installazione e disinstallazione. Lo
 script scarica automaticamente da GitHub Releases il JAR compilato per il motore
 selezionato. Non servono il repository sorgente, Windows, `scp`, Maven o Node.js

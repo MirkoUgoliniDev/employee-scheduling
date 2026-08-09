@@ -1,10 +1,11 @@
 # ============================================================================
 #  install-windows.ps1 - Employee Scheduling installation wizard (Windows 11)
-#  Run:  powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
+#  Run:  powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1 [-DemoData]
 # ============================================================================
 param(
     [ValidateSet('msi', 'app-image', 'none')]
-    [string]$Package
+    [string]$Package,
+    [switch]$DemoData
 )
 
 $ErrorActionPreference = 'Stop'
@@ -328,6 +329,14 @@ if ($mode -eq "2") {
     $dbUrl = $dbUser = $dbPassPlain = ""
 }
 
+# Sample business data is opt-in. Release packages remain production-clean;
+# local test builds can use -DemoData or answer the interactive question.
+$demoDataEnabled = $DemoData.IsPresent
+if (-not $Package -and -not $demoDataEnabled) {
+    $demoChoice = Read-Host "  Install sample business data for testing? y/N [N]"
+    $demoDataEnabled = $demoChoice -match '^(?i:y|yes)$'
+}
+
 # -- 2. HTTP port --------------------------------------------------------------
 # (No question about the data directory: packaged data lives in
 #  %LOCALAPPDATA%\EmployeeScheduling; development data lives in databases\.)
@@ -400,6 +409,7 @@ $lines += "QUARKUS_LOG_FILE_PATH=$dataDirFwd/app.log"
 # backup.admin-token=${BACKUP_ADMIN_TOKEN:}; the converter treats an empty string
 # as null, so Quarkus does not start at all (including mvn test).
 $lines += "BACKUP_ADMIN_TOKEN=$backupToken"
+$lines += "APP_DEMO_DATA=$($demoDataEnabled.ToString().ToLowerInvariant())"
 if ($dbKind -eq "postgresql") {
     $lines += "DATABASE_URL=$dbUrl"
     $lines += "DATABASE_USERNAME=$dbUser"
@@ -558,6 +568,7 @@ if ($pkg -eq "1" -or $pkg -eq "2") {
     $jopts += "--java-options", "-Dquarkus.log.file.level=INFO"
     # Open the browser automatically at startup (desktop-app experience).
     $jopts += "--java-options", "-Dapp.open-browser-on-start=true"
+    $jopts += "--java-options", "-Dapp.demo-data.enabled=$($demoDataEnabled.ToString().ToLowerInvariant())"
     # Optional application icon: assets\app\app-icon.ico
     $iconPath = Join-Path $Root "assets\app\app-icon.ico"
     if (Test-Path -LiteralPath $iconPath) {
