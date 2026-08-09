@@ -30,7 +30,7 @@ Per usare il wizard grafico/testuale o un pacchetto compilato manualmente resta
 disponibile la modalità avanzata:
 
 ```bash
-sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.1-SNAPSHOT-runner.jar
+sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.2-SNAPSHOT-runner.jar
 ```
 
 > Il wizard manuale richiede l'intera cartella `setup/`, non il solo

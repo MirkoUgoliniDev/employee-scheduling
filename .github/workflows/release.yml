@@ -1,4 +1,4 @@
-name: Publish Linux packages
+name: Publish release packages
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  linux-packages:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,17 +44,67 @@ jobs:
             -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sqlite
           cp target/*-runner.jar release/employee-scheduling-sqlite-runner.jar
 
-          cd release
-          sha256sum employee-scheduling-*-runner.jar > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: release/*.jar
+          if-no-files-found: error
+
+  windows-msi:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build Windows MSI
+        shell: powershell
+        run: .\scripts\install-windows.ps1 -Package msi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: dist/*.msi
+          if-no-files-found: error
+
+  publish-release:
+    needs:
+      - linux-packages
+      - windows-msi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-packages'
+          path: release
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-msi
+          path: release
+
+      - name: Generate checksums
+        working-directory: release
+        run: sha256sum *.jar *.msi > SHA256SUMS
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: >-
           gh release create "$GITHUB_REF_NAME"
-          release/employee-scheduling-postgresql-runner.jar
-          release/employee-scheduling-sqlite-runner.jar
-          release/SHA256SUMS
+          release/*
           --verify-tag
           --generate-notes
           --title "Employee Scheduling $GITHUB_REF_NAME"
