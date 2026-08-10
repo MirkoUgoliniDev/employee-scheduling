@@ -80,6 +80,52 @@ class AuthenticationEnforcementTest {
         given().when().delete("/structures/1").then().statusCode(403);
     }
 
+    /**
+     * The skill catalogue is administrative: head nurses assign skills to employees and
+     * locations, they do not create, rename or delete them. That was enforced only in the
+     * interface, where ConfigPage redirects non-admins — so a head nurse with curl could
+     * rewrite the whole structure's catalogue, and deleting a skill cascades over its
+     * associations with locations, employees, shifts and templates.
+     */
+    @Test
+    @TestSecurity(user = "capo", roles = "CAPOSALA")
+    void caposalaCannotChangeTheSkillCatalogue() {
+        // No identifier here needs to exist. Authorization is decided before the method body
+        // runs, so the call never reaches a lookup: that is what makes the assertion about the
+        // role and not about the contents of the test database.
+        given().contentType("application/json").body("[{\"id\":999,\"name\":\"x\"}]")
+                .when().post("/demo-data/save_skills").then().statusCode(403);
+        given().when().delete("/demo-data/skills/999").then().statusCode(403);
+        // The translations of those same skills have been ADMIN-only from the start; assert it
+        // here too, so the two halves of the catalogue cannot drift apart again.
+        given().contentType("application/json").body("[]")
+                .when().put("/localizzazioni/skills/999").then().statusCode(403);
+    }
+
+    /**
+     * Pins the meaning of the 403 above. Without this, the previous test would still pass if
+     * those endpoints became unreachable for everyone: a 403 would then prove nothing about
+     * roles. An administrator must get past the role check and stop at input validation.
+     */
+    @Test
+    @TestSecurity(user = "admin", roles = "ADMIN")
+    void adminReachesTheSkillCatalogue() {
+        given().contentType("application/json").body("[{\"id\":999,\"name\":\"x\"}]")
+                .when().post("/demo-data/save_skills").then()
+                .statusCode(org.hamcrest.Matchers.not(equalTo(403)));
+        given().when().delete("/demo-data/skills/999").then()
+                .statusCode(org.hamcrest.Matchers.not(equalTo(403)));
+    }
+
+    /** The operational half of skills must keep working for a head nurse. */
+    @Test
+    @TestSecurity(user = "capo", roles = "CAPOSALA")
+    void caposalaStillReadsSkills() {
+        // structureId is deliberately omitted: it defaults to 0 and the endpoint answers 200
+        // with an empty catalogue, so the assertion does not depend on any structure existing.
+        given().when().get("/demo-data/get_skills").then().statusCode(200);
+    }
+
     @Test
     @TestSecurity(user = "capo", roles = "CAPOSALA")
     void caposalaCanStillSendShiftEmails() {

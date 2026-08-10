@@ -258,10 +258,19 @@ private static LocalDateTime parseWindowBound(String value) {
 
 /**
  * @brief Saves a list of skills (insert new or update existing).
+ *
+ * @details ADMIN only, overriding the class-level annotation. The skill catalogue is
+ *          administrative: head nurses assign skills, they do not create or rename them.
+ *          That was enforced only in the interface — ConfigPage redirects non-admins — so
+ *          a head nurse with curl could create and rename skills for the whole structure.
+ *          LocalizzazioneResource, which renames the same skills in five languages, has
+ *          been ADMIN-only from the start.
+ *
  * @param skills the list of Skill objects to save
  * @return a Response indicating success or failure of the save operation
  */
 @POST
+@RolesAllowed("ADMIN")
 @Path("/save_skills")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -2051,10 +2060,16 @@ public Response deleteShiftById(@PathParam("shift_id") int shift_id,
 
 /**
  * @brief Deletes a skill by its ID.
+ *
+ * @details ADMIN only, for the same reason as {@code save_skills}: deleting a skill cascades
+ *          over its associations with locations, employees, shifts and templates, and is not
+ *          a head nurse's operation.
+ *
  * @param id the unique identifier of the skill to delete
  * @return a Response with HTTP 204 on success, or HTTP 404 if not found
  */
 @DELETE
+@RolesAllowed("ADMIN")
 @Path("/skills/{id}")
 @Transactional
     public Response deleteSkill(@PathParam("id") int id,
