@@ -20,9 +20,12 @@ Thumbs.db
 *.db-wal
 *.db-shm
 
-# Database e configurazione DB Browser locali: i dati reali non appartengono
-# al repository pubblico. Lo schema portabile resta in databases/schema.sql.
+# Database locali e configurazione DB Browser. L'unica eccezione e'
+# employee_scheduling.db: e' il database DI PROVA pubblicato apposta, con nomi
+# ed email di fantasia e nessuna credenziale (vedi CLAUDE.md, "Anonimizzazione").
+# Qualunque altro .db in questa cartella e' roba di lavoro e resta fuori.
 databases/*.db
+!databases/employee_scheduling.db
 databases/*.sqbpro
 
 # Backup automatici del DB

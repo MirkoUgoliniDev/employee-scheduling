@@ -30,7 +30,14 @@ $Root = Split-Path $PSScriptRoot -Parent
 function Invoke-Native([scriptblock]$cmd) {
     $prev = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    try { & $cmd 2>&1 | Out-Null } finally { $ErrorActionPreference = $prev }
+    # Clear it first: if the executable does not exist, PowerShell raises
+    # CommandNotFoundException, the catch swallows it, and $LASTEXITCODE still holds
+    # whatever the PREVIOUS native command left. A missing jpackage right after a
+    # successful mvn would be read as exit 0, and the script would announce a package
+    # that was never produced.
+    $global:LASTEXITCODE = $null
+    try { & $cmd 2>&1 | Out-Null } catch { $global:LASTEXITCODE = 127 } finally { $ErrorActionPreference = $prev }
+    if ($null -eq $LASTEXITCODE) { return 127 }
     return $LASTEXITCODE
 }
 
@@ -179,7 +186,7 @@ function Invoke-MsiTextPositionPatch([string]$msiPath) {
     # the custom image; overriding the dialog in WiX v3 is impossible (LGHT0091
     # duplicate symbol). The post-build Control-table patch moves text left
     # (X=20, W=175), into the image's empty block (x 0..200). COM details and
-    # quirks are in docs\Consolidati\PACKAGING-WINDOWS-MSI.md (7.14-7.15).
+    # quirks are in docs\PACKAGING-WINDOWS-MSI.md (7.14-7.15).
     if (-not (Test-Path -LiteralPath $msiPath)) {
         Write-Host "  [WARNING] MSI not found: installer text patch skipped." -ForegroundColor Yellow
         return $false
@@ -415,7 +422,7 @@ if ($dbKind -eq "postgresql") {
     $lines += "DATABASE_USERNAME=$dbUser"
     $lines += "DATABASE_PASSWORD=$dbPassPlain"
 } else {
-    $lines += "APP_DATABASE_PATH=$dataDirFwd/large_data.db"
+    $lines += "APP_DATABASE_PATH=$dataDirFwd/employee_scheduling.db"
 }
 if ($mock -eq "y") {
     $lines += "QUARKUS_MAILER_MOCK=true"
@@ -479,7 +486,7 @@ try {
 
 # Use the newest, not the first alphabetically: mvn runs without clean, and with
 # two runner JARs in target\ the old one would otherwise be packaged.
-$jar = Get-ChildItem "$Root\target\*runner.jar" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$jar = Get-ChildItem "$Root\target\*runner.jar" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 if (-not $jar) { Write-Host "  JAR not found!" -ForegroundColor Red; exit 1 }
 
 # -- Packaging: ask whether to build the native app ---------------------------

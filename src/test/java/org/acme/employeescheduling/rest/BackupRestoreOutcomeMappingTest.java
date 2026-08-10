@@ -26,13 +26,13 @@ class BackupRestoreOutcomeMappingTest {
 
     @Test
     void restoredMapsTo200() {
-        Response response = resource.toResponse(RestoreOutcome.restored(), "large_data_20260801_101500_manual.db");
+        Response response = resource.toResponse(RestoreOutcome.restored(), "employee_scheduling_20260801_101500_manual.db");
 
         assertEquals(200, response.getStatus());
         Map<?, ?> body = body(response);
         assertEquals(Boolean.TRUE, body.get("restored"));
         assertEquals("RESTORED", body.get("status"));
-        assertEquals("large_data_20260801_101500_manual.db", body.get("filename"));
+        assertEquals("employee_scheduling_20260801_101500_manual.db", body.get("filename"));
         assertNull(body.get("error"), "un esito riuscito non deve portare codici di errore");
         assertFalse(body.containsKey("recoveryFile"));
     }
@@ -89,13 +89,13 @@ class BackupRestoreOutcomeMappingTest {
     void inconsistentMapsTo500AndCarriesTheRecoveryFile() {
         Response response = resource.toResponse(
                 RestoreOutcome.inconsistent("PROMOTION_IO_ERROR", "rollback fallito",
-                        "large_data_20260801_101500_prerestore.db"), "backup.db");
+                        "employee_scheduling_20260801_101500_prerestore.db"), "backup.db");
 
         assertEquals(500, response.getStatus());
         Map<?, ?> body = body(response);
         assertEquals(Boolean.FALSE, body.get("restored"));
         assertEquals("INCONSISTENT", body.get("status"));
-        assertEquals("large_data_20260801_101500_prerestore.db", body.get("recoveryFile"));
+        assertEquals("employee_scheduling_20260801_101500_prerestore.db", body.get("recoveryFile"));
     }
 
     @Test

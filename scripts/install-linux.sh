@@ -31,7 +31,10 @@ INSTALL_DIR="/opt/employee-scheduling"
 ENV_FILE="/etc/employee-scheduling.env"
 DATA_DIR="/var/lib/employee-scheduling"
 ENGINE="postgresql"
+ENGINE_GIVEN="no"
 PORT="8080"
+PORT_GIVEN="no"
+DATA_DIR_GIVEN="no"
 JAR_SRC=""
 FROM_SOURCE="no"
 CREATE_SERVICE="yes"
@@ -85,11 +88,11 @@ need_value() {
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --engine)      need_value "$@"; ENGINE="$2"; shift 2 ;;
+        --engine)      need_value "$@"; ENGINE="$2"; ENGINE_GIVEN="yes"; shift 2 ;;
         --jar)         need_value "$@"; JAR_SRC="$2"; shift 2 ;;
         --from-source) FROM_SOURCE="yes"; shift ;;
-        --port)        need_value "$@"; PORT="$2"; shift 2 ;;
-        --data-dir)    need_value "$@"; DATA_DIR="$2"; shift 2 ;;
+        --port)        need_value "$@"; PORT="$2"; PORT_GIVEN="yes"; shift 2 ;;
+        --data-dir)    need_value "$@"; DATA_DIR="$2"; DATA_DIR_GIVEN="yes"; shift 2 ;;
         --db-password) need_value "$@"; DB_PASS="$2"; shift 2 ;;
         --smtp-host)   need_value "$@"; SMTP_HOST="$2"; shift 2 ;;
         --smtp-port)   need_value "$@"; SMTP_PORT="$2"; shift 2 ;;
@@ -157,9 +160,20 @@ step "[1/8] System"
 # choice explicit: pressing Enter keeps test mode (OTP in journald), while a
 # production installation can configure delivery before the first account.
 env_value() {
-    local value
+    local value quoted="no"
     value="$(grep -E "^$1=" "$ENV_FILE" 2>/dev/null | tail -n1 | cut -d= -f2- || true)"
+    case "$value" in \"*\") quoted="yes" ;; esac
     value="${value#\"}"; value="${value%\"}"
+    # Undo what env_quote did on write. Without this the value is escaped again on
+    # every re-run: an SMTP password containing a backslash is stored doubled, read
+    # back doubled, and written doubled again, so systemd eventually hands Quarkus
+    # the wrong password and delivery starts failing after an update that "changed
+    # nothing about email". Quotes first, then backslashes: the reverse order would
+    # unescape a backslash that was itself escaping a quote.
+    if [ "$quoted" = "yes" ]; then
+        value="${value//\\\"/\"}"
+        value="${value//\\\\/\\}"
+    fi
     printf '%s' "$value"
 }
 
@@ -174,6 +188,37 @@ env_quote() {
     value="${value//\"/\\\"}"
     printf '"%s"' "$value"
 }
+# Reuse engine, port and data directory from an existing installation unless they
+# were given explicitly. Without this a plain "update with the new jar" silently
+# reverts all three to the factory defaults: on a site installed with
+# --engine sqlite --data-dir /srv/es, the service would come back up green on an
+# empty PostgreSQL database while the real one sits orphaned in /srv/es, and the
+# uninstaller — which reads APP_DATA_DIR from the rewritten env file — would never
+# find it again. setup/wizard.py resolve_existing() exists for the same reason.
+if [ -f "$ENV_FILE" ]; then
+    REUSED=""
+    if [ "$ENGINE_GIVEN" = "no" ]; then
+        existing_engine="$(env_value QUARKUS_PROFILE)"
+        case "$existing_engine" in
+            postgresql|sqlite) ENGINE="$existing_engine"; REUSED="engine=$ENGINE" ;;
+        esac
+    fi
+    if [ "$PORT_GIVEN" = "no" ]; then
+        existing_port="$(env_value QUARKUS_HTTP_PORT)"
+        case "$existing_port" in
+            ''|*[!0-9]*) ;;
+            *) PORT="$existing_port"; REUSED="$REUSED port=$PORT" ;;
+        esac
+    fi
+    if [ "$DATA_DIR_GIVEN" = "no" ]; then
+        existing_data="$(env_value APP_DATA_DIR)"
+        case "$existing_data" in
+            /*) DATA_DIR="$existing_data"; REUSED="$REUSED data-dir=$DATA_DIR" ;;
+        esac
+    fi
+    [ -n "$REUSED" ] && info "Existing installation found; reused:$REUSED (pass the options explicitly to change them)."
+fi
+
 if [ -z "$SMTP_HOST" ] && [ -f "$ENV_FILE" ]; then
     SMTP_HOST="$(env_value QUARKUS_MAILER_HOST)"
     if [ -n "$SMTP_HOST" ]; then
@@ -330,6 +375,18 @@ if [ "$ENGINE" = "postgresql" ]; then
     # Generated password: letters and digits only because it enters a JDBC URL
     # and an environment file, where special characters require different
     # escaping at each location and one will eventually be mishandled.
+    # Reuse the password already in the configuration instead of rotating it on
+    # every run. Rotation looks harmless but the role is altered here, several
+    # steps before the env file is written: if anything in between dies — a wrong
+    # --jar path is the common case — PostgreSQL has the new password and the
+    # configuration still has the old one. The running service survives on its
+    # pooled connections and fails at the next restart, hours later, with nothing
+    # linking it to the aborted update. setup/steps/database.py avoids this the
+    # same way.
+    if [ -z "$DB_PASS" ]; then
+        DB_PASS="$(env_value DATABASE_PASSWORD)"
+        [ -n "$DB_PASS" ] && info "Reusing the database password from the existing configuration."
+    fi
     if [ -z "$DB_PASS" ]; then
         DB_PASS="$(head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | cut -c1-32)"
         [ "${#DB_PASS}" -ge 24 ] || die "Database password generation failed."
@@ -505,8 +562,19 @@ install -m 755 -o root -g root "$UNINSTALLER_SRC" "$INSTALL_DIR/uninstall-linux.
 
 # The JAR remains root-owned and read-only for the service: a compromised process
 # must not be able to rewrite its own executable.
-rm -f "$INSTALL_DIR"/*runner.jar
-install -m 644 -o root -g root "$JAR_SRC" "$INSTALL_DIR/$JAR_NAME"
+# Copy to a staging name, then rename: an 80 MB copy onto a full SD card that
+# fails halfway would otherwise leave a TRUNCATED file under the very name the
+# systemd unit points at, and the previous working jar already deleted. After a
+# reboot the service dies with "Invalid or corrupt jarfile" in a Restart=on-failure
+# loop. setup/lib/runner.py copy() does the same, for the same reason.
+install -m 644 -o root -g root "$JAR_SRC" "$INSTALL_DIR/$JAR_NAME.part"     || die "Copying the package failed (out of disk space?)."
+sync
+mv -f "$INSTALL_DIR/$JAR_NAME.part" "$INSTALL_DIR/$JAR_NAME"
+# Now that the new package is in place, drop older ones with a different name.
+for old_jar in "$INSTALL_DIR"/*runner.jar; do
+    [ -e "$old_jar" ] || continue
+    [ "$(basename "$old_jar")" = "$JAR_NAME" ] || rm -f "$old_jar"
+done
 if [ -n "$DOWNLOAD_DIR" ]; then
     rm -f -- "$JAR_SRC"
     rmdir -- "$DOWNLOAD_DIR" 2>/dev/null || true
@@ -593,6 +661,12 @@ Description=Employee Scheduling — employee shift planning
 Documentation=https://github.com/MirkoUgoliniDev/employee-scheduling
 After=network-online.target${DB_URL:+ postgresql.service}
 Wants=network-online.target${DB_URL:+ postgresql.service}
+# Do not start before the data directory's filesystem is mounted. USB disk
+# enumeration is slow on a Raspberry Pi: without this, after a reboot the service
+# starts before the mount, finds an empty directory, and Flyway creates a new
+# database that then disappears behind the mount. The Python wizard has had this
+# line from the start; the script was missing it.
+RequiresMountsFor=${DATA_DIR}
 
 [Service]
 Type=simple
@@ -675,11 +749,24 @@ echo "  Data engine   : $ENGINE"
 echo "  Data & backups: $DATA_DIR"
 echo "  Application   : $INSTALL_DIR/$JAR_NAME"
 echo "  Configuration : $ENV_FILE"
-echo "  Address       : http://${IP:-localhost}:${PORT}"
-echo ""
-echo "  Live log      : journalctl -u $SERVICE_NAME -f"
-echo "  Status        : systemctl status $SERVICE_NAME"
-echo "  Restart       : systemctl restart $SERVICE_NAME"
+# Without a service there is nothing listening and nothing in journald: printing
+# an address and a journalctl command would describe an installation that does
+# not exist. Say instead how to start it, including -Dapp.data.dir, without which
+# the database lands in ./databases relative to the current directory.
+if [ "$CREATE_SERVICE" = "yes" ]; then
+    echo "  Address       : http://${IP:-localhost}:${PORT}"
+    echo ""
+    echo "  Live log      : journalctl -u $SERVICE_NAME -f"
+    echo "  Status        : systemctl status $SERVICE_NAME"
+    echo "  Restart       : systemctl restart $SERVICE_NAME"
+else
+    echo ""
+    echo "  No service was registered. Start it by hand with:"
+    echo "    sudo -u $SERVICE_USER java -Dapp.data.dir=$DATA_DIR \\"
+    echo "         -jar $INSTALL_DIR/$JAR_NAME"
+    echo "  Without -Dapp.data.dir the database is created in ./databases,"
+    echo "  relative to the working directory."
+fi
 echo "  Uninstall     : sudo $INSTALL_DIR/uninstall-linux.sh"
 echo ""
 echo "  The first registered account becomes the administrator."

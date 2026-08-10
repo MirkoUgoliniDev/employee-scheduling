@@ -81,10 +81,15 @@ fi
 # precisely when the directory is irrelevant. A one-level path such as /data is
 # also allowed: it is legitimate, and requiring two levels blocked normal setups.
 if [ "$PURGE" = "yes" ]; then
-    case "$DATA_DIR" in
-        /|/bin|/boot|/dev|/etc|/home|/lib|/lib64|/media|/mnt|/opt|/proc|/root|/run|/sbin|/srv|/sys|/tmp|/usr|/var|/var/lib)
+    # Strip the trailing slash before matching, or the guard is trivially bypassed:
+    # APP_DATA_DIR=/var/ does not match the literal /var, falls through to /*, and
+    # rm -rf /var/ runs. install-linux.sh normalises the same way, and the list
+    # below is kept in step with the one there and with setup/lib/constants.py.
+    SAFE_DIR="${DATA_DIR%/}"
+    case "$SAFE_DIR" in
+        ""|/|/bin|/boot|/dev|/etc|/home|/lib|/lib64|/media|/mnt|/opt|/proc|/root|/run|/sbin|/srv|/sys|/tmp|/usr|/usr/local|/var|/var/cache|/var/lib|/var/log|/var/run|/var/tmp)
             die "Suspicious data directory; refusing to delete it: $DATA_DIR" ;;
-        /*) ;;
+        /*) DATA_DIR="$SAFE_DIR" ;;
         *) die "The data directory is not an absolute path; refusing to delete it: $DATA_DIR" ;;
     esac
 fi

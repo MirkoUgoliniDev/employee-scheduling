@@ -48,7 +48,7 @@ public class AppDataDirConfigSource implements ConfigSource {
 
         Map<String, String> values = new LinkedHashMap<>();
         values.put("app.data.dir.resolved", base.toString());
-        values.put("demo.db.name", base.resolve("large_data.db").toString());
+        values.put("demo.db.name", base.resolve(LegacyDatabaseName.CURRENT_FILE).toString());
         values.put("backup.dir", base.resolve("backups").toString());
         values.put("backup.settings.file", base.resolve("backup-settings.properties").toString());
         values.put("quarkus.log.file.path", base.resolve("app.log").toString());

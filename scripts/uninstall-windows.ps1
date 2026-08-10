@@ -37,7 +37,18 @@ $AppName  = 'EmployeeScheduling'
 $failed   = $false
 
 # Resolve BEFORE any relaunch, while the environment still belongs to the user.
-if ($DataRoot) { $dataRoot = $DataRoot }
+if ($DataRoot) {
+    # -DataRoot exists so the real user's path survives elevation, but it is passed
+    # straight to Remove-Item -Recurse -Force and -Silent skips the confirmation:
+    # "-RemoveData -Silent -DataRoot C:\Users\me\Documents" would wipe that folder
+    # without a prompt. Accept it only when it names our own data directory.
+    $leaf = Split-Path $DataRoot -Leaf
+    if ($leaf -ne $AppName -and $leaf -ne '.employee-scheduling') {
+        Write-Host "  -DataRoot does not point at the application data directory: $DataRoot" -ForegroundColor Red
+        exit 1
+    }
+    $dataRoot = $DataRoot
+}
 elseif ($env:LOCALAPPDATA) { $dataRoot = Join-Path $env:LOCALAPPDATA $AppName }
 else { $dataRoot = Join-Path $HOME '.employee-scheduling' }
 

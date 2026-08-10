@@ -33,6 +33,7 @@ import io.agroal.api.AgroalDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import org.acme.employeescheduling.config.LegacyDatabaseName;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.sqlite.SQLiteConnection;
 import io.quarkus.arc.properties.UnlessBuildProperty;
@@ -216,6 +217,24 @@ public class BackupService implements DatabaseBackupService {
     }
 
     /**
+     * @brief Does this backup belong to the database currently in use?
+     *
+     * @details Normally the answer is "the prefix matches the database file name". The exception
+     *          is the rename of 9 August 2026: the SQLite file was called {@code large_data.db}
+     *          and is now {@code employee_scheduling.db}, aligned with the PostgreSQL database
+     *          name. {@link org.acme.employeescheduling.config.LegacyDatabaseName} renames the
+     *          file itself at startup, but backups taken before then keep the old prefix — and
+     *          rejecting them would silently make every pre-rename backup unrestorable, exactly
+     *          when a restore matters most. The check still refuses backups from a genuinely
+     *          different database, which is the property it exists for.
+     */
+    private boolean isOwnBackup(String prefix) {
+        return baseName().equals(prefix)
+                || (LegacyDatabaseName.CURRENT_BASE.equals(baseName())
+                    && LegacyDatabaseName.LEGACY_BASE.equals(prefix));
+    }
+
+    /**
      * @brief Performs a consistent backup with VACUUM INTO. @return created-file information.
      */
     public Map<String, Object> performBackup(String tag) throws Exception {
@@ -392,7 +411,7 @@ public class BackupService implements DatabaseBackupService {
         Set<String> expectedSchema = null;
         try { // Reentrant: performBackup reacquires the same lock without deadlock.
             Matcher nameMatcher = BACKUP_NAME.matcher(backupFile.getFileName().toString());
-            if (!nameMatcher.matches() || !baseName().equals(nameMatcher.group(1)))
+            if (!nameMatcher.matches() || !isOwnBackup(nameMatcher.group(1)))
                 return RestoreOutcome.rejected(RestoreOutcome.INCOMPATIBLE_DATABASE,
                         "Il backup non proviene da questo database");
             expectedSchema = sqliteSchema(Path.of(dbName));

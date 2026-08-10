@@ -22,6 +22,10 @@ public class AppMain {
 
     public static void main(String... args) {
         SingleInstanceGuard.enforce();
+        // Same reason as the guard above: this has to happen before Flyway runs, or Flyway
+        // creates an empty database under the new name and the rename can no longer be done
+        // safely. Only the instance that won the lock gets here.
+        LegacyDatabaseName.migrate();
         Quarkus.run(args);
     }
 }

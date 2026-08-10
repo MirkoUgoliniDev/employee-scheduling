@@ -142,13 +142,34 @@ public class DemoDataRepository {
 	// Migrations/seeding (ensure*Table) are idempotent but write hundreds of rows.
 	// They must run ONCE per application lifetime, not on every request: otherwise each
 	// page load hammers the DB (SQLITE_BUSY under concurrency) and continually dirties
-	// large_data.db.
+	// the SQLite file.
 	private volatile boolean schemaInitialized = false;
 	private final Object _schemaLock = new Object();
 
-	/** Initializes DDL/seeds before the first ORM endpoint can query a legacy DB. */
+	/**
+	 * @brief Initializes DDL/seeds before the first ORM endpoint can query a legacy DB.
+	 *
+	 * @details Skipped on a Flyway-managed database even when the legacy bootstrap is enabled.
+	 *          The bootstrap is idempotent and changes nothing there, but it rewrites the file
+	 *          on every startup: measured on the published demo database, a startup under the
+	 *          default profile left the content identical and the bytes different. That is
+	 *          enough to make {@code databases/employee_scheduling.db} — which is tracked in
+	 *          git — show up as modified after every {@code mvn quarkus:dev}, and to turn each
+	 *          commit into an 860 KB binary diff carrying no information.
+	 */
 	void onStart(@Observes StartupEvent ignored) {
-		if (legacySqliteBootstrap) ensureSchemaInitialized();
+		if (!legacySqliteBootstrap) return;
+		try (Connection conn = DatabaseConnection.connect(dbName)) {
+			if (hasFlywayHistory(conn)) {
+				logger.info("Flyway-managed database: skipping the legacy SQLite bootstrap");
+				return;
+			}
+		} catch (Exception e) {
+			// connect() declares a checked Exception. Unreadable connection: fall through to
+			// the bootstrap, which is what happened before this check existed.
+			logger.log(Level.FINE, "Cannot determine whether Flyway manages this database", e);
+		}
+		ensureSchemaInitialized();
 	}
 
 	private static <T> List<T> loadInChunks(Set<Integer> ids, Function<List<Integer>, List<T>> loader) {

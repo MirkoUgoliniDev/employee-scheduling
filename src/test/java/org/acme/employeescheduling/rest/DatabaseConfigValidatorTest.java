@@ -28,31 +28,31 @@ class DatabaseConfigValidatorTest {
     @Test
     void acceptsTheSqliteProfileWhereTheUrlDerivesFromDbName() {
         assertDoesNotThrow(() -> validator("sqlite", "sqlite",
-                "jdbc:sqlite:databases/large_data.db", "databases/large_data.db").validate());
+                "jdbc:sqlite:databases/employee_scheduling.db", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void acceptsEquivalentPathsWrittenDifferently() {
         assertDoesNotThrow(() -> validator("sqlite", "sqlite",
-                "jdbc:sqlite:databases/../databases/large_data.db", "databases/large_data.db").validate());
+                "jdbc:sqlite:databases/../databases/employee_scheduling.db", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void acceptsSqliteUrlWithConnectionParameters() {
         assertDoesNotThrow(() -> validator("sqlite", "sqlite",
-                "jdbc:sqlite:databases/large_data.db?busy_timeout=5000", "databases/large_data.db").validate());
+                "jdbc:sqlite:databases/employee_scheduling.db?busy_timeout=5000", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void acceptsPostgresqlProfileIgnoringTheSqliteFile() {
         assertDoesNotThrow(() -> validator("postgresql", "postgresql",
-                "jdbc:postgresql://localhost:5432/employee_scheduling", "databases/large_data.db").validate());
+                "jdbc:postgresql://localhost:5432/employee_scheduling", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void rejectsUrlPointingToADifferentSqliteFileThanTheBackupSource() {
         IllegalStateException error = assertThrows(IllegalStateException.class, () -> validator("sqlite", "sqlite",
-                "jdbc:sqlite:databases/other.db", "databases/large_data.db").validate());
+                "jdbc:sqlite:databases/other.db", "databases/employee_scheduling.db").validate());
         assertTrue(error.getMessage().contains(Path.of("databases/other.db").toAbsolutePath().normalize().toString()),
                 "il messaggio deve indicare il file effettivamente in uso: " + error.getMessage());
     }
@@ -60,25 +60,25 @@ class DatabaseConfigValidatorTest {
     @Test
     void rejectsRuntimeEngineDifferentFromTheDeclaredOne() {
         IllegalStateException error = assertThrows(IllegalStateException.class, () -> validator("sqlite", "postgresql",
-                "jdbc:postgresql://localhost:5432/employee_scheduling", "databases/large_data.db").validate());
+                "jdbc:postgresql://localhost:5432/employee_scheduling", "databases/employee_scheduling.db").validate());
         assertTrue(error.getMessage().contains("app.database.kind"), error.getMessage());
     }
 
     @Test
     void rejectsDeclaredPostgresqlRunningOnSqlite() {
         assertThrows(IllegalStateException.class, () -> validator("postgresql", "sqlite",
-                "jdbc:sqlite:databases/large_data.db", "databases/large_data.db").validate());
+                "jdbc:sqlite:databases/employee_scheduling.db", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void rejectsInMemorySqliteBecauseNoFileCanBeBackedUp() {
         assertThrows(IllegalStateException.class, () -> validator("sqlite", "sqlite",
-                "jdbc:sqlite::memory:", "databases/large_data.db").validate());
+                "jdbc:sqlite::memory:", "databases/employee_scheduling.db").validate());
     }
 
     @Test
     void toleratesSpacingAndCaseInTheDeclaredKind() {
         assertDoesNotThrow(() -> validator(" SQLite ", "sqlite",
-                "jdbc:sqlite:databases/large_data.db", " databases/large_data.db ").validate());
+                "jdbc:sqlite:databases/employee_scheduling.db", " databases/employee_scheduling.db ").validate());
     }
 }
