@@ -28,13 +28,40 @@ def _escape(value) -> str:
     return text.replace("\n", " ").replace("\r", " ")
 
 
+def _smtp_port(value, runner) -> int:
+    """SMTP port as a plain integer, falling back to the standard port.
+
+    Never fall back silently: the substitution would surface much later as
+    delivery failing for no visible reason, with nothing pointing at the port.
+    """
+    try:
+        port = int(str(value).strip())
+        if 1 <= port <= 65535:
+            return port
+    except (TypeError, ValueError):
+        pass
+    runner.log(f"    [warning] invalid SMTP port {value!r}: using 587")
+    return 587
+
+
 def _read_existing(path: Path) -> dict:
+    """Values from an existing environment file, with the write-time escaping undone.
+
+    Reading a quoted value without unescaping it re-escapes it on the next write:
+    an SMTP password containing a backslash gets doubled at every update, so after
+    a couple of them systemd hands Quarkus a different password and delivery fails
+    for no visible reason. Quotes are unescaped before backslashes — the reverse
+    order would consume a backslash that was itself escaping a quote.
+    """
     values = {}
     try:
         for line in path.read_text(encoding="utf-8").splitlines():
             match = re.match(r'^([A-Z0-9_]+)=("?)(.*?)\2$', line.strip())
             if match:
-                values[match.group(1)] = match.group(3)
+                value = match.group(3)
+                if match.group(2):
+                    value = value.replace('\\"', '"').replace("\\\\", "\\")
+                values[match.group(1)] = value
     except OSError:
         pass
     return values
@@ -42,7 +69,7 @@ def _read_existing(path: Path) -> dict:
 
 class EnvConfigStep(Step):
     def __init__(self):
-        super().__init__("Configurazione", "Chiavi segrete e parametri del servizio")
+        super().__init__("Configuration", "Service secrets and parameters")
 
     def execute(self, runner, sysinfo, config: dict) -> bool:
         self.start()
@@ -54,15 +81,15 @@ class EnvConfigStep(Step):
         session_key = existing.get("AUTH_SESSION_KEY") or _generate_secret()
         backup_token = existing.get("BACKUP_ADMIN_TOKEN") or _generate_secret()
         if existing.get("AUTH_SESSION_KEY"):
-            runner.log("    chiave di sessione esistente riusata: nessuno viene disconnesso")
+            runner.log("    existing session key reused: nobody is logged out")
 
         # With fewer than 16 characters, Quarkus returns 500 for every request
         # with a message that does not mention the key. Check here, where the
         # remedy is obvious.
         if len(session_key) < SECRET_MIN_LENGTH:
-            return self.fail(f"Chiave di sessione troppo corta ({len(session_key)}).")
+            return self.fail(f"Session key too short ({len(session_key)}).")
         if len(backup_token) < SECRET_MIN_LENGTH:
-            return self.fail(f"Token di backup troppo corto ({len(backup_token)}).")
+            return self.fail(f"Backup token too short ({len(backup_token)}).")
 
         engine = config.get("engine", "postgresql")
         port = int(config.get("port", DEFAULT_PORT))
@@ -83,9 +110,15 @@ class EnvConfigStep(Step):
 
         if engine == "postgresql":
             password = config.get("db_password") or existing.get("DATABASE_PASSWORD", "")
+            if not password and runner.dry_run:
+                # The database step changes nothing in simulation and
+                # deliberately leaves no password in config, so that a
+                # simulation followed by a real run cannot reuse a placeholder.
+                # Keep the placeholder local to this simulated write.
+                password = "(simulation)"
             if not password:
-                return self.fail("Password del database mancante.",
-                                 "Rilancia il wizard dal passo del database.")
+                return self.fail("Database password missing.",
+                                 "Run the wizard again from the database step.")
             lines += [
                 f"DATABASE_URL={config.get('db_url')}",
                 f"DATABASE_USERNAME={DB_USER}",
@@ -98,7 +131,7 @@ class EnvConfigStep(Step):
         # log again, with no obvious link to an update performed days earlier.
         smtp_host = config.get("smtp_host") or existing.get("QUARKUS_MAILER_HOST", "")
         if smtp_host and not config.get("smtp_host"):
-            runner.log("    configurazione email ripresa dall'installazione esistente")
+            runner.log("    email configuration reused from the existing installation")
             config["smtp_user"] = existing.get("QUARKUS_MAILER_USERNAME", "")
             config["smtp_pass"] = existing.get("QUARKUS_MAILER_PASSWORD", "")
             config["smtp_port"] = existing.get("QUARKUS_MAILER_PORT", 587)
@@ -114,7 +147,11 @@ class EnvConfigStep(Step):
             lines += [
                 "QUARKUS_MAILER_MOCK=false",
                 f'QUARKUS_MAILER_HOST="{_escape(smtp_host)}"',
-                f"QUARKUS_MAILER_PORT={config.get('smtp_port', 587)}",
+                # int() and not _escape(): this is the one value written
+                # unquoted, so a newline in it would append arbitrary lines to
+                # an environment file systemd reads as root. The web form sends
+                # a number, but the endpoint accepts any JSON.
+                f"QUARKUS_MAILER_PORT={_smtp_port(config.get('smtp_port', 587), runner)}",
                 f'QUARKUS_MAILER_USERNAME="{_escape(config.get("smtp_user", ""))}"',
                 f'QUARKUS_MAILER_PASSWORD="{_escape(config.get("smtp_pass", ""))}"',
                 f'QUARKUS_MAILER_FROM="{_escape(config.get("smtp_from") or config.get("smtp_user", ""))}"',
@@ -122,9 +159,14 @@ class EnvConfigStep(Step):
             ]
         else:
             lines.append("QUARKUS_MAILER_MOCK=true")
+            # PostgreSQL only, and deliberately so. With app.registration.mode
+            # left at "auto" the mode follows the engine: SQLite resolves to
+            # standalone, where registration is username+password and no OTP is
+            # ever generated. Warning there would send the operator hunting in
+            # journalctl for a code that is never produced.
             if engine == "postgresql":
-                runner.log("    [attenzione] Nessun SMTP configurato: il codice di registrazione")
-                runner.log("                 comparira' solo nel log del servizio.")
+                runner.log("    [warning] No SMTP configured: the registration code will")
+                runner.log("              appear only in the service log.")
 
         # 640 root:service — the service can read it; no other user can.
         ok, err = runner.write(ENV_FILE, "\n".join(lines) + "\n", mode=0o640)
@@ -135,4 +177,4 @@ class EnvConfigStep(Step):
                         str(ENV_FILE)])
 
         config["backup_token"] = backup_token
-        return self.done(f"Scritta in {ENV_FILE}")
+        return self.done(f"Written to {ENV_FILE}")

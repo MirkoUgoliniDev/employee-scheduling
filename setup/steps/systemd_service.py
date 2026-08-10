@@ -9,7 +9,7 @@ from lib.step_base import Step
 
 UNIT_TEMPLATE = """\
 [Unit]
-Description=Employee Scheduling — pianificazione turni del personale
+Description=Employee Scheduling — employee shift planning
 Documentation=https://github.com/MirkoUgoliniDev/employee-scheduling
 After=network-online.target{after_db}
 Wants=network-online.target{after_db}
@@ -53,14 +53,14 @@ WantedBy=multi-user.target
 
 class SystemdStep(Step):
     def __init__(self):
-        super().__init__("Servizio", "Unita' systemd, avvio automatico e riavvio in caso di errore")
+        super().__init__("Service", "systemd unit, automatic startup, and restart on failure")
 
     def execute(self, runner, sysinfo, config: dict) -> bool:
         self.start()
 
         jar_name = config.get("jar_name")
         if not jar_name:
-            return self.fail("Nome del pacchetto non noto: il passo precedente non e' riuscito.")
+            return self.fail("Package name unknown: the previous step did not succeed.")
 
         java = shutil.which("java") or "/usr/bin/java"
         data_dir = str(config.get("data_dir"))
@@ -70,7 +70,7 @@ class SystemdStep(Step):
         # an error that does not explain why.
         protect_home = "false" if data_dir.startswith(("/home/", "/root/")) else "true"
         if protect_home == "false":
-            runner.log("    dati sotto /home: ProtectHome disattivato per non nascondere la cartella")
+            runner.log("    data under /home: ProtectHome disabled so the directory stays visible")
 
         after_db = " postgresql.service" if config.get("engine") == "postgresql" else ""
 
@@ -85,7 +85,7 @@ class SystemdStep(Step):
 
         ok, err = runner.run(["systemctl", "daemon-reload"])
         if not ok:
-            return self.fail(f"Ricarica di systemd non riuscita: {err}")
+            return self.fail(f"systemd reload failed: {err}")
 
         runner.run(["systemctl", "enable", SERVICE_NAME])
 
@@ -93,7 +93,7 @@ class SystemdStep(Step):
         # a previous installation, it must restart with the new package.
         ok, err = runner.run(["systemctl", "restart", SERVICE_NAME])
         if not ok:
-            return self.fail(f"Il servizio non si avvia: {err}",
-                             f"Diagnosi: journalctl -u {SERVICE_NAME} -n 60 --no-pager")
+            return self.fail(f"The service does not start: {err}",
+                             f"Diagnostics: journalctl -u {SERVICE_NAME} -n 60 --no-pager")
 
-        return self.done("Servizio registrato e avviato")
+        return self.done("Service registered and started")

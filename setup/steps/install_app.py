@@ -12,7 +12,7 @@ _BUILD_TIME_CLASS = "io/quarkus/runtime/generated/BuildTimeRunTimeFixedConfigSou
 
 #: The JAR was built without -Dquarkus.profile: it works with neither engine and
 #: is the most likely case because it is produced by a careless "mvn package".
-NO_PROFILE = "senza-profilo"
+NO_PROFILE = "no-profile"
 
 
 def baked_engine(jar: Path):
@@ -49,35 +49,35 @@ def baked_engine(jar: Path):
 
 class InstallAppStep(Step):
     def __init__(self):
-        super().__init__("Applicazione", "Copia del pacchetto in /opt")
+        super().__init__("Application", "Copy of the package into /opt")
 
     def execute(self, runner, sysinfo, config: dict) -> bool:
         self.start()
 
         jar = config.get("jar")
         if not jar:
-            return self.fail("Nessun pacchetto da installare.",
-                             "Indica il jar con --jar percorso/al/employee-scheduling-runner.jar")
+            return self.fail("No package to install.",
+                             "Specify the jar with --jar path/to/employee-scheduling-runner.jar")
 
         source = Path(jar).expanduser()
         if not source.is_file():
-            return self.fail(f"Pacchetto non trovato: {source}",
-                             "Compilalo sul PC e copialo qui con scp.")
+            return self.fail(f"Package not found: {source}",
+                             "Build it on your PC and copy it here with scp.")
         if source.suffix != ".jar":
-            return self.fail(f"Il file indicato non e' un jar: {source.name}")
+            return self.fail(f"The specified file is not a jar: {source.name}")
 
         engine = config.get("engine", "postgresql")
         baked = baked_engine(source)
         if baked is None:
-            runner.log("    [attenzione] motore del pacchetto non verificabile:"
-                       f" assicurati che sia compilato con -Dquarkus.profile={engine}")
+            runner.log("    [warning] the package engine cannot be verified:"
+                       f" make sure it was built with -Dquarkus.profile={engine}")
         elif baked != engine:
             return self.fail(
-                f"Il pacchetto e' compilato per '{baked}' ma stai installando con motore '{engine}'.",
-                "Ricompilalo: mvn package -DskipTests "
+                f"The package is built for '{baked}' but you are installing with engine '{engine}'.",
+                "Rebuild it: mvn package -DskipTests "
                 f"-Dquarkus.package.jar.type=uber-jar -Dquarkus.profile={engine}")
         else:
-            runner.log(f"    motore del pacchetto verificato: {baked}")
+            runner.log(f"    package engine verified: {baked}")
 
         ok, err = runner.mkdir(INSTALL_DIR, mode=0o755)
         if not ok:
@@ -100,9 +100,9 @@ class InstallAppStep(Step):
                 if old.name != source.name:
                     try:
                         old.unlink()
-                        runner.log(f"    rimosso il pacchetto precedente {old.name}")
+                        runner.log(f"    removed the previous package {old.name}")
                     except OSError as exc:
-                        runner.log(f"    [attenzione] {old.name} non rimosso: {exc}")
+                        runner.log(f"    [warning] {old.name} not removed: {exc}")
 
         # Ship the uninstaller with the application. The summary used to show
         # "./scripts/uninstall-linux.sh," a repository-relative path that the
@@ -115,10 +115,10 @@ class InstallAppStep(Step):
             if ok:
                 config["uninstaller"] = str(INSTALL_DIR / uninstaller.name)
             else:
-                runner.log(f"    [attenzione] disinstallatore non copiato: {err}")
+                runner.log(f"    [warning] uninstaller not copied: {err}")
         else:
-            runner.log("    [attenzione] scripts/uninstall-linux.sh non trovato:"
-                       " la disinstallazione restera' possibile solo dal repository")
+            runner.log("    [warning] scripts/uninstall-linux.sh not found:"
+                       " uninstallation will only be possible from the repository")
 
         config["jar_name"] = source.name
         size_mb = source.stat().st_size // (1024 * 1024) if source.exists() else 0

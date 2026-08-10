@@ -72,13 +72,13 @@ class Runner:
             elif shutil.which("sudo"):
                 argv = ["sudo", "-n", "-u", user] + argv
             else:
-                return False, "Serve runuser o sudo per cambiare utente."
+                return False, "runuser or sudo is required to switch user."
 
         # Commands marked sensitive do not show arguments: this line reaches the
         # terminal, scrollback, and the browser of anyone following installation.
-        printable = " ".join(argv) if not secret else f"{argv[0]} (argomenti nascosti)"
+        printable = " ".join(argv) if not secret else f"{argv[0]} (arguments hidden)"
         if self.dry_run:
-            self.log(f"    [simulazione] {printable}")
+            self.log(f"    [simulation] {printable}")
             return True, ""
 
         self.log(f"    $ {printable}")
@@ -92,21 +92,21 @@ class Runner:
                 stdin=None if stdin_text is not None else subprocess.DEVNULL,
                 env=self._env())
         except FileNotFoundError:
-            return False, f"Comando non trovato: {argv[0]}"
+            return False, f"Command not found: {argv[0]}"
         except subprocess.TimeoutExpired:
-            return False, f"Tempo scaduto ({timeout}s): {printable}"
+            return False, f"Timed out ({timeout}s): {printable}"
 
         out = (result.stdout or "").strip()
         err = (result.stderr or "").strip()
         if result.returncode != 0:
             # The actual error is almost always on stderr; if empty, fall back to
             # stdout because some tools (including psql) write there.
-            detail = err or out or f"uscita {result.returncode}"
+            detail = err or out or f"exit code {result.returncode}"
             if secret:
                 # Hiding only arguments is not enough: when a statement fails,
                 # PostgreSQL REPEATS it in the error, including the password. That
                 # message is shown to the user and sent to installation browsers.
-                return False, "comando fallito (dettagli omessi: contengono un segreto)"
+                return False, "command failed (details omitted: they contain a secret)"
             return False, detail
 
         if out and not check_output and not secret:
@@ -117,14 +117,14 @@ class Runner:
     def shell(self, command: str, timeout: int = 1800) -> Tuple[bool, str]:
         """Like :meth:`run`, but for a shell line (pipes and redirections)."""
         if self.dry_run:
-            self.log(f"    [simulazione] {command}")
+            self.log(f"    [simulation] {command}")
             return True, ""
         self.log(f"    $ {command}")
         try:
             result = subprocess.run(["bash", "-c", command], capture_output=True,
                                     text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
-            return False, f"Tempo scaduto ({timeout}s)"
+            return False, f"Timed out ({timeout}s)"
         if result.returncode != 0:
             return False, (result.stderr or result.stdout or "").strip()
         return True, (result.stdout or "").strip()
@@ -140,7 +140,7 @@ class Runner:
         credentials file is briefly readable by everyone.
         """
         if self.dry_run:
-            self.log(f"    [simulazione] scrittura {path} ({len(content)} byte, {oct(mode)})")
+            self.log(f"    [simulation] write {path} ({len(content)} bytes, {oct(mode)})")
             return True, ""
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -157,8 +157,8 @@ class Runner:
                     os.unlink(tmp)
                 raise
         except Exception as exc:  # noqa: BLE001 - the message is shown to the user
-            return False, f"Scrittura di {path} non riuscita: {exc}"
-        self.log(f"    scritto {path} ({oct(mode)})")
+            return False, f"Failed to write {path}: {exc}"
+        self.log(f"    wrote {path} ({oct(mode)})")
         return True, ""
 
     def copy(self, src: Path, dst: Path, mode: int = 0o644) -> Tuple[bool, str]:
@@ -172,7 +172,7 @@ class Runner:
         directory and rename it only after a complete, verified copy.
         """
         if self.dry_run:
-            self.log(f"    [simulazione] copia {src} → {dst}")
+            self.log(f"    [simulation] copy {src} → {dst}")
             return True, ""
         staging = dst.with_name(dst.name + ".tmp-setup")
         try:
@@ -187,8 +187,8 @@ class Runner:
             actual = staging.stat().st_size
             if actual != expected:
                 staging.unlink()
-                return False, (f"Copia incompleta: {actual} byte invece di {expected}. "
-                               "Spazio esaurito?")
+                return False, (f"Incomplete copy: {actual} bytes instead of {expected}. "
+                               "Out of disk space?")
             os.chmod(str(staging), mode)
             os.replace(str(staging), str(dst))
         except Exception as exc:  # noqa: BLE001
@@ -197,14 +197,14 @@ class Runner:
                     staging.unlink()
                 except OSError:
                     pass
-            return False, f"Copia di {src} non riuscita: {exc}"
-        self.log(f"    copiato {src.name} → {dst}")
+            return False, f"Failed to copy {src}: {exc}"
+        self.log(f"    copied {src.name} → {dst}")
         return True, ""
 
     def mkdir(self, path: Path, mode: int = 0o755,
               owner: Optional[Tuple[str, str]] = None) -> Tuple[bool, str]:
         if self.dry_run:
-            self.log(f"    [simulazione] cartella {path} ({oct(mode)})")
+            self.log(f"    [simulation] directory {path} ({oct(mode)})")
             return True, ""
         try:
             path.mkdir(parents=True, exist_ok=True)
@@ -212,5 +212,5 @@ class Runner:
             if owner:
                 shutil.chown(str(path), user=owner[0], group=owner[1])
         except Exception as exc:  # noqa: BLE001
-            return False, f"Creazione di {path} non riuscita: {exc}"
+            return False, f"Failed to create {path}: {exc}"
         return True, ""

@@ -1,386 +1,416 @@
-# Installazione su Linux — guida operativa
+# Installing on Linux — operations guide
 
-Wizard di installazione di Employee Scheduling come servizio su una macchina
-sempre accesa: Raspberry Pi, mini-PC o macchina virtuale.
+Wizard that installs Employee Scheduling as a service on an always-on machine:
+Raspberry Pi, mini-PC, or virtual machine.
 
-Usa **soltanto la libreria standard di Python**: non c'è niente da installare
-prima di poterlo lanciare, che su una macchina appena preparata è proprio il
-momento in cui farlo è più scomodo.
+It uses **only Python's standard library**: there is nothing to install before
+you can launch it, which on a freshly prepared machine is precisely when doing
+so is most awkward.
 
 ---
 
-## In breve
+## In short
 
 ```bash
-# 1. entra nel Raspberry
+# 1. log in to the Raspberry Pi
 ssh pi@raspberrypi.local
 
-# 2. scarica soltanto il piccolo installer Raspberry della Release
+# 2. download only the small Raspberry installer from the Release
 curl -fLO https://github.com/MirkoUgoliniDev/employee-scheduling/releases/latest/download/employee-scheduling-raspberry-installer.tar.gz
 mkdir employee-scheduling-installer
 tar -xzf employee-scheduling-raspberry-installer.tar.gz -C employee-scheduling-installer
 cd employee-scheduling-installer
 
-# 3. avvia il setup temporaneo; il JAR viene scaricato automaticamente
+# 3. start the temporary setup; the JAR is downloaded automatically
 sudo ./scripts/start-web-setup.sh
 ```
 
-Il comando mostra un indirizzo breve come `http://192.168.1.151:8899` e un codice
-temporaneo: apri l'indirizzo dal PC collegato alla stessa rete locale fidata e
-inserisci il codice nella pagina. Il codice cambia a ogni avvio e il server
-privilegiato si spegne automaticamente quando l'installazione termina. Dalla
-pagina puoi provare l'invio SMTP prima di installare e scegliere i dati
-dimostrativi.
+The command prints a short address such as `http://192.168.1.151:8899` and a
+temporary code: open the address from a PC on the same trusted local network and
+enter the code on the page. The code changes at every start, and the privileged
+server shuts down automatically once installation finishes. From the page you
+can test SMTP delivery before installing and choose whether to load the sample
+data.
 
-Il JAR è conservato in `/var/cache/employee-scheduling-installer` con il numero
-della Release: chiudere e riaprire il wizard non lo scarica nuovamente. Usa
-`sudo ./scripts/start-web-setup.sh --refresh` soltanto per forzare il download.
+The JAR is kept in `/var/cache/employee-scheduling-installer` under the Release
+number: closing and reopening the wizard does not download it again. Use
+`sudo ./scripts/start-web-setup.sh --refresh` only to force a fresh download.
 
-Per un'installazione di test, gli stessi dati dimostrativi portabili possono
-essere caricati sia su PostgreSQL sia su SQLite aggiungendo `--demo-data`:
+**The engine is chosen at launch, not on the page.** The launcher downloads the
+asset built for one engine and passes it to the wizard, so for SQLite start it
+with `sudo ./scripts/start-web-setup.sh --engine sqlite`. Selecting the other
+engine in the browser stops the installation at the System check, with the
+baked-engine mismatch — before anything on the machine is touched.
+
+For a test installation, the same portable sample data can be loaded on both
+PostgreSQL and SQLite by adding `--demo-data`:
 
 ```bash
 sudo ./scripts/install-linux.sh --engine postgresql --demo-data
 ```
 
-L'opzione crea sedi, operatori, specialisti, competenze e turni non assegnati,
-ma non crea utenti, password o configurazioni SMTP. È idempotente e nelle
-installazioni di produzione resta disattivata per impostazione predefinita.
+The option creates locations, employees, specialists, skills, and unassigned
+shifts, but it creates no users, passwords, or SMTP configuration. It is
+idempotent and stays disabled by default in production installations.
 
-L'archivio contiene gli script e il wizard web, ma non il codice applicativo. Il
-launcher scarica automaticamente da GitHub Releases il JAR compilato per il motore
-selezionato. Non servono il repository sorgente, Windows, `scp`, Maven o Node.js
-sul Raspberry.
+The archive contains the scripts and the web wizard, but not the application
+code. The launcher automatically downloads from GitHub Releases the JAR built
+for the selected engine. The source repository, Windows, `scp`, Maven, and
+Node.js are not needed on the Raspberry Pi.
 
-Per usare il wizard testuale o un pacchetto compilato manualmente resta
-disponibile la modalità avanzata:
+To use the text wizard or a manually built package, the advanced mode remains
+available:
 
 ```bash
-sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-1.2.2-SNAPSHOT-runner.jar
+sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-runner.jar
 ```
 
-> Il wizard manuale richiede l'intera cartella `setup/`, non il solo
-> `wizard.py`. L'archivio Raspberry ora la include già.
+> The manual wizard requires the whole `setup/` directory, not just
+> `wizard.py`. The Raspberry archive now already includes it.
 
-> ### `-Dquarkus.profile` non è opzionale
+> ### `-Dquarkus.profile` is not optional
 >
-> Il motore dati (`quarkus.datasource.db-kind`) e le cartelle delle migrazioni
-> Flyway sono fissati quando il jar viene **compilato**: nessuna variabile
-> d'ambiente può cambiarli dopo. Le conseguenze sono concrete:
+> The data engine (`quarkus.datasource.db-kind`) and the Flyway migration
+> directories are fixed when the jar is **built**: no environment variable can
+> change them afterwards. The consequences are concrete:
 >
-> - compilando per SQLite e installando con `--engine postgresql`, il servizio
->   parte e muore con *"Driver does not support the provided URL"*;
-> - compilando **senza** profilo il guasto è peggiore, perché è muto: il profilo
->   di default ha `quarkus.flyway.active=false`, quindi le migrazioni **non
->   girano affatto**. Su un'installazione nuova le tabelle non vengono create e
->   l'applicazione si comporta in modo inspiegabile, senza un solo errore che
->   punti alla causa.
+> - building for SQLite and installing with `--engine postgresql` makes the
+>   service start and die with *"Driver does not support the provided URL"*;
+> - building **without** a profile is worse, because the failure is silent: the
+>   default profile has `quarkus.flyway.active=false`, so the migrations **do not
+>   run at all**. On a fresh installation the tables are never created and the
+>   application behaves inexplicably, without a single error pointing at the
+>   cause.
 >
-> Il wizard legge il motore cablato dentro il jar e **rifiuta prima di toccare
-> la macchina** sia il motore sbagliato sia il pacchetto compilato senza profilo.
-> Usa `-Dquarkus.profile=sqlite` se installerai con `--engine sqlite`.
+> The wizard reads the engine baked into the jar and **refuses before touching
+> the machine** both the wrong engine and a package built without a profile.
+> Use `-Dquarkus.profile=sqlite` if you will install with `--engine sqlite`.
 >
-> Attenzione a un dettaglio che inganna: **Quarkus legge anche il file `.env`
-> in fase di compilazione**. Se nel progetto c'è un `.env` con
-> `QUARKUS_PROFILE=…`, il profilo viene applicato anche senza passarlo a Maven —
-> e su un clone pulito, dove quel file non c'è, lo stesso comando produce un jar
-> diverso. Passalo sempre esplicitamente.
+> Watch out for a detail that misleads: **Quarkus also reads the `.env` file at
+> build time**. If the project contains an `.env` with `QUARKUS_PROFILE=…`, the
+> profile is applied even without passing it to Maven — and on a clean clone,
+> where that file is absent, the same command produces a different jar. Always
+> pass it explicitly.
 
 ---
 
-## Le modalità
+## The modes
 
-| Comando | Quando serve |
+| Command | When it is useful |
 |---|---|
-| `sudo python3 setup/wizard.py --dry-run --jar …` | Mostra ogni comando che eseguirebbe **senza modificare niente**. Da qui conviene sempre partire. |
-| `sudo python3 setup/wizard.py --tui --jar …` | Installazione da terminale. È la modalità predefinita quando non si passa `--web`. |
-| `sudo python3 setup/wizard.py --web --jar …` | Interfaccia da browser, con i passi che avanzano in tempo reale. |
+| `sudo python3 setup/wizard.py --dry-run --jar …` | Shows every command it would run **without changing anything**. Always a good starting point. |
+| `sudo python3 setup/wizard.py --tui --jar …` | Installation from the terminal. This is the default mode when `--web` is not passed. |
+| `sudo python3 setup/wizard.py --web --jar …` | Browser interface, with steps advancing in real time. |
 
-### Modalità web locale o tramite tunnel SSH
+### Web mode: local network or SSH tunnel
 
-Il launcher consigliato espone temporaneamente la porta `8899` sulla rete locale
-e protegge ogni richiesta con un codice temporaneo mostrato nel terminale. Usalo
-solo su una rete fidata e non condividere il codice. Per mantenere il wizard accessibile
-**solo sulla macchina stessa**, avvialo con `--local-only`; dal tuo PC:
+The recommended launcher temporarily exposes port `8899` on the local network
+and protects every request with a temporary code shown in the terminal. Use it
+only on a trusted network and do not share the code. To keep the wizard
+reachable **only on the machine itself**, start it with `--local-only`; then
+from your PC:
 
 ```bash
 ssh -L 8899:localhost:8899 pi@raspberrypi.local
-# poi apri http://localhost:8899
+# then open http://localhost:8899
 ```
 
-La pagina esegue comandi **come root**. La chiave temporanea impedisce richieste
-casuali, ma il traffico resta HTTP: su una rete non fidata usa sempre il tunnel.
+The page runs commands **as root**. The temporary key blocks stray requests, but
+the traffic is still HTTP: on an untrusted network always use the tunnel.
 
-Nella pagina il form raccoglie motore dati, porta, percorso del pacchetto,
-cartella dati, dati dimostrativi e configurazione SMTP completa. Il pulsante di
-prova verifica DNS, connessione, STARTTLS, autenticazione e invio prima di
-modificare il servizio.
+On the page, the form collects data engine, port, package path, data directory,
+sample data, and the full SMTP configuration. The test button verifies DNS,
+connection, STARTTLS, authentication, and delivery before the service is
+modified.
 
-Lanciando `--web` insieme a `--dry-run`, la pagina **non può** avviare
-un'installazione vera: entrambi i pulsanti restano in simulazione.
-
----
-
-## Prerequisiti
-
-Molto pochi, ed è voluto:
-
-- **Linux con systemd** — Raspberry Pi OS, Debian, Ubuntu (ramo `apt`) oppure
-  Fedora, RHEL, Rocky, AlmaLinux (ramo `dnf`)
-- **Python 3** — già presente su tutte le distribuzioni citate
-- **Privilegi di root** (`sudo`)
-- **Il pacchetto `.jar`**, compilato altrove
-
-Java e PostgreSQL **non** sono prerequisiti: li installa il wizard.
-
-Il ramo `dnf` è il meno collaudato dei due, e su Fedora e RHEL c'è SELinux attivo
-di serie: la combinazione con `ProtectSystem=strict` potrebbe richiedere un
-aggiustamento delle etichette.
-
-### Perché il jar si compila sul PC e non qui
-
-Compilare richiede Maven, Node.js 20 o superiore e parecchi minuti di CPU. Su
-Debian bookworm — la base di Raspberry Pi OS — Node si ferma alla 18, che non
-basta per questo frontend.
+Running `--web` together with `--dry-run`, the page **cannot** start a real
+installation: both buttons stay in simulation.
 
 ---
 
-## Le opzioni
+## Prerequisites
 
-| Opzione | Predefinito | Cosa fa |
+Very few, and deliberately so:
+
+- **Linux with systemd** — Raspberry Pi OS, Debian, Ubuntu (`apt` branch) or
+  Fedora, RHEL, Rocky, AlmaLinux (`dnf` branch)
+- **Python 3** — already present on all the distributions listed above
+- **Root privileges** (`sudo`)
+- **The `.jar` package** — only for the manual wizard: the launcher and
+  `install-linux.sh` download it automatically
+
+Java and PostgreSQL are **not** prerequisites: the wizard installs them.
+
+The `dnf` branch is the less battle-tested of the two, and on Fedora and RHEL
+SELinux is enabled out of the box: combined with `ProtectSystem=strict` it may
+require adjusting the labels.
+
+### Why the jar is built on the PC and not here
+
+Building requires Maven, Node.js 20 or later, and several minutes of CPU. On
+Debian bookworm — the basis of Raspberry Pi OS — Node stops at 18, which is not
+enough for this frontend.
+
+---
+
+## The options
+
+| Option | Default | What it does |
 |---|---|---|
-| `--jar PERCORSO` | — | Il pacchetto da installare. **Obbligatorio.** |
-| `--engine postgresql\|sqlite` | `postgresql` | Motore dati. |
-| `--port N` | `8080` | Porta dell'applicazione. |
-| `--data-dir PERCORSO` | `/var/lib/employee-scheduling` | Backup, impostazioni e — solo con SQLite — il database. Deve essere assoluto e senza spazi. |
-| `--web` | — | Interfaccia da browser. |
-| `--tui` | — | Interfaccia da terminale (predefinita). |
-| `--web-port N` | `8899` | Porta del wizard, non dell'applicazione. |
-| `--dry-run` | — | Simula soltanto. |
-| `--yes`, `-y` | — | Non chiede conferma, per l'automazione. |
-| `--smtp-host`, `--smtp-user`, `--smtp-pass` | vuoti | Invio email. |
-| `--smtp-port` | `587` | Solo da riga di comando. |
-| `--smtp-from` | utente SMTP | Solo da riga di comando. |
+| `--jar PATH` | — | The package to install. **Mandatory in `--tui` mode**; in `--web` mode it can be typed on the page. |
+| `--engine postgresql\|sqlite` | `postgresql` | Data engine. |
+| `--port N` | `8080` | Application port. |
+| `--data-dir PATH` | `/var/lib/employee-scheduling` | Backups, settings, and — only with SQLite — the database. Must be absolute and without spaces. |
+| `--web` | — | Browser interface. |
+| `--tui` | — | Terminal interface (default). |
+| `--web-port N` | `8899` | Port of the wizard, not of the application. |
+| `--web-host ADDR` | `127.0.0.1` | Address the wizard listens on. `0.0.0.0` exposes it on the local network — this is what the launcher does. |
+| `--dry-run` | — | Simulate only. |
+| `--yes`, `-y` | — | Do not ask for confirmation, for automation. |
+| `--demo-data` | off | Loads the portable sample dataset on first startup. If omitted, the value is reused from the existing installation. |
+| `--smtp-host`, `--smtp-user`, `--smtp-pass` | empty | Email delivery. |
+| `--smtp-port` | `587` | Also settable on the web page. |
+| `--smtp-from` | SMTP username | Also settable on the web page. |
 
-Senza SMTP i codici di registrazione compaiono soltanto nel registro del
-servizio (`journalctl -u employee-scheduling`).
+Without SMTP, registration codes appear only in the service log
+(`journalctl -u employee-scheduling`).
 
-### Quale motore scegliere
+### Which engine to choose
 
-**SQLite** è un file solo, non ha servizi da mantenere e su un Raspberry consuma
-molto meno. Va bene per una struttura con poche persone che non modificano gli
-stessi turni nello stesso momento.
+**SQLite** is a single file, has no service to maintain, and consumes far less
+on a Raspberry Pi. It is fine for a structure with few people who do not edit
+the same shifts at the same time.
 
-**PostgreSQL** serve quando più persone lavorano insieme sulla pianificazione, ed
-è l'unico dei due che regge davvero l'accesso contemporaneo. È anche l'unico su
-cui funziona la registrazione con codice via email.
-
----
-
-## Cosa fa il wizard, passo per passo
-
-1. **Controllo del sistema** — privilegi, gestore pacchetti, systemd, spazio
-   libero, porta libera. Qui vengono validati anche **il pacchetto e la cartella
-   dati**: se qualcosa non va, il wizard si ferma *prima* di modificare
-   qualunque cosa, non a metà strada.
-2. **Java** — installa la 21, oppure la 17 dove la 21 non c'è. L'applicazione è
-   compilata per la 17, quindi la 17 basta. Saltato solo se è già presente Java
-   **17 o superiore**: con una versione più vecchia (8 o 11) il passo installa
-   comunque, senza rimuovere quella esistente.
-3. **Database** — solo con `--engine postgresql`: installa il servizio, crea
-   ruolo e database, e **prova davvero a connettersi** con le credenziali. Con
-   SQLite viene saltato.
-4. **Utente e cartelle** — utente di sistema senza shell, con la cartella dati
-   come home (non ne viene creata una propria). Crea la cartella dati e la
-   sottocartella `backups/`, entrambe con permessi `750`.
-5. **Applicazione** — copia il jar in `/opt/employee-scheduling`, di proprietà
-   di root e in sola lettura per il servizio.
-6. **Configurazione** — genera chiave di sessione e token di backup, scrive
-   `/etc/employee-scheduling.env` con permessi `640 root:employee-scheduling`.
-7. **Servizio** — unità systemd con avvio automatico, riavvio in caso di errore
-   e contenimento (`ProtectSystem=strict`, `ReadWritePaths`, `PrivateTmp`).
-8. **Verifica** — attende fino a tre minuti che l'applicazione risponda. Se il
-   servizio **muore**, il passo fallisce e stampa le ultime righe del registro.
-   Se invece è ancora vivo ma non ha finito di avviarsi, il passo viene
-   segnalato come *saltato*, non come errore: su hardware lento il primo avvio
-   può richiedere di più, e non c'è niente da correggere.
-
-Al primo fallimento il wizard si ferma: i passi dipendono l'uno dall'altro, e
-proseguire lascerebbe la macchina in uno stato peggiore di quello di partenza.
+**PostgreSQL** is needed when several people work on the schedule together, and
+it is the only one of the two that really handles concurrent access. It is also
+the only one on which registration with an emailed code works.
 
 ---
 
-## Dopo l'installazione
+## What the wizard does, step by step
+
+1. **System check** — privileges, package manager, systemd, free space, free
+   port. **The package and the data directory** are validated here too: if
+   something is wrong, the wizard stops *before* changing anything, not halfway
+   through.
+2. **Java** — installs 21, or 17 where 21 is unavailable. The application is
+   built for 17, so 17 is enough. Skipped only if Java **17 or later** is
+   already present: with an older version (8 or 11) the step installs anyway,
+   without removing the existing one.
+3. **Database** — only with `--engine postgresql`: installs the service, creates
+   the role and the database, and **actually tries to connect** with the
+   credentials. With SQLite it is skipped.
+4. **User and directories** — a system user without a shell, using the data
+   directory as its home (no private home is created). Creates the data
+   directory and the `backups/` subdirectory, both with `750` permissions.
+5. **Application** — copies the jar to `/opt/employee-scheduling`, owned by root
+   and read-only for the service.
+6. **Configuration** — generates the session key and the backup token, writes
+   `/etc/employee-scheduling.env` with `640 root:employee-scheduling`.
+7. **Service** — systemd unit with automatic startup, restart on failure, and
+   confinement (`ProtectSystem=strict`, `ReadWritePaths`, `PrivateTmp`).
+8. **Verification** — waits up to three minutes for the application to respond.
+   If the service **dies**, the step fails and prints the last lines of the log.
+   If instead it is still alive but has not finished starting, the step is
+   reported as *skipped*, not as an error: on slow hardware the first startup
+   can take longer, and there is nothing to fix.
+
+At the first failure the wizard stops: the steps depend on one another, and
+continuing would leave the machine in a worse state than it started in.
+
+---
+
+## After installation
 
 ```bash
-systemctl status employee-scheduling      # stato
-journalctl -u employee-scheduling -f      # registro in tempo reale
-systemctl restart employee-scheduling     # riavvio
+systemctl status employee-scheduling      # status
+journalctl -u employee-scheduling -f      # live log
+systemctl restart employee-scheduling     # restart
 ```
 
-L'applicazione risponde su `http://<indirizzo-del-server>:8080`, o sulla porta
-scelta con `--port`. **Il primo account che si registra diventa amministratore.**
+The application answers on `http://<server-address>:8080`, or on the port chosen
+with `--port`. **The first account that registers becomes the administrator.**
 
-### Dove stanno davvero i dati
+### Where the data actually lives
 
-Dipende dal motore, ed è la differenza che conta di più se un giorno devi
-spostare o salvare l'installazione.
+It depends on the engine, and it is the difference that matters most if one day
+you have to move or save the installation.
 
 | | SQLite | PostgreSQL |
 |---|---|---|
-| Database | `/var/lib/employee-scheduling/large_data.db` | nel cluster PostgreSQL (`/var/lib/postgresql/…`) |
-| Backup | `/var/lib/employee-scheduling/backups/` | idem (file `.dump`) |
-| Impostazioni backup | `/var/lib/employee-scheduling/` | idem |
-| Registro del servizio | journald | journald |
+| Database | `/var/lib/employee-scheduling/employee_scheduling.db` | in the PostgreSQL cluster (`/var/lib/postgresql/…`) |
+| Backups | `/var/lib/employee-scheduling/backups/` | same (`.dump` files) |
+| Backup settings | `/var/lib/employee-scheduling/` | same |
+| Service log | journald | journald |
 
-Con PostgreSQL, **copiare la cartella dati non porta via il database**: si porta
-via solo i backup. Il registro non viene scritto su file: si legge con
+With PostgreSQL, **copying the data directory does not take the database with
+it**: it only takes the backups. The log is not written to a file: read it with
 `journalctl -u employee-scheduling`.
 
-Se un servizio va in ciclo di riavvii, `systemctl status` può mostrarlo comunque
-come attivo per qualche istante: l'unità ha `Restart=on-failure` con dieci
-secondi di attesa. Il journal è l'unico posto dove il ciclo si vede.
+If a service enters a restart loop, `systemctl status` may still show it as
+active for a few moments: the unit has `Restart=on-failure` with a ten-second
+delay. The journal is the only place where the loop is visible.
 
-### Il token dei backup
+### The backup token
 
-L'amministrazione dei backup dall'interfaccia richiede un token, che il wizard
-genera ma **non mostra**. Si legge così:
+Administering backups from the interface requires a token, which the wizard
+generates but **does not display**. Read it like this:
 
 ```bash
 sudo grep BACKUP_ADMIN_TOKEN /etc/employee-scheduling.env
 ```
 
-Da un indirizzo diverso da `localhost` le chiamate di backup rispondono **426**
-finché il traffico non passa da HTTPS. Su un server headless in rete locale la
-via più semplice è lo stesso tunnel SSH che si usa per il wizard: dal punto di
-vista dell'applicazione la richiesta arriva da `localhost`, quindi passa.
+From an address other than `localhost`, backup calls answer **426** until the
+traffic goes over HTTPS. On a headless server in a local network, the simplest
+route is the same SSH tunnel used for the wizard: from the application's point
+of view the request comes from `localhost`, so it passes.
 
 ```bash
 ssh -L 8080:localhost:8080 pi@raspberrypi.local
-# poi apri http://localhost:8080 e la sezione backup funziona
+# then open http://localhost:8080 and the backup section works
 ```
 
-Le alternative sono un reverse proxy con certificato davanti all'applicazione,
-oppure — solo su una rete di cui ti fidi davvero — disattivare il requisito con
-`backup.admin.require-tls-for-remote=false`.
+The alternatives are a reverse proxy with a certificate in front of the
+application, or — only on a network you genuinely trust — disabling the
+requirement by adding `BACKUP_ADMIN_REQUIRE_TLS_FOR_REMOTE=false` to
+`/etc/employee-scheduling.env` and restarting the service. On an installed
+service that env file is the only writable place: the corresponding property,
+`backup.admin.require-tls-for-remote`, is baked into the jar.
 
-Con PostgreSQL i backup richiedono `pg_dump` e `pg_restore`. Il wizard avvisa se
-mancano, e in quel caso l'applicazione disattiva da sola backup e ripristino.
+With PostgreSQL, backups require `pg_dump` and `pg_restore`. The wizard warns if
+they are missing, and in that case the application disables backup and restore
+by itself.
 
 ---
 
-## Aggiornare
+## Updating
 
-Si rilancia lo stesso wizard con il pacchetto nuovo:
+Run the same wizard again with the new package:
 
 ```bash
 sudo python3 setup/wizard.py --tui --yes --jar ~/employee-scheduling-1.3.0-runner.jar
 ```
 
-Il wizard riconosce che la porta è occupata dal **proprio** servizio e procede
-come aggiornamento. Non serve ripetere le opzioni: **motore, porta e cartella
-dati vengono ripresi dall'installazione esistente** e il wizard lo dichiara
-prima di partire. Indicarli esplicitamente li cambia.
+The wizard recognizes that the port is held by **its own** service and proceeds
+as an update. There is no need to repeat the options: **engine, port, and data
+directory are reused from the existing installation**, and the wizard says so
+before starting. Specifying them explicitly changes them — and that is exactly
+what `start-web-setup.sh` does with the engine, which it always passes: on an
+SQLite installation, re-run it with `--engine sqlite` or it falls back to
+PostgreSQL.
 
-Vengono riusate anche **la chiave di sessione e la password del database**:
-nessuno viene disconnesso e nulla si disallinea.
+**The session key and the database password** are reused too: nobody is logged
+out and nothing falls out of sync.
 
-Il pacchetto precedente viene rimosso da `/opt/employee-scheduling` se ha un
-nome diverso da quello nuovo, per non lasciare due jar in cartella.
+The previous package is removed from `/opt/employee-scheduling` if its name
+differs from the new one, so two jars are not left in the directory.
 
-Le migrazioni dello schema si applicano da sole al primo avvio. Come per ogni
-cambio di schema, conviene avere un backup recente.
+Schema migrations apply themselves on the first startup. As with every schema
+change, it is wise to have a recent backup.
 
 ---
 
-## Se qualcosa non va
+## If something goes wrong
 
-Il wizard scrive tutto in `/var/log/employee-scheduling-setup.log`: ogni comando
-eseguito e il suo esito. In modalità web è l'unica traccia che resta dopo aver
-chiuso il browser.
+The wizard writes everything to `/var/log/employee-scheduling-setup.log`: every
+command executed and its outcome. In web mode it is the only trace left after
+closing the browser.
 
-**"Un'altra installazione è già in corso"** — un wizard è rimasto aperto, magari
-in una sessione SSH caduta. Il lock è `/var/run/employee-scheduling-setup.lock`
-e contiene il PID: se quel processo non esiste più, il wizard lo recupera da
-solo al rilancio.
+**"Another installation is already in progress"** — a wizard was left open,
+perhaps in a dropped SSH session. The lock is
+`/var/run/employee-scheduling-setup.lock` and contains the PID: if that process
+no longer exists, the wizard recovers it by itself on the next run.
 
-**"Il pacchetto è compilato per X ma stai installando con motore Y"** — ricompila
-il jar con `-Dquarkus.profile=Y`. Nulla è stato modificato sulla macchina.
+**"The package is built for X but you are installing with engine Y"** — rebuild
+the jar with `-Dquarkus.profile=Y`. Nothing was changed on the machine.
 
-**Il servizio non parte** — la diagnosi è quasi sempre nelle ultime righe:
+**The service does not start** — the diagnosis is almost always in the last
+lines:
 ```bash
 journalctl -u employee-scheduling -n 60 --no-pager
 ```
 
-**Connessione al database rifiutata** — manca la riga per le connessioni locali
-in `pg_hba.conf`:
+**Database connection refused** — the line for local connections is missing from
+`pg_hba.conf`:
 ```
 host all all 127.0.0.1/32 scram-sha-256
 ```
 
-**La porta 8080 è occupata da un altro programma** — installa su un'altra porta
-con `--port 8090`. Sotto la 1024 non si può andare: il servizio gira senza
-privilegi e non potrebbe occuparla.
+**Port 8080 is used by another program** — install on another port with
+`--port 8090`. Below 1024 is not possible: the service runs unprivileged and
+could not bind there.
 
-**"Un'installazione di pacchetti precedente è rimasta a metà"** — è successo che
-un `apt` sia stato interrotto. Non si risolve rilanciando il wizard:
+**"A previous package installation was left halfway through"** — an `apt` run
+was interrupted. Running the wizard again does not fix it:
 ```bash
 sudo dpkg --configure -a
 ```
 
-**"PostgreSQL risulta avviato ma il server non risponde"** — su Debian
-`postgresql.service` è solo un contenitore: il server vero è il cluster.
+**"PostgreSQL appears started but the server does not respond"** — on Debian
+`postgresql.service` is only a wrapper: the real server is the cluster.
 ```bash
-pg_lsclusters                       # vedi lo stato reale
-sudo pg_ctlcluster 15 main start    # avvialo
+pg_lsclusters                       # see the real status
+sudo pg_ctlcluster 15 main start    # start it
 ```
 
-**Cartella dati su un disco esterno** — il wizard rifiuta di installare se il
-disco non risulta montato, perché altrimenti i dati finirebbero sulla scheda e
-sparirebbero dietro il mount al primo riavvio. L'unità systemd generata attende
-il montaggio prima di avviare il servizio.
+**Data directory on an external disk** — the wizard refuses to install if a data
+directory **under `/mnt/` or `/media/`** is not mounted, because otherwise the
+data would land on the SD card and disappear behind the mount at the first
+reboot. A disk mounted elsewhere (for example `/srv/data`) is not checked. The
+unit generated by the Python wizard waits for the mount before starting the
+service (`RequiresMountsFor`); the one written by `install-linux.sh` does not.
 
 ---
 
-## Disinstallare
+## Uninstalling
 
 ```bash
-sudo ./scripts/uninstall-linux.sh            # rimuove servizio e applicazione, TIENE i dati
-sudo ./scripts/uninstall-linux.sh --purge    # rimuove anche dati, backup e database
+sudo /opt/employee-scheduling/uninstall-linux.sh            # removes service and application, KEEPS the data
+sudo /opt/employee-scheduling/uninstall-linux.sh --purge    # removes everything, see below
 ```
 
-Senza `--purge` restano la cartella dati, l'utente di servizio e il file di
-configurazione — quest'ultimo perché contiene ancora la password del database in
-uso. Reinstallando, l'applicazione ritrova tutto com'era.
+Both installers copy the uninstaller next to the application, so it stays
+available even after the extracted installer archive is gone. From the
+repository, `sudo ./scripts/uninstall-linux.sh` is equivalent.
 
-`--purge` chiede di scrivere `DELETE` per esteso: non è reversibile. Aggiungendo
-`--yes` non chiede nulla.
+`--purge` also removes the data directory, the backups, the database **and its
+PostgreSQL role**, the configuration file, the service user, and the installer
+cache in `/var/cache/employee-scheduling-installer`.
 
----
+Without `--purge`, the data directory, the service user, and the configuration
+file remain — the last one because it still contains the password of the
+database in use. On reinstall, the application finds everything as it was.
 
-## Sicurezza
-
-Il traffico è in **HTTP, non cifrato**: va bene su una rete locale fidata. Se
-l'applicazione deve essere raggiungibile da fuori, mettila dietro un reverse
-proxy con certificato — nginx o Caddy — e non esporre la porta direttamente.
-
-Il file `/etc/employee-scheduling.env` contiene la password del database, la
-chiave di sessione e il token dei backup. È `640 root:employee-scheduling` e non
-va copiato altrove né messo sotto controllo di versione.
+`--purge` asks you to type `DELETE` in full: it is not reversible. Adding
+`--yes` skips every question.
 
 ---
 
-## Installazione consigliata: script shell
+## Security
 
-Per un'installazione rapida o automatizzata resta disponibile
-`scripts/install-linux.sh`, che fa le stesse cose in una riga sola:
+The traffic is **plain HTTP, not encrypted**: fine on a trusted local network.
+If the application must be reachable from outside, put it behind a reverse proxy
+with a certificate — nginx or Caddy — and do not expose the port directly.
+
+The file `/etc/employee-scheduling.env` contains the database password, the
+session key, and the backup token. It is `640 root:employee-scheduling` and must
+not be copied elsewhere or placed under version control.
+
+---
+
+## Recommended installation: shell script
+
+For a quick or automated installation, `scripts/install-linux.sh` remains
+available and does the same things in a single line:
 
 ```bash
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-Senza `--jar` scarica automaticamente l'ultima Release compilata per il motore
-scelto. Accetta anche `--from-source` (compila sul posto: lento su un Raspberry
-e richiede Node 20+) e `--no-service` (non registra il servizio systemd).
+Without `--jar` it uses a jar already present in `target/`, and only if there is
+none does it download the latest Release built for the chosen engine. It also
+accepts `--from-source` (builds in place: slow on a
+Raspberry Pi and requires Node 20+) and `--no-service` (does not register the
+systemd service).
 
-Il wizard resta disponibile per installazioni manuali con un JAR locale.
+The wizard remains available for manual installations with a local JAR.

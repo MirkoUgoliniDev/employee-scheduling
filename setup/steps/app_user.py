@@ -23,8 +23,8 @@ def _user_exists(name: str) -> bool:
 
 class AppUserStep(Step):
     def __init__(self):
-        super().__init__("Utente e cartelle",
-                         "Utente di sistema dedicato e cartella dei dati")
+        super().__init__("User and directories",
+                         "Dedicated system user and data directory")
 
     def execute(self, runner, sysinfo, config: dict) -> bool:
         self.start()
@@ -38,17 +38,17 @@ class AppUserStep(Step):
         # simulation would report one thing and installation would do another.
         ok, out = runner.run(["id", SERVICE_USER], check_output=True)
         if runner.dry_run:
-            runner.log(f"    [simulazione] l'utente {SERVICE_USER} "
-                       f"{'esiste gia' if _user_exists(SERVICE_USER) else 'verrebbe creato'}")
+            runner.log(f"    [simulation] user {SERVICE_USER} "
+                       f"{'already exists' if _user_exists(SERVICE_USER) else 'would be created'}")
         elif ok:
-            runner.log(f"    utente {SERVICE_USER} gia' presente")
+            runner.log(f"    user {SERVICE_USER} already present")
         else:
             ok, err = runner.run(["useradd", "--system", "--no-create-home",
                                   "--home-dir", str(data_dir),
                                   "--shell", "/usr/sbin/nologin", SERVICE_USER])
             if not ok:
-                return self.fail(f"Creazione dell'utente di servizio non riuscita: {err}")
-            runner.log(f"    utente {SERVICE_USER} creato")
+                return self.fail(f"Creating the service user failed: {err}")
+            runner.log(f"    user {SERVICE_USER} created")
 
         # 750: the service writes, the group reads, and others have no access.
         # The database and backups — personnel data — are stored here.
@@ -60,7 +60,7 @@ class AppUserStep(Step):
         if not runner.dry_run:
             ok, err = runner.run(["chown", "-R", f"{SERVICE_USER}:{SERVICE_USER}", str(data_dir)])
             if not ok:
-                return self.fail(f"Assegnazione della proprieta' non riuscita: {err}")
+                return self.fail(f"Assigning ownership failed: {err}")
 
         config["data_dir"] = str(data_dir)
-        return self.done(f"Dati in {data_dir}")
+        return self.done(f"Data in {data_dir}")

@@ -34,7 +34,7 @@ def setup_file_logging() -> None:
         LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
         logging.basicConfig(filename=str(LOG_FILE), level=logging.DEBUG,
                             format="%(asctime)s %(levelname)s %(message)s")
-        logging.info("=== Wizard Employee Scheduling v%s avviato ===", WIZARD_VERSION)
+        logging.info("=== Employee Scheduling wizard v%s started ===", WIZARD_VERSION)
     except OSError:
         pass  # proceed without a log: this is not a reason to block installation
 
@@ -42,36 +42,36 @@ def setup_file_logging() -> None:
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         prog="wizard.py",
-        description="Installa Employee Scheduling come servizio su Linux.")
+        description="Install Employee Scheduling as a service on Linux.")
     parser.add_argument("--web", action="store_true",
-                        help=f"interfaccia da browser sulla porta {WEB_PORT}")
+                        help=f"browser interface on port {WEB_PORT}")
     parser.add_argument("--tui", action="store_true",
-                        help="interfaccia testuale (predefinita senza --web)")
+                        help="text interface (default when --web is absent)")
     parser.add_argument("--dry-run", action="store_true",
-                        help="mostra cosa farebbe senza modificare nulla")
-    parser.add_argument("--jar", default="", help="pacchetto da installare")
+                        help="show what it would do without changing anything")
+    parser.add_argument("--jar", default="", help="package to install")
     # Default to None rather than the constant value to distinguish "not given"
     # from "explicitly set to the default." During an update, omitted values
     # must be recovered from the existing installation rather than reset to
     # factory defaults — see resolve_existing().
     parser.add_argument("--engine", choices=("postgresql", "sqlite"), default=None,
-                        help=f"motore dati (predefinito: {DEFAULT_ENGINE})")
+                        help=f"data engine (default: {DEFAULT_ENGINE})")
     parser.add_argument("--port", type=int, default=None,
-                        help=f"porta dell'applicazione (predefinito: {DEFAULT_PORT})")
+                        help=f"application port (default: {DEFAULT_PORT})")
     parser.add_argument("--data-dir", default=None,
-                        help=f"dati, backup e database (predefinito: {DATA_DIR})")
+                        help=f"data, backups, and database (default: {DATA_DIR})")
     parser.add_argument("--web-port", type=int, default=WEB_PORT)
     parser.add_argument("--web-host", default="127.0.0.1",
-                        help="indirizzo del wizard (predefinito: solo localhost)")
+                        help="wizard address (default: localhost only)")
     parser.add_argument("--smtp-host", default="")
     parser.add_argument("--smtp-port", type=int, default=587)
     parser.add_argument("--smtp-user", default="")
     parser.add_argument("--smtp-pass", default="")
     parser.add_argument("--smtp-from", default="")
     parser.add_argument("--demo-data", action="store_const", const=True, default=None,
-                        help="carica il dataset dimostrativo al primo avvio")
+                        help="load the sample dataset on first startup")
     parser.add_argument("--yes", "-y", action="store_true",
-                        help="non chiedere conferma (per l'automazione)")
+                        help="do not ask for confirmation (for automation)")
     return parser.parse_args(argv)
 
 
@@ -140,7 +140,7 @@ def run_steps(steps, runner, sysinfo, config, on_status=None) -> bool:
         if on_status:
             step.set_callback(on_status)
         if abort.is_set():
-            step.skip("Interrotto dall'utente")
+            step.skip("Interrupted by the user")
             continue
 
         runner.log("")
@@ -150,14 +150,14 @@ def run_steps(steps, runner, sysinfo, config, on_status=None) -> bool:
         except Exception as exc:  # noqa: BLE001
             # An unexpected exception must not appear as a Python traceback: turn
             # it into a failed step, with details in the log.
-            logging.exception("Eccezione nel passo %s", step.name)
-            ok = step.fail(f"Errore imprevisto: {exc}",
-                           f"Dettagli completi in {LOG_FILE}")
+            logging.exception("Exception in step %s", step.name)
+            ok = step.fail(f"Unexpected error: {exc}",
+                           f"Full details in {LOG_FILE}")
 
         if step.status == Status.SKIPPED:
-            runner.log(f"   {STEP_ICONS[Status.SKIPPED]} saltato: {step.message}")
+            runner.log(f"   {STEP_ICONS[Status.SKIPPED]} skipped: {step.message}")
         elif ok:
-            runner.log(f"   {STEP_ICONS[Status.DONE]} {step.message or 'fatto'}")
+            runner.log(f"   {STEP_ICONS[Status.DONE]} {step.message or 'done'}")
         else:
             runner.log(f"   {STEP_ICONS[Status.FAILED]} {step.message}")
             return False
@@ -168,24 +168,24 @@ def print_summary(config, sysinfo, dry_run: bool) -> None:
     ip = sysinfo.primary_ip() or "localhost"
     print("")
     print("=" * 54)
-    print("  Installazione completata" if not dry_run else "  Simulazione conclusa (nulla e' stato modificato)")
+    print("  Installation completed" if not dry_run else "  Simulation finished (nothing was changed)")
     print("=" * 54)
-    print(f"  Motore dati   : {config.get('engine')}")
-    print(f"  Dati e backup : {config.get('data_dir')}")
-    print(f"  Indirizzo     : http://{ip}:{config.get('port')}")
+    print(f"  Data engine     : {config.get('engine')}")
+    print(f"  Data and backups: {config.get('data_dir')}")
+    print(f"  Address         : http://{ip}:{config.get('port')}")
     print("")
-    print(f"  Registro      : journalctl -u {SERVICE_NAME} -f")
-    print(f"  Stato         : systemctl status {SERVICE_NAME}")
+    print(f"  Log             : journalctl -u {SERVICE_NAME} -f")
+    print(f"  Status          : systemctl status {SERVICE_NAME}")
     # Absolute path to what was installed on the machine, not a repository-
     # relative path: the repository may be gone when this is needed.
-    print(f"  Disinstalla   : sudo {config.get('uninstaller', './scripts/uninstall-linux.sh')}")
+    print(f"  Uninstall       : sudo {config.get('uninstaller', './scripts/uninstall-linux.sh')}")
     print("")
     if not dry_run:
-        print("  Il primo account che si registra diventa amministratore.")
+        print("  The first account that registers becomes the administrator.")
         print("")
-        print("  Il traffico e' in HTTP, non cifrato: va bene su una rete locale")
-        print("  fidata. Per esporlo fuori, mettilo dietro un reverse proxy con")
-        print("  certificato.")
+        print("  Traffic is plain HTTP, not encrypted: fine on a trusted local")
+        print("  network. To expose it outside, put it behind a reverse proxy")
+        print("  with a certificate.")
     print("")
 
 
@@ -193,34 +193,38 @@ def print_summary(config, sysinfo, dry_run: bool) -> None:
 def run_tui(steps, runner, sysinfo, config, assume_yes: bool) -> int:
     print("")
     print("=" * 54)
-    print(f"  Employee Scheduling — wizard di installazione v{WIZARD_VERSION}")
+    print(f"  Employee Scheduling — installation wizard v{WIZARD_VERSION}")
     print("=" * 54)
     for key, value in sysinfo.summary().items():
         print(f"  {key:14}: {value}")
     print("")
-    print(f"  Motore dati   : {config['engine']}")
-    print(f"  Porta         : {config['port']}")
-    print(f"  Cartella dati : {config['data_dir']}")
-    print(f"  Pacchetto     : {config['jar'] or '(non indicato)'}")
+    print(f"  Data engine   : {config['engine']}")
+    print(f"  Port          : {config['port']}")
+    print(f"  Data directory: {config['data_dir']}")
+    print(f"  Package       : {config['jar'] or '(not specified)'}")
     if config.get("reused_settings"):
         print("")
-        print("  Trovata un'installazione esistente: motore, porta e cartella dati")
-        print("  sono stati ripresi da quella. Per cambiarli indicali esplicitamente.")
+        print("  An existing installation was found: engine, port, and data directory")
+        print("  were reused from it. To change them, specify them explicitly.")
     if runner.dry_run:
         print("")
-        print("  SIMULAZIONE: nessuna modifica verra' applicata.")
+        print("  SIMULATION: no change will be applied.")
     print("")
 
     if not assume_yes and not runner.dry_run:
         try:
-            answer = input("  Procedere? [s/N]: ").strip().lower()
+            answer = input("  Proceed? [y/N]: ").strip().lower()
         except EOFError:
             # No interactive terminal (scripted execution): stop instead of
             # installing without anyone explicitly asking for it.
-            print("  Nessuna risposta possibile: usa --yes per procedere senza conferma.")
+            print("  No answer is possible: use --yes to proceed without confirmation.")
             return 1
-        if answer not in ("s", "si", "sì", "y", "yes"):
-            print("  Annullato.")
+        # The prompt says [y/N], but the Italian synonyms are still accepted: the
+        # operators installing this typed "s" until today, and a refusal here is
+        # silent — it prints "Cancelled" and returns 0, so a wrapper script would
+        # see a successful run that installed nothing.
+        if answer not in ("y", "yes", "s", "si", "sì"):
+            print("  Cancelled.")
             return 0
 
     ok = run_steps(steps, runner, sysinfo, config)
@@ -228,8 +232,8 @@ def run_tui(steps, runner, sysinfo, config, assume_yes: bool) -> int:
         print_summary(config, sysinfo, runner.dry_run)
         return 0
     print("")
-    print("  Installazione interrotta. Correggi il problema e rilancia il wizard:")
-    print("  i passi gia' completati si riconoscono da soli e non vengono rifatti.")
+    print("  Installation stopped. Fix the problem and run the wizard again:")
+    print("  steps already completed detect themselves and are not repeated.")
     return 1
 
 
@@ -242,7 +246,7 @@ def main(argv=None) -> int:
     config = config_from_args(args)
 
     if os.name != "posix":
-        print("Questo wizard installa un servizio Linux. Su Windows usa install-windows.ps1.")
+        print("This wizard installs a Linux service. On Windows use install-windows.ps1.")
         return 1
 
     # Command-line simulation changes nothing, so it needs no lock: users should
@@ -255,16 +259,16 @@ def main(argv=None) -> int:
     # nonexistent PID, and asked to delete a nonexistent file. The actual problem
     # was only a forgotten sudo.
     if not sysinfo.is_root:
-        print("Servono i privilegi di root.")
-        print(f"  Rilancialo con: sudo python3 {' '.join(sys.argv)}")
+        print("Root privileges are required.")
+        print(f"  Run it again with: sudo python3 {' '.join(sys.argv)}")
         return 1
 
     needs_lock = args.web or not args.dry_run
     lock = SetupLock(LOCK_FILE)
     if needs_lock and not lock.acquire():
         pid = lock.owner_pid()
-        print(f"Un'altra installazione e' gia' in corso (processo {pid}).")
-        print(f"Se sei sicuro che non lo sia, rimuovi {LOCK_FILE} e riprova.")
+        print(f"Another installation is already in progress (process {pid}).")
+        print(f"If you are sure it is not, remove {LOCK_FILE} and try again.")
         return 1
 
     try:
@@ -276,7 +280,7 @@ def main(argv=None) -> int:
         return run_tui(steps, runner, sysinfo, config, assume_yes=args.yes)
     except KeyboardInterrupt:
         get_abort_event().set()
-        print("\n  Interrotto.")
+        print("\n  Interrupted.")
         return 130
     finally:
         lock.release()

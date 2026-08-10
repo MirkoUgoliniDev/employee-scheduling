@@ -131,11 +131,11 @@ class SystemInfo:
 
     def summary(self) -> dict:
         return {
-            "modello": self.model,
-            "sistema": self.os_name,
-            "architettura": self.arch,
-            "memoria": f"{self.ram_mb} MB" if self.ram_mb else "sconosciuta",
-            "spazio libero": f"{self.disk_free_mb} MB" if self.disk_free_mb else "sconosciuto",
-            "java": str(self.java_major) if self.java_major else "assente",
-            "systemd": "si" if self.has_systemd else "no",
+            "model": self.model,
+            "system": self.os_name,
+            "architecture": self.arch,
+            "memory": f"{self.ram_mb} MB" if self.ram_mb else "unknown",
+            "free space": f"{self.disk_free_mb} MB" if self.disk_free_mb else "unknown",
+            "java": str(self.java_major) if self.java_major else "absent",
+            "systemd": "yes" if self.has_systemd else "no",
         }

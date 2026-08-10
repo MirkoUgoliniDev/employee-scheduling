@@ -4,6 +4,11 @@ from lib.constants import JAVA_MIN_MAJOR, JAVA_PACKAGES
 from lib.step_base import Step
 
 
+#: Fallback hint when the apt error matches no known cause. Named because the
+#: caller recognizes it to substitute a more specific suggestion.
+GENERIC_APT_HINT = "Check the network connection and the configured repositories."
+
+
 def _apt_hint(error: str) -> str:
     """Hint tailored to the actual apt error.
 
@@ -14,28 +19,28 @@ def _apt_hint(error: str) -> str:
     """
     lowered = error.lower()
     if "dpkg was interrupted" in lowered or "dpkg --configure" in lowered:
-        return ("Un'installazione di pacchetti precedente e' rimasta a meta'. "
-                "Esegui prima: sudo dpkg --configure -a")
+        return ("A previous package installation was left halfway through. "
+                "Run this first: sudo dpkg --configure -a")
     if "could not get lock" in lowered or "unable to acquire" in lowered:
-        return ("Un altro programma sta usando apt (di solito l'aggiornamento "
-                "automatico). Attendi qualche minuto e rilancia.")
-    return "Controlla la connessione di rete e i repository configurati."
+        return ("Another program is using apt (usually the automatic update). "
+                "Wait a few minutes and run again.")
+    return GENERIC_APT_HINT
 
 
 class JavaStep(Step):
     def __init__(self):
-        super().__init__("Java", f"Ambiente di esecuzione {JAVA_MIN_MAJOR} o superiore")
+        super().__init__("Java", f"Runtime environment {JAVA_MIN_MAJOR} or later")
 
     def execute(self, runner, sysinfo, config: dict) -> bool:
         self.start()
 
         if sysinfo.java_major >= JAVA_MIN_MAJOR:
-            return self.skip(f"Java {sysinfo.java_major} gia' presente")
+            return self.skip(f"Java {sysinfo.java_major} already present")
 
         if sysinfo.package_manager == "apt":
             ok, err = runner.run(["apt-get", "update", "-q", "-o", "DPkg::Lock::Timeout=600"])
             if not ok:
-                return self.fail(f"Aggiornamento dell'elenco pacchetti non riuscito: {err}",
+                return self.fail(f"Package list update failed: {err}",
                                  _apt_hint(err))
 
         # Try 21 first and fall back to 17: Debian bookworm — the basis of
@@ -43,7 +48,7 @@ class JavaStep(Step):
         # fails and is not an error to report.
         last_error = ""
         for package in JAVA_PACKAGES:
-            runner.log(f"    tentativo con {package}")
+            runner.log(f"    trying {package}")
             if sysinfo.package_manager == "apt":
                 ok, err = runner.run(["apt-get", "install", "-y", "-q", "-o", "DPkg::Lock::Timeout=600",
                                       "-o", "Dpkg::Options::=--force-confold", package])
@@ -55,18 +60,18 @@ class JavaStep(Step):
                 # here would report a false failure on a machine that simply
                 # does not have Java yet — the normal reason for simulating.
                 if runner.dry_run:
-                    return self.done(f"Verrebbe installato {package}")
+                    return self.done(f"{package} would be installed")
                 # Do not trust only the package manager's result: verify that
                 # Java actually responds and determine its version.
                 sysinfo.java_major = sysinfo.detect_java_major()
                 if sysinfo.java_major >= JAVA_MIN_MAJOR:
-                    return self.done(f"Java {sysinfo.java_major} installato")
-                last_error = (f"{package} installato ma java riporta la versione "
-                              f"{sysinfo.java_major or 'sconosciuta'}")
+                    return self.done(f"Java {sysinfo.java_major} installed")
+                last_error = (f"{package} installed but java reports version "
+                              f"{sysinfo.java_major or 'unknown'}")
             else:
                 last_error = err
 
         hint = _apt_hint(last_error)
-        if hint.startswith("Controlla"):
-            hint = f"Installa a mano un JRE {JAVA_MIN_MAJOR}+ e rilancia il wizard."
-        return self.fail(f"Installazione di Java non riuscita. {last_error}", hint)
+        if hint == GENERIC_APT_HINT:
+            hint = f"Install a JRE {JAVA_MIN_MAJOR}+ manually and run the wizard again."
+        return self.fail(f"Java installation failed. {last_error}", hint)
