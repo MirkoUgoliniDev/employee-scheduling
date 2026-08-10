@@ -75,8 +75,9 @@ against a real server.
 
 **The first three checks do not look at `setup/`.** The wizard is Python: it is neither
 compiled nor imported by Maven or tsc, so a broken f-string there passes them all in
-silence. The fourth check is the one that catches it, and it is the pair CI runs in
-`.github/workflows/release.yml`.
+silence. The fourth check is the one that catches it, and `.github/workflows/release.yml`
+runs both halves of it — `compileall` over `setup` and `scripts/test-smtp.py`, then
+`wizard.py --help`, which is what exercises the `argparse` definitions.
 
 ## Authentication and roles
 
@@ -238,6 +239,7 @@ To be anonymized, in every database:
 | `email_log` | `sent_to`, `filename` (the PDF file name contains first and last name) |
 | `email_settings` | `host`, `username`, `password`, `mail_from` — **a working SMTP credential** |
 | `app_users` | **empty it completely**: `password_hash` is a credential, and an existing ADMIN prevents first boot from creating the administrator, locking whoever installs the application out of their own instance |
+| `pdf_templates` | `logo_data_url` — **the customer's logo, as a base64 PNG**, plus `header_text` and `footer_text` |
 
 Rules learned in the field:
 
@@ -256,6 +258,15 @@ Rules learned in the field:
    other than `example.com` (the placeholders `esempio.it`/`exemple.fr`/`ejemplo.es`/
    `beispiel.de` are UI translation text, not data).
 6. **A dated backup outside the repo** before starting: anonymization is not reversible.
+7. **Look for embedded binaries, not only for text.** `pdf_templates.logo_data_url` held the
+   logo of a real public health authority for several releases — 19KB of base64 in a settings
+   table. Every check above missed it: a table-by-table read of names and emails does not look
+   at a settings row, and `grep -a` on strings cannot see a name that exists only as pixels in
+   a PNG. It is also third-party trademarked material, which Apache-2.0 does not let us
+   redistribute. Sweep for it explicitly — `SELECT` every column matching `%data:image%` or
+   `%base64%` across every table, then **decode and look at** what you find — and replace it
+   with a neutral placeholder rather than an empty string, because the column is `NOT NULL` and
+   the PDF path feeds it straight to jsPDF.
 
 ## Localizations: one place, two databases
 
