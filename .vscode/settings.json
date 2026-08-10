@@ -16,7 +16,7 @@
       "id": "quarkus_dev",
       "name": "Quarkus SQLite Dev Mode",
       "text": "$(database) SQLite Dev",
-      "tooltip": "Avvia Quarkus in Dev Mode con SQLite",
+      "tooltip": "Start Quarkus in dev mode on SQLite",
       "alignment": "left",
       "priority": 100,
       "command": "workbench.action.tasks.runTask",
@@ -28,7 +28,7 @@
       "id": "quarkus_dev_postgresql",
       "name": "Quarkus PostgreSQL Dev Mode",
       "text": "$(database) PostgreSQL Dev",
-      "tooltip": "Avvia Quarkus in Dev Mode con PostgreSQL",
+      "tooltip": "Start Quarkus in dev mode on PostgreSQL",
       "alignment": "left",
       "priority": 99,
       "command": "workbench.action.tasks.runTask",
@@ -40,7 +40,7 @@
       "id": "package_msi",
       "name": "Packaging MSI",
       "text": "$(package) MSI",
-      "tooltip": "Compila frontend/backend e genera l'MSI",
+      "tooltip": "Build front end and back end, then produce the MSI",
       "alignment": "left",
       "priority": 96,
       "command": "workbench.action.tasks.runTask",
@@ -76,7 +76,7 @@
       "id": "open_app",
       "name": "Open App",
       "text": "$(globe) Open App",
-      "tooltip": "Apri l'app su http://localhost:8080",
+      "tooltip": "Open the application at http://localhost:8080",
       "alignment": "left",
       "priority": 97,
       "command": "vscode.open",
@@ -86,14 +86,14 @@
     },
     {
       "id": "free_port_8080",
-      "name": "Libera porta 8080",
-      "text": "$(debug-disconnect) Libera 8080",
-      "tooltip": "Termina il processo che occupa la porta 8080",
+      "name": "Free port 8080",
+      "text": "$(debug-disconnect) Free 8080",
+      "tooltip": "Kill the process holding port 8080",
       "alignment": "left",
       "priority": 98,
       "command": "workbench.action.tasks.runTask",
       "arguments": [
-        "Server: Libera porta 8080"
+        "Server: Free port 8080"
       ]
     }
   ],

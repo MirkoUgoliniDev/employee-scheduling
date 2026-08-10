@@ -1,10 +1,17 @@
-# Installation — Employee Scheduling
+# Installing on Windows
 
-**Detailed** installation guide for Windows 11 and Linux, with automated wizards.
+Installing Employee Scheduling on Windows 11, and the manual build that produces the package.
+
+| If you are installing on | Read |
+|---|---|
+| Windows 11 | This document |
+| Linux, any flavour | [`INSTALLATION-LINUX.md`](INSTALLATION-LINUX.md) |
+| A headless Raspberry Pi | [`../setup/INSTALL.md`](../setup/INSTALL.md) — the browser wizard |
+| Neither: you want to know why it is built this way | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
 
 ---
 
-## 0. Installation modes
+## 1. Installation modes
 
 The application supports two database engines and three distribution forms:
 
@@ -27,7 +34,7 @@ Distribution forms:
 
 ---
 
-## 0.1 Handing the application to someone else
+## 2. Handing the application to someone else
 
 Whoever installs it **needs neither the repository nor any development tool**: no JDK, Maven,
 Node, or WiX. They receive a single file, the MSI, and configure whatever differs between
@@ -91,7 +98,7 @@ confirmation first.
 
 ---
 
-## 1. Prerequisites
+## 3. Prerequisites
 
 ### Windows 11
 
@@ -115,35 +122,9 @@ git --version
 If `mvn` is not recognized: add Maven's `bin` directory to the system PATH
 (Control Panel → Environment Variables → Path → New).
 
-### Linux (Debian/Ubuntu/Raspberry Pi OS)
-
-```bash
-sudo apt update
-sudo apt install -y openjdk-21-jdk maven nodejs npm git curl
-java -version
-mvn -version
-```
-
-On distributions without a JDK 21 package (for example older Ubuntu releases):
-
-```bash
-# Manual installation of Temurin 21
-wget -qO- https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg
-echo "deb https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
-sudo apt update
-sudo apt install -y temurin-21-jdk maven
-```
-
-PostgreSQL (server mode only):
-
-```bash
-sudo apt install -y postgresql postgresql-client
-sudo systemctl enable --now postgresql
-```
-
 ---
 
-## 2. Running the wizards
+## 4. Running the wizard
 
 ### Windows 11
 
@@ -171,7 +152,7 @@ The session key and the backup token are **generated automatically**; you are no
 them.
 
 The **data directory is no longer asked for**: in a package the data always goes to
-`%LOCALAPPDATA%\EmployeeScheduling` (see § 0.1), while in development it stays in `databases\`.
+`%LOCALAPPDATA%\EmployeeScheduling` (see § 2), while in development it stays in `databases\`.
 
 At the end it creates `.env` (needed only by `mvn quarkus:dev`), builds, and generates the
 package in `dist\`.
@@ -181,68 +162,18 @@ package in `dist\`.
 > procedure, precedence of configuration sources, pitfalls encountered with symptom and remedy,
 > pre-release checklist. Where the two contradict each other, that one wins.
 
-### Linux
-
-```bash
-git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
-cd employee-scheduling
-sudo ./scripts/install-linux.sh --engine postgresql
-```
-
-The script automatically downloads the most recent PostgreSQL JAR from GitHub Releases,
-installs Java and PostgreSQL, and registers the systemd service. No compilation and no manual
-transfer from a PC are needed.
-
-Main options:
-
-- **systemd service** — `employee-scheduling.service` is created and started by default
-  (automatic restart at boot, logs in journald); `--no-service` skips it, and it is skipped
-  automatically when `systemctl` is absent;
-- **Data** — default `/var/lib/employee-scheduling` (writing there requires sudo).
-
-For a Raspberry Pi, the browser-based wizard is documented in
-[`setup/INSTALL.md`](../setup/INSTALL.md).
-
 ---
 
-## 2.1 Registration modes (differentiated)
+## 5. Manual installation (without the wizard)
 
-The application distinguishes two registration modes, selected by `app.registration.mode` in
-`.env` (default `auto`):
-
-| Mode | Typical database | Registration flow | Email/OTP |
-|---|---|---|---|
-| **standalone** | SQLite (Windows/Linux desktop) | username+password directly | **None** — no email server required |
-| **server** | PostgreSQL (multi-user) | email → 6-digit OTP → token → profile | **Mandatory** for verification and notifications |
-| **auto** (default) | derived from the database | sqlite → standalone, postgresql → server | — |
-
-In **standalone**:
-- the **first user** creates the active ADMIN with only a username and password;
-- later users are created as CAPOSALA **awaiting approval** (the ADMIN activates them from
-  Users, with no email involved);
-- the OTP endpoints answer `OTP_NOT_REQUIRED` (the UI hides them automatically).
-
-In **server**:
-- registration with email verification via OTP (as in section 6);
-- CAPOSALA users are created as pending, with an **email notification** to the active ADMINs.
-
-The value can be set in `.env` (`APP_REGISTRATION_MODE=standalone|server|auto`) or in the
-`application-*.properties` profiles, but **the wizards never write it**: the `auto` default
-derives it from the engine at runtime — SQLite → standalone, PostgreSQL → server. Set it by
-hand only to override that.
-
----
-
-## 3. Manual installation (without the wizards)
-
-### 3.1 Clone and build
+### 5.1 Clone and build
 
 ```bash
 git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
 cd employee-scheduling
 ```
 
-### 3.2 Frontend (required before the first build)
+### 5.2 Frontend (required before the first build)
 
 ```bash
 cd frontend
@@ -251,7 +182,7 @@ npm run build      # produces the static assets served by Quarkus
 cd ..
 ```
 
-### 3.3 Backend — SQLite desktop mode
+### 5.3 Backend — SQLite desktop mode
 
 The build must use the **uber-jar** option (the default fast-jar of Quarkus 3 does not produce
 a standalone executable file):
@@ -284,9 +215,9 @@ java -jar target/employee-scheduling-<version>-SNAPSHOT-runner.jar
 
 Open the browser at `http://localhost:8080` → the **first registration** creates the ADMIN with
 a username and a password only. With the `sqlite` profile the mode resolves to *standalone*, so
-there is no email and no OTP — see § 2.1.
+there is no email and no OTP — see [`AUTHENTICATION.md`](AUTHENTICATION.md).
 
-### 3.4 Backend — PostgreSQL mode
+### 5.4 Backend — PostgreSQL mode
 
 Create the database (once):
 
@@ -296,7 +227,7 @@ sudo -u postgres psql -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'choose
 sudo -u postgres psql -c "CREATE DATABASE employee_scheduling OWNER employee_scheduling;"
 ```
 
-**Rebuild the jar for this engine first.** The one produced in § 3.3 was built with
+**Rebuild the jar for this engine first.** The one produced in § 5.3 was built with
 `-Dquarkus.profile=sqlite`, and no environment variable can change that afterwards: the engine
 and the Flyway locations are fixed at build time. Setting `QUARKUS_PROFILE=postgresql` on a
 SQLite jar makes the service start and die with *"Driver does not support the provided URL"*.
@@ -320,7 +251,7 @@ java -jar target/employee-scheduling-<version>-SNAPSHOT-runner.jar
 
 The Flyway migrations create the schema automatically on first startup.
 
-### 3.5 Email configuration (OTP)
+### 5.5 Email configuration (OTP)
 
 The app sends OTPs and notifications over SMTP. Which route applies depends on how it was
 installed — and the two are not interchangeable:
@@ -356,7 +287,7 @@ emails end up in the **logs** and are never sent.
 
 ---
 
-## 4. Native Windows application (jpackage)
+## 6. Native Windows application (jpackage)
 
 > Summary section. The complete version — with the pitfalls encountered, their symptoms, and
 > the pre-release checklist — is in
@@ -429,7 +360,7 @@ Result:
 **Configuring the installed app.** Settings are passed as individual `-D` options, which
 jpackage writes into `<install>\app\EmployeeScheduling.cfg`. Whoever installs it can then
 correct any value in `%LOCALAPPDATA%\EmployeeScheduling\config.properties`, which **takes
-precedence** over those `-D` options (see § 0.1).
+precedence** over those `-D` options (see § 2).
 
 > **Do not use `-Dquarkus.config.locations=...\.env`**: in Quarkus 3.37 that property does not
 > accept `file:///` URIs, and the value is looked up as a class name
@@ -441,92 +372,9 @@ safely live in `C:\Program Files` and uninstallation takes nothing of yours with
 
 ---
 
-## 5. Installing as a Linux service (systemd)
-
-The wizard generates the file, but by hand:
-
-```bash
-# Data directory, owned by the service user
-sudo useradd --system --no-create-home --home-dir /var/lib/employee-scheduling \
-     --shell /usr/sbin/nologin employee-scheduling
-sudo mkdir -p /var/lib/employee-scheduling
-sudo chown -R employee-scheduling:employee-scheduling /var/lib/employee-scheduling
-```
-
-`/etc/systemd/system/employee-scheduling.service`:
-
-```ini
-[Unit]
-Description=Employee Scheduling (staff shifts)
-# network-online.target on both lines: pulling it in with Wants while
-# ordering After=network.target means never actually waiting for the network.
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=employee-scheduling
-Group=employee-scheduling
-WorkingDirectory=/var/lib/employee-scheduling
-EnvironmentFile=/etc/employee-scheduling.env
-# -Dapp.data.dir and the APP_DATA_DIR variable in the environment file are
-# equivalent: AppDataDirectory reads the system property first, then the
-# variable. The generated units set both, so that the uninstaller can also
-# find a non-default directory. What matters is that ONE of the two is
-# present: it is what moves database, backups and settings together, instead
-# of writing them relative to WorkingDirectory.
-ExecStart=/usr/bin/java -Dapp.data.dir=/var/lib/employee-scheduling -jar /opt/employee-scheduling/employee-scheduling-<version>-SNAPSHOT-runner.jar
-Restart=on-failure
-RestartSec=5
-# Hardening. ProtectSystem=strict makes the whole filesystem read-only, so
-# ReadWritePaths is mandatory alongside it, or the service cannot write anything.
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ReadWritePaths=/var/lib/employee-scheduling
-
-[Install]
-WantedBy=multi-user.target
-```
-
-`/etc/employee-scheduling.env` (mode 600, root only):
-
-```ini
-AUTH_SESSION_KEY=a-cryptographic-key-of-at-least-32-characters!!
-QUARKUS_PROFILE=sqlite
-APP_DATA_DIR=/var/lib/employee-scheduling
-BACKUP_ADMIN_TOKEN=a-long-random-token
-QUARKUS_MAILER_HOST=smtp.example.com
-QUARKUS_MAILER_PORT=587
-QUARKUS_MAILER_USERNAME=no-reply@example.com
-QUARKUS_MAILER_PASSWORD=smtp-password
-QUARKUS_MAILER_FROM=no-reply@example.com
-QUARKUS_MAILER_MOCK=false
-```
-
-Enable and start:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now employee-scheduling
-sudo systemctl status employee-scheduling
-journalctl -u employee-scheduling -f     # live log
-```
-
-> With PostgreSQL it is enough to change the variables to `QUARKUS_PROFILE=postgresql` plus
-> `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`.
-
-> Writing this unit by hand is rarely worth it: `scripts/install-linux.sh` and the Raspberry
-> wizard generate an **equivalent** unit and stay in sync with the code. Theirs adds further
-> confinement (`ProtectHome`, `ProtectKernelTunables`, `ProtectKernelModules`,
-> `ProtectControlGroups`, `RestrictSUIDSGID`, `RestrictNamespaces`, `LockPersonality`,
-> `TimeoutStopSec`, and `RequiresMountsFor` in the Python wizard) and writes `QUARKUS_HTTP_PORT`
-> and `APP_DEMO_DATA` into the environment file. Read the generated file for the authoritative
-> version; use this section to understand what it produces, or to adapt it.
-
 ---
 
-## 6. First startup and initial configuration
+## 7. First startup and initial configuration
 
 1. Open `http://localhost:8080` (or the server machine's address);
 2. Click **Register**;
@@ -541,16 +389,13 @@ journalctl -u employee-scheduling -f     # live log
 
 ---
 
-## 7. Backup and updating
+## 8. Backup and updating
 
 ### Backup
 
-- **SQLite**: automatic backup in `<data>/backups` (default every 30 minutes, retention 48
-  files, configurable from Configuration → Backup). Take a hot copy from the Backup panel,
-  which uses `VACUUM INTO` — atomic and consistent. **Do not copy the `.db` file by hand while
-  the application runs**: without the `-wal`/`-shm` files the copy is not consistent.
-- **PostgreSQL**: automatic `pg_dump` into the same directory; restoring from the panel is
-  protected by a token.
+Automatic backups every 30 minutes by default, plus one before every destructive operation,
+configurable from Configuration → Backup. Mechanisms, safeguards and typed restore outcomes:
+[`CONFIGURATION.md`](CONFIGURATION.md).
 
 ### Updating
 
@@ -566,7 +411,7 @@ mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sq
 application directory — on Windows in `%LOCALAPPDATA%\EmployeeScheduling`.
 
 > For a jpackage installation (app-image or MSI) you do not "replace a JAR": you regenerate the
-> whole package by running section 4 again.
+> whole package by running § 6 again.
 
 **Updating an existing Windows installation**:
 
@@ -579,7 +424,7 @@ installation carrying the **same** version number is not reliable.
 
 ---
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -589,7 +434,7 @@ installation carrying the **same** version number is not reliable.
 | Interface always in Italian, language selector inert | `localStorage` quota exhausted by old caches | In the browser console: remove the `i18n_cache*` keys and reload — [§ 7.11](PACKAGING-WINDOWS-MSI.md) |
 | Empty lists with no error at all after a reinstall | Selected structure left in `localStorage` and no longer existing | Fixed since 5 August 2026; on earlier versions, reselect the structure from the top bar |
 | `.ps1` opens in Notepad | `.ps1` files do not run on a double-click | Use `uninstall.cmd`, not the script directly |
-| The OTP never arrives | SMTP in mock mode or not configured | Check the log; configure SMTP (section 3.5) |
+| The OTP never arrives | SMTP in mock mode or not configured | Check the log; configure SMTP (§ 5.5) |
 | `Unrecognized configuration key` | Wrong profile | Use an explicit `QUARKUS_PROFILE=sqlite` or `postgresql` |
 | Login blocked ("pending") | CAPOSALA not approved | The ADMIN approves them from Users |
 | Backup disabled (PostgreSQL) | `pg_dump` not found | Install the PostgreSQL client tools or set `backup.postgresql.bin-dir` |

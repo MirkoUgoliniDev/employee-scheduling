@@ -101,7 +101,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Server: Libera porta 8080",
+      "label": "Server: Free port 8080",
       "type": "process",
       "command": "cmd.exe",
       "args": [

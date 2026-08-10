@@ -62,14 +62,16 @@ chi ci arriva da lì non legge l'italiano. Ma non tutto va tradotto, e la distin
 - **I messaggi degli installer e del wizard** — `echo`, `Write-Host`, `print()`,
   `die`, `info`, `warn`, `runner.log()`, i nomi e le descrizioni degli step, la
   pagina web del wizard Raspberry, l'help di `argparse` — **e tutta la
-  documentazione distribuita**: `setup/INSTALL.md`, `docs/INSTALLATION.md`,
-  `docs/PACKAGING-WINDOWS-MSI.md`. Regola cambiata il 9 agosto 2026: fino a quel
-  giorno erano in italiano, ma l'installer è la prima cosa che vede chi arriva
-  dal quickstart pubblico, e un wizard italiano lo blocca prima ancora di vedere
-  l'applicazione. Lo stesso giorno `docs/` ha smesso di essere un archivio
-  interno: handoff, diari e rapporti datati sono stati cancellati (restano nella
-  history git) e ci sono rimasti solo due documenti manutenuti, entrambi linkati
-  dal README. Quello che si pubblica si scrive in inglese.
+  documentazione distribuita**: tutto `docs/` e `setup/INSTALL.md`. Regola
+  cambiata il 9 agosto 2026: fino a quel giorno erano in italiano, ma l'installer
+  è la prima cosa che vede chi arriva dal quickstart pubblico, e un wizard
+  italiano lo blocca prima ancora di vedere l'applicazione. Lo stesso giorno
+  `docs/` ha smesso di essere un archivio interno — handoff, diari e rapporti
+  datati cancellati, restano nella history git — ed è stata riorganizzata per
+  lettore: ogni documento risponde a una domanda sola (`ARCHITECTURE`,
+  `USER-GUIDE`, `INSTALLATION-WINDOWS`, `INSTALLATION-LINUX`, `CONFIGURATION`,
+  `AUTHENTICATION`, `DEVELOPMENT`, `PACKAGING-WINDOWS-MSI`), tutti linkati
+  dall'indice del README. Quello che si pubblica si scrive in inglese.
 
 **In italiano:**
 
