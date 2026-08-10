@@ -59,7 +59,54 @@ versioned coupling that lives outside the process.
 
 ---
 
-## 2. One artifact, built in one order
+## 2. Startup: what happens before anything can go wrong
+
+Three things must happen in a fixed order, and each of them was moved earlier at some point
+because it had gone wrong where it used to be.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant JVM as JVM
+    participant Main as AppMain.main()
+    participant Guard as SingleInstanceGuard
+    participant Rename as LegacyDatabaseName
+    participant Q as Quarkus
+    participant CS as Config sources
+    participant FW as Flyway
+    participant Obs as StartupEvent observers
+
+    JVM->>Main: launch
+    Main->>Guard: enforce()
+    alt another instance holds the lock
+        Guard-->>JVM: open the browser on it, exit
+    end
+    Main->>Rename: migrate()
+    Note over Rename: renames large_data.db → employee_scheduling.db,<br/>WAL companions first. Must precede Flyway.
+    Main->>Q: Quarkus.run()
+    Q->>CS: build (AppUserConfigSource 450, AppDataDirConfigSource 320, …)
+    Note over CS: the data directory is resolved here,<br/>which is why config.properties cannot move it
+    Q->>FW: migrate at start
+    Q->>Obs: StartupEvent
+    Note over Obs: DatabaseConfigValidator (APPLICATION) … UiTranslationSyncService (+600)<br/>DemoDataRepository, DemoDatasetSeeder and BrowserLauncher declare no priority
+    Obs-->>JVM: listening on :8080
+```
+
+**Why `main()` and not a `StartupEvent` observer.** Observers fire after runtime
+initialisation — that is, after Flyway has already migrated and after the HTTP port has been
+contested. The duplicate-instance check used to live there, and two rapid double-clicks on the
+desktop icon had two processes migrating the same SQLite file at once. The rename has the same
+constraint for a different reason: arriving after Flyway means finding an empty database
+already created under the new name, at which point renaming is no longer safe.
+
+**Only two observers declare a priority**, and only one of those orderings is load-bearing:
+`UiTranslationSyncService` at `APPLICATION + 600` runs after everything that might still be
+creating tables. The rest — `DemoDataRepository`, `DemoDatasetSeeder`, `BrowserLauncher` —
+leave it to CDI, so their relative order is undefined and nothing may depend on it.
+
+---
+
+## 3. One artifact, built in one order
 
 The frontend is not deployed separately: Vite writes its output straight into the resources
 that Quarkus serves, so the jar contains the interface.
@@ -91,7 +138,7 @@ profile.
 
 ---
 
-## 3. Front end — React 19, TypeScript, Vite
+## 4. Front end — React 19, TypeScript, Vite
 
 React for the interactive timeline, which is the heart of the product: dragging a shift onto
 an operator and seeing constraints react is not something a server-rendered page does well.
@@ -118,7 +165,7 @@ fetched rather than compiled in.
 
 ---
 
-## 4. Back end — layering
+## 5. Back end — layering
 
 ```mermaid
 flowchart TB
@@ -139,6 +186,30 @@ JSON deserialisation) — and one rule: the REST layer never returns an entity. 
 rename does not become a breaking API change, and so that a lazily-loaded association cannot
 serialise half the database by accident.
 
+### What a request passes through
+
+```mermaid
+flowchart TB
+    REQ(["HTTP request"]) --> SPA{"Is it a browser<br/>navigation?"}
+    SPA -- "Accept: text/html,<br/>unknown path" --> IDX["SpaRoutingFilter<br/>serves index.html"]
+    SPA -- "API call" --> BAK{"/backup/*?"}
+    BAK -- yes --> TOK["BackupAdminFilter<br/>AUTHENTICATION − 200<br/>token, and TLS unless localhost"]
+    BAK -- no --> GATE
+    TOK --> GATE["DatabaseRequestGate<br/>AUTHENTICATION − 100<br/>excludes REST during a restore;<br/>serialises writers on SQLite"]
+    GATE --> AUTH["Quarkus form authentication<br/>session cookie, 8 hours"]
+    AUTH --> ACT["ActiveUserFilter<br/>AUTHORIZATION<br/>pending accounts get INACTIVE"]
+    ACT --> ROLE["@RolesAllowed<br/>ADMIN / CAPOSALA"]
+    ROLE --> RES["Resource method<br/>validates structure ownership"]
+    RES --> ORM["Panache query, filtered by structure"]
+    ORM --> DB[("Database")]
+```
+
+The order is expressed as JAX-RS priorities, and it matters: the backup token is checked
+*before* authentication, which is why an unauthenticated call to `/backup/list` answers 401
+from the token filter rather than 403 from the role check. `ActiveUserFilter` exempts `/auth/me`,
+`/auth/logout` and `/auth/register/*`, so an account still awaiting approval can discover its
+own state, sign out, and finish registering — and nothing else.
+
 The planning model lives in `domain/` and `dto/` — the transport shapes double as problem
 facts — and is **deliberately not** the persistence model. Timefold needs a
 graph it can copy cheaply thousands of times per second; JPA entities carry proxies, dirty
@@ -147,7 +218,7 @@ touches the database mid-solve.
 
 ---
 
-## 5. Persistence — Hibernate ORM with Panache
+## 6. Persistence — Hibernate ORM with Panache
 
 The data layer was hand-written JDBC until July 2026: roughly 6,500 lines of
 `PreparedStatement`, string-built SQL and manual result mapping. It was migrated to
@@ -167,6 +238,50 @@ What the change bought, concretely:
   `structureId` owns the requested record before delegating — belt and braces, because
   cross-organisation reads were a real class of bug before.
 
+### The data model, in one picture
+
+Everything an organisation owns hangs off `structures`, and that single edge is what makes
+multi-organisation isolation enforceable rather than aspirational.
+
+```mermaid
+erDiagram
+    STRUCTURES ||--o{ EMPLOYEES : owns
+    STRUCTURES ||--o{ SPECIALISTS : owns
+    STRUCTURES ||--o{ LOCATIONS : owns
+    STRUCTURES ||--o{ SKILLS : owns
+    STRUCTURES ||--o{ SHIFT_TEMPLATE_HEADERS : owns
+
+    SPECIALISTS ||--o{ LOCATIONS : "supervises (SET NULL)"
+    LOCATIONS ||--o{ SHIFTS : "must be covered by"
+    EMPLOYEES ||--o{ SHIFTS : "assigned to (SET NULL)"
+
+    EMPLOYEES ||--o{ EMPLOYEE_SKILLS : has
+    SKILLS ||--o{ EMPLOYEE_SKILLS : ""
+    LOCATIONS ||--o{ LOCATION_SKILLS : requires
+    SKILLS ||--o{ LOCATION_SKILLS : ""
+    SHIFTS ||--o{ SHIFT_SKILLS : "snapshot of"
+    SKILLS ||--o{ SHIFT_SKILLS : ""
+
+    EMPLOYEES ||--o{ EMPLOYEE_DATES : "prefers / cannot"
+    EMPLOYEES ||--o{ OPERATOR_SPECIALIST_AFFINITY : ""
+    SPECIALISTS ||--o{ OPERATOR_SPECIALIST_AFFINITY : "avoid / incompatible"
+
+    SHIFT_TEMPLATE_HEADERS ||--o{ SHIFT_TEMPLATES : "named week"
+    LOCATIONS ||--o{ SHIFT_TEMPLATES : ""
+```
+
+Three modelling choices are worth naming, because each one is a decision and not an accident:
+
+- **`shifts.employee_id` is `ON DELETE SET NULL`, everything else cascades.** Removing an
+  employee must not remove the shift they were covering: the coverage still has to happen, and
+  the schedule should show the hole rather than quietly lose the row.
+- **`shift_skills` records requirements per shift**, even though `location_skills` already
+  says what a location needs: applying a template copies the rows onto each generated shift.
+  The solver therefore reads the requirements attached to the shift it is assigning, not the
+  location's current ones.
+- **Skills belong to a structure** (`UNIQUE (structure_id, name)`, since V5). Two
+  organisations can both have a skill called "Triage" and mean different things by it.
+
 Two kinds of direct JDBC remain. The deliberate ones are compatibility DDL for pre-Flyway
 databases and the SQLite backup path, which needs `VACUUM INTO` on a real connection. The rest
 is the superseded JDBC data layer still sitting in `DemoDataRepository`: every REST call now
@@ -175,7 +290,7 @@ second way of reaching the database.
 
 ---
 
-## 6. Two engines, one application
+## 7. Two engines, one application
 
 ```mermaid
 flowchart LR
@@ -209,7 +324,7 @@ sat beside it — an empty application with the data two centimetres away and no
 
 ---
 
-## 7. Flyway — one migration set per engine
+## 8. Flyway — one migration set per engine
 
 ```mermaid
 flowchart TB
@@ -242,7 +357,7 @@ Two settings deserve their reasoning:
 
 ---
 
-## 8. Timefold Solver — the planning model
+## 9. Timefold Solver — the planning model
 
 ```mermaid
 classDiagram
@@ -348,7 +463,7 @@ without the assignments; the interface polls the full-solution endpoint instead.
 
 ---
 
-## 9. Configuration — who wins over whom
+## 10. Configuration — who wins over whom
 
 ```mermaid
 flowchart TB
@@ -372,7 +487,7 @@ says one thing and an application that does another.
 
 ---
 
-## 10. Data, backups, and where things live
+## 11. Data, backups, and where things live
 
 Application data lives **outside** the installation directory —
 `%LOCALAPPDATA%\EmployeeScheduling` on Windows, the configured data directory on Linux. This
@@ -380,6 +495,26 @@ is not tidiness: it is the fix for three real failures. Uninstalling used to del
 user's database; the uninstaller could not remove a log file the running application held
 open; and hardening the backup directory's permissions locked out SYSTEM, which is the
 account the MSI uninstaller runs as.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Validating: restore requested
+    Validating --> REJECTED: wrong origin, unreadable file,<br/>or incompatible schema
+    Validating --> Snapshotting: accepted
+    Snapshotting --> Promoting: pre-restore snapshot taken
+    Promoting --> RESTORED: promotion succeeded
+    Promoting --> RollingBack: promotion failed
+    RollingBack --> ROLLED_BACK: previous state recovered
+    RollingBack --> INCONSISTENT: rollback failed too<br/>(recoveryFile names the snapshot)
+    REJECTED --> [*]
+    RESTORED --> [*]
+    ROLLED_BACK --> [*]
+    INCONSISTENT --> [*]
+```
+
+Three of the four outcomes are ordinary answers, not failures. Only `INCONSISTENT` needs a
+human, and it is the reason the outcome is a typed value rather than a boolean: "it did not
+work" would not tell the operator whether their data is intact.
 
 Backups are scheduled and also taken before every destructive operation. Restore is not a
 file copy: the backup is staged, validated, its schema compared against the live one, and a
@@ -391,7 +526,39 @@ or nothing, always".
 
 ---
 
-## 11. What was deliberately not done
+## 12. Five languages, edited at runtime
+
+Translations are not compiled into the bundle. They live in the database, in `labels` and
+`localizzazioni`, and the interface fetches them — which is what lets an administrator rename
+a label from the Labels page without a rebuild, in all five languages.
+
+```mermaid
+flowchart LR
+    TSV["i18n/ui-translations.tsv<br/>the canonical catalogue<br/>key + 5 languages"]
+    SYNC["UiTranslationSyncService<br/>at startup, via JPA"]
+    DB[("labels + localizzazioni<br/>same on both engines")]
+    API["GET /translations"]
+    LS["localStorage cache<br/>versioned by CACHE_KEY"]
+    UI["t('key', 'fallback')"]
+
+    TSV --> SYNC --> DB --> API --> LS --> UI
+    EDIT["Labels page"] --> DB
+```
+
+Two properties make this safe rather than fragile:
+
+- **The sync is additive.** It inserts what is missing and never overwrites, so an edit made
+  from the interface survives every restart. The TSV is the floor, not the truth.
+- **It runs through JPA**, so SQLite and PostgreSQL receive exactly the same rows. The older
+  seed used SQLite-only SQL, and a key added there appeared on one engine and not the other —
+  the user then saw the Italian fallback in every language, on PostgreSQL only.
+
+`UiTranslationCatalogTest` fails the build if a language is missing, if a key is duplicated,
+or if a key exists in the historical SQLite seed but not in the portable catalogue.
+
+---
+
+## 13. What was deliberately not done
 
 - **No microservices.** One process is easier to install, back up and reason about, and the
   load is a handful of concurrent planners.
