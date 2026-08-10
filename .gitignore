@@ -43,8 +43,11 @@ raspberry-setup.zip
 raspberry-setup.tar.gz
 .public-export/
 
-# Claude Code
-.claude/
+# Claude Code: the agent and skill definitions travel with the repository, because they
+# describe how to work on it. Machine-specific state and granted permissions do not.
+.claude/*
+!.claude/agents/
+!.claude/skills/
 
 dist/
 databases/standalone-test.db
