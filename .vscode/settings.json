@@ -97,7 +97,6 @@
       ]
     }
   ],
-  "idf.currentSetup": "C:\\Users\\mirko\\esp\\v5.5.2\\esp-idf",
   "java.configuration.updateBuildConfiguration": "disabled",
   "microprofile.tools.validation.unknown.excluded": [
     "quarkus.flyway.connect-retries"

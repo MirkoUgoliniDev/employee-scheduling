@@ -104,6 +104,25 @@ mvn -B test "-Dquarkus.test.profile=test-sqlite"        # 184 tests, 18 skipped
 mvn -B test "-Dquarkus.test.profile=test-postgresql"    # requires PostgreSQL
 ```
 
+The PostgreSQL profile expects a database named `employee_scheduling_test` owned by a role
+`employee_scheduling` whose password is *also* `employee_scheduling` — those are the defaults
+baked into `application-test-postgresql.properties`, and they are what CI provides. On a machine
+where the application is already installed the role exists with the strong password chosen at
+install time instead, so the defaults are rejected. Override them rather than changing the
+server's password:
+
+```bash
+export TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/employee_scheduling_test
+export TEST_DATABASE_USERNAME=employee_scheduling
+export TEST_DATABASE_PASSWORD=the-password-you-chose
+```
+
+Read the failure carefully, because it is quieter than it looks. A rejected password does not
+fail loudly: Quarkus cannot start, so **every test class that touches the database is reported
+as skipped**, not failed, and only the two or three classes that force their own Quarkus
+instance surface as errors. A run that reports "166 tests, 3 errors, 90 skipped" has verified
+nothing about PostgreSQL at all — check the skip count, not just the error count.
+
 > Do **not** export `BACKUP_ADMIN_TOKEN` for the test run: the test profiles supply their own
 > token. If it is already set in your shell it must be at least 32 bytes, otherwise the backup
 > filter rejects it and eight tests fail with 503 where they expect 401 or 200.

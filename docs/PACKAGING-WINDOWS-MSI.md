@@ -138,7 +138,7 @@ practice, copy the two function bodies, or resize the bitmaps by hand to 370x44 
 $env:Path = "C:\tools\wix314;" + $env:Path
 # jpackage wants a numeric three-component version: read it from pom.xml and
 # strip -SNAPSHOT, which is what Get-AppVersion does.
-$appVersion = "1.2.8"
+$appVersion = "1.2.9"
 
 # random 64-hex-character key: see 7.1 — below 16 characters the app does not start
 $bytes = New-Object byte[] 32

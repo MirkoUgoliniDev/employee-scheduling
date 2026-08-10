@@ -36,6 +36,9 @@ jobs:
         shell: bash
         run: |
           python3 -m compileall -q setup scripts/test-smtp.py
+          # Exercise the wizard's argparse too: compileall alone would not catch a
+          # broken default or a bad format string in the option definitions.
+          python3 setup/wizard.py --help > /dev/null
           mkdir -p release
           mvn -B -ntp clean package -DskipTests \
             -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql

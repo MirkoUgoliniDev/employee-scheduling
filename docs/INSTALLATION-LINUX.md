@@ -263,7 +263,7 @@ sudo -u employee-scheduling java -Dapp.data.dir=/var/lib/employee-scheduling \
 
 Mind the file name: the asset downloaded from GitHub Releases is named after the **engine**
 (`employee-scheduling-postgresql-runner.jar`), while a jar you build yourself carries the
-version (`employee-scheduling-1.2.8-SNAPSHOT-runner.jar`). Use the name of the file you
+version (`employee-scheduling-1.2.9-SNAPSHOT-runner.jar`). Use the name of the file you
 actually copied into `/opt`.
 
 Without `-Dapp.data.dir` the database is created in `./databases`, relative to the working

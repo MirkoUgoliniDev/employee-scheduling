@@ -20,23 +20,23 @@ Thumbs.db
 *.db-wal
 *.db-shm
 
-# Database locali e configurazione DB Browser. L'unica eccezione e'
-# employee_scheduling.db: e' il database DI PROVA pubblicato apposta, con nomi
-# ed email di fantasia e nessuna credenziale (vedi CLAUDE.md, "Anonimizzazione").
-# Qualunque altro .db in questa cartella e' roba di lavoro e resta fuori.
+# Local databases and DB Browser configuration. The one exception is
+# employee_scheduling.db: it is the DEMONSTRATION database, published on purpose, with
+# invented names and emails and no credentials (see CLAUDE.md, "Anonymization").
+# Every other .db in this directory is working material and stays out.
 databases/*.db
 !databases/employee_scheduling.db
 databases/*.sqbpro
 
-# Backup automatici del DB
+# Automatic database backups
 databases/backups/
 
-# Snapshot manuali del DB e impostazioni backup scritte a runtime
+# Manual database snapshots and backup settings written at runtime
 databases/*_pre-*.db
 databases/backup-settings.properties
 databases/app.log*
 
-# Environment (credenziali locali, non committare)
+# Environment (local credentials — never commit)
 .env
 .runtime-backups/
 raspberry-setup.zip
@@ -55,17 +55,16 @@ databases/*pre-standalone*
 
 employee-scheduling-datalarge_data.db
 
-# Cache di Python del wizard di installazione
+# Python cache of the installation wizard
 __pycache__/
 *.pyc
 
-# Configurazione locale degli assistenti di codice: e' roba della macchina di
-# chi sviluppa, non del progetto. .kilo in particolare contiene migliaia di file
-# di cache e senza questa regola un "git add -A" distratto se li porterebbe tutti
-# dentro.
+# Local configuration of the coding assistants: it belongs to the developer's machine,
+# not to the project. .kilo in particular holds thousands of cache files, and without
+# this rule an absent-minded "git add -A" would drag every one of them in.
 .kilo/
 .agents/
 
-# Diario di lavoro personale: utile a chi sviluppa, rumore per chi legge il
-# repository. Resta sul disco, fuori dal controllo di versione.
+# Personal working diary: useful to the developer, noise to whoever reads the
+# repository. It stays on disk, outside version control.
 MEMORY.md
