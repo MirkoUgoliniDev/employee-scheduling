@@ -13,15 +13,11 @@ you sign in with, so a head nurse sees fewer sections than the administrator sho
 
 ---
 
-This guide follows the normal administrative workflow: sign in, configure an organisation,
-prepare the scheduling data, generate a roster, and publish the result. The screenshots use
-demonstration records; names, addresses and e-mail addresses are examples only. Labels may vary
-slightly with the selected interface language and the permissions assigned to the signed-in user.
-
 ## 1. Sign in and select a workspace
 
-Open the application URL and enter your credentials. If registration is enabled, use
-**Register** to request an account. Newly registered server-mode accounts may require approval
+Open the application URL and enter your credentials. Use **Register** to request an account:
+in server deployments the address is verified with a passcode, and in either mode every account
+after the first waits for approval. Newly registered server-mode accounts may require approval
 from an administrator before they can access the application.
 
 ![Employee Scheduling sign-in page](../assets/readme/Screenshot22.png)
@@ -206,8 +202,8 @@ changing production components.
 <p align="center"><em>Figure 21 — System information provides a concise operational and dependency inventory.</em></p>
 
 Administrators manage application accounts from **Users**. Review the assigned role and active
-status before granting access. Deactivation is preferable to deletion when an account must retain
-an audit or historical association.
+status before granting access. Accounts are never deleted, only deactivated: the row and its
+last-login record are kept for auditing, and the interface offers no delete control.
 
 ![Users administration page](../assets/readme/Screenshot10.png)
 

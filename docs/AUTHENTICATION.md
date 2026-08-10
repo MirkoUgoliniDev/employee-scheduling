@@ -17,10 +17,15 @@ with a one-time passcode. Neither is a setting somebody has to remember to chang
 | **ADMIN** | Configuration, backup and restore, labels, organisations, SMTP, solver parameters, **user management and approval** |
 | **HEAD NURSE** | Shifts, employees, locations, specialists, affinities, date preferences, reports, shift e-mails |
 
+> HEAD NURSE is **`CAPOSALA`** in the API, in the annotations and in the `app_users.role`
+> column, for historical reasons. Send that value, not the English label, or the endpoint
+> answers `USER_ROLE_INVALID`.
+
 The **skills** catalogue is administered from Configuration, which the interface opens to
 administrators only; head nurses assign skills to employees and locations and are not offered
-the catalogue itself. This one is a UI restriction rather than an enforced one: the underlying
-endpoints still accept both roles.
+the catalogue itself. This is enforced, not merely hidden: `POST /demo-data/save_skills` and
+`DELETE /demo-data/skills/{id}` are `@RolesAllowed("ADMIN")`, matching `LocalizzazioneResource`,
+which renames the same skills in five languages.
 
 ## Registration flow
 
@@ -53,8 +58,9 @@ First launch (no accounts yet)          Subsequent registrations
 
 - **Standalone** — no passcode and no mail server required to register
 - **Server** — six-digit passcode sent by e-mail, valid for five minutes, compared in constant
-  time, five attempts maximum, with rate limiting (5 sends per address and 10 per IP address
-  per window)
+  time, five attempts maximum, with rate limiting: 5 sends per address and 10 per IP address
+  in a five-minute window, plus 30 completion attempts per IP, which bounds guessing of the
+  one-time token
 - **Pending accounts** cannot sign in: the application answers `INACTIVE` and explains why
 - **E-mail addresses** are stored on `app_users` in a unique column (migration V3)
 
@@ -97,8 +103,10 @@ sequenceDiagram
     U->>A: e-mail address
     A->>M: six-digit passcode
     M-->>U: message
-    U->>A: passcode + chosen credentials
+    U->>A: passcode
     A->>A: constant-time comparison, five attempts, five minutes
+    A-->>U: one-time token
+    U->>A: token + chosen credentials
     alt first account ever
         A-->>U: ADMIN, active, signed in
     else any later account

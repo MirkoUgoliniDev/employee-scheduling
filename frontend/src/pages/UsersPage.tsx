@@ -155,7 +155,7 @@ export default function UsersPage() {
               <th>{t('user.email', 'Email')}</th>
               <th style={{ width: 150 }}>{t('user.role', 'Ruolo')}</th>
               <th style={{ width: 100 }}>{t('label.active', 'Attivo')}</th>
-              <th style={{ width: 180 }}>{t('label.createdAt', 'Creato il')}</th>
+              <th style={{ width: 180 }}>{t('col.createdAt', 'Creato il')}</th>
               <th style={{ width: 90 }}>{t('table.actions', 'Azioni')}</th>
             </tr>
           </thead>

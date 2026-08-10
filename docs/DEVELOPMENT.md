@@ -100,7 +100,7 @@ mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sq
 ## Tests
 
 ```bash
-mvn -B test "-Dquarkus.test.profile=test-sqlite"        # 181 tests, 18 skipped
+mvn -B test "-Dquarkus.test.profile=test-sqlite"        # 184 tests, 18 skipped
 mvn -B test "-Dquarkus.test.profile=test-postgresql"    # requires PostgreSQL
 ```
 

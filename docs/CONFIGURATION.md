@@ -16,16 +16,25 @@ Key environment variables:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `AUTH_SESSION_KEY` | Session cookie encryption. Must be **more** than 16 characters (32+ recommended); at or below that, sign-in fails with an opaque 500 | development only |
+| `AUTH_SESSION_KEY` | Session cookie encryption. Must not be **shorter than 16 characters** (32+ recommended); below that, sign-in fails with an opaque 500 that never mentions the key | development only |
+| `APP_DATA_DIR` | Data directory: database, backups, settings, log. Equivalent to `-Dapp.data.dir`, which wins if both are set. The uninstaller reads it to find a non-default directory | platform-dependent |
+| `APP_REGISTRATION_MODE` | `standalone`, `server`, or `auto`. `auto` derives it from the engine — SQLite → standalone, PostgreSQL → server — and is what the installers leave in place. In standalone the OTP endpoints answer `OTP_NOT_REQUIRED` | `auto` |
+| `APP_DEMO_DATA` | Loads the portable sample dataset at first startup. Idempotent, creates no users | `false` |
+| `QUARKUS_HTTP_PORT` | Application port | `8080` |
+| `BACKUP_ADMIN_REQUIRE_TLS_FOR_REMOTE` | When `false`, the backup API answers non-`localhost` callers over plain HTTP instead of 426. Only on a network you trust | `true` |
 | `QUARKUS_PROFILE` | `sqlite` or `postgresql`. **Build-time**: it selects the Flyway locations baked into the jar, so it must be passed to `mvn`/`quarkus:dev`. Setting it against an already-built jar does not change engine | desktop default |
 | `APP_DATABASE_PATH` | SQLite file location (`sqlite` and `legacy-sqlite` profiles only; the default profile hardcodes the path) | `databases/employee_scheduling.db` |
 | `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | PostgreSQL connection | — |
 | `QUARKUS_MAILER_*` | SMTP for passcodes and notifications | mocked in development |
 | `BACKUP_ADMIN_TOKEN` | Required by the backup API | — |
 
-> **No database is committed**: `databases/*.db` is git-ignored and created at first startup.
-> Only `databases/schema.sql` is tracked. Any database that does get shared must be
-> **anonymised** first — fictional names and addresses, no SMTP credentials.
+> **One database is committed, on purpose**: `databases/employee_scheduling.db`, the published
+> demo dataset — fictional names and addresses, no SMTP credentials, `app_users` empty so the
+> first startup can create the administrator. `.gitignore` excludes `databases/*.db` and then
+> re-admits that one file. Every other `.db` stays out.
+>
+> The file is rewritten at runtime, so **before committing it again after working on it**, run
+> the anonymisation checklist in `CLAUDE.md`: your own data may have grown into it.
 
 **Where the data lives.** During development, in `databases/`. In the installed Windows
 application, in `%LOCALAPPDATA%\EmployeeScheduling`, resolved at startup from
@@ -60,8 +69,15 @@ Safeguards:
 
 The detail worth internalising: **a restore is not a file copy**. The backup is staged and
 validated, its schema is compared with the live one, and a pre-restore snapshot is taken
-first. It then either applies completely or leaves the database untouched — and reports which
-of the two happened, as a typed outcome rather than as a message to interpret.
+first. It then reports a typed outcome: `RESTORED`, `REJECTED` (nothing was written),
+`ROLLED_BACK` (the previous state was recovered) or — if promotion *and* rollback both fail —
+`INCONSISTENT`, which names a recovery file for manual repair. Three of the four are ordinary
+answers, not errors.
+
+And the other direction: **do not "back up" by copying the `.db` file by hand while the
+application is running**. Without its `-wal` and `-shm` companions the copy is not consistent,
+and the transactions still in the WAL are silently missing when you restore it months later.
+That is exactly why the panel uses `VACUUM INTO`.
 
 ---
 

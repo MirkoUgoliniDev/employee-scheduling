@@ -71,16 +71,19 @@ starts the service and waits for it to answer.
 | `--jar PATH` | — | Use a local package. Without it, a jar already in `target/` is used, otherwise the latest Release is downloaded |
 | `--port N` | `8080` | Application port. Below 1024 is refused: the service runs unprivileged |
 | `--data-dir PATH` | `/var/lib/employee-scheduling` | Backups, settings and, with SQLite, the database |
+| `--db-password SECRET` | generated | PostgreSQL password. Letters and digits only — the script refuses anything else, because the value travels through a JDBC URL, an environment file and a `psql` command line, each with its own escaping |
 | `--demo-data` | off | Loads the portable sample dataset — locations, employees, specialists, skills, unassigned shifts. No users, no passwords |
 | `--from-source` | off | Builds on the machine. Slow on a Pi, and requires Node 20+ |
 | `--no-service` | off | Installs without registering the systemd unit |
-| `--smtp-host`, `--smtp-user`, `--smtp-pass`, `--smtp-port`, `--smtp-from` | empty | Email delivery |
+| `--smtp-host`, `--smtp-user`, `--smtp-pass` | empty | Email delivery |
+| `--smtp-port` | `587` | |
+| `--smtp-from` | the SMTP username | |
 | `--yes`, `-y` | off | No questions, for automation |
 
 **Re-running it is how you update.** Engine, port and data directory are read back from the
 existing installation unless you pass them explicitly, and the script says which values it
-reused. The session key and the database password are reused too, so nobody is logged out and
-nothing falls out of sync.
+reused. The session key, the database password, the whole SMTP block and the demo-data setting
+are preserved too — so nobody is logged out, and an update does not silently stop e-mail.
 
 > **`-Dquarkus.profile` is fixed when the jar is built.** The data engine and the Flyway
 > migration directories are baked in; no environment variable changes them afterwards.
@@ -127,6 +130,13 @@ neither an environment to move through nor a way to log in.
 
 ### 4.2 PostgreSQL, when that is the engine
 
+Section 2 installs the server; this route does not, so start there:
+
+```bash
+sudo apt install -y postgresql postgresql-client
+sudo systemctl enable --now postgresql
+```
+
 ```bash
 sudo -u postgres psql -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'choose-a-strong-password';"
 sudo -u postgres psql -c "CREATE DATABASE employee_scheduling OWNER employee_scheduling;"
@@ -169,12 +179,12 @@ DATABASE_PASSWORD=the-password-you-chose
 
 Two values are worth understanding rather than copying:
 
-- **`AUTH_SESSION_KEY` must be longer than 16 characters.** At or below that, Quarkus refuses
-  to build the session manager and *every sign-in* fails with an opaque 500 that never
-  mentions the key.
-- **`BACKUP_ADMIN_TOKEN` must not be empty.** An empty value makes the application refuse to
-  start; a value shorter than 32 bytes makes the backup API answer 503 while scheduled backups
-  keep running — a failure nobody notices until they open the Backup page.
+- **`AUTH_SESSION_KEY` must not be shorter than 16 characters** (32+ recommended). Below
+  that, Quarkus refuses to build the session manager and *every sign-in* fails with an opaque
+  500 that never mentions the key.
+- **`BACKUP_ADMIN_TOKEN` must not be empty, and not shorter than 32 bytes.** Either way the
+  application starts normally and the backup API answers 503 while scheduled backups keep
+  running — a failure nobody notices until they open the Backup page.
 
 Quoting matters: systemd applies C-style escapes inside quotes, so a `"` or a `\` in an SMTP
 password must be escaped, or Quarkus receives a truncated password and delivery fails with
@@ -208,7 +218,7 @@ EnvironmentFile=/etc/employee-scheduling.env
 # property first, then the variable. What matters is that ONE of the two is present:
 # it is what moves database, backups and settings together, instead of writing them
 # relative to WorkingDirectory.
-ExecStart=/usr/bin/java -Dapp.data.dir=/var/lib/employee-scheduling -jar /opt/employee-scheduling/employee-scheduling-<version>-runner.jar
+ExecStart=/usr/bin/java -Dapp.data.dir=/var/lib/employee-scheduling -jar /opt/employee-scheduling/employee-scheduling-<engine>-runner.jar
 Restart=on-failure
 RestartSec=10
 TimeoutStopSec=30
@@ -248,8 +258,13 @@ journalctl -u employee-scheduling -f
 
 ```bash
 sudo -u employee-scheduling java -Dapp.data.dir=/var/lib/employee-scheduling \
-     -jar /opt/employee-scheduling/employee-scheduling-<version>-runner.jar
+     -jar /opt/employee-scheduling/employee-scheduling-<engine>-runner.jar
 ```
+
+Mind the file name: the asset downloaded from GitHub Releases is named after the **engine**
+(`employee-scheduling-postgresql-runner.jar`), while a jar you build yourself carries the
+version (`employee-scheduling-1.2.8-SNAPSHOT-runner.jar`). Use the name of the file you
+actually copied into `/opt`.
 
 Without `-Dapp.data.dir` the database is created in `./databases`, relative to the working
 directory — which is rarely where you meant.
@@ -370,13 +385,13 @@ full, and it refuses outright if the configured data directory looks like a syst
 | The service does not start | Almost always visible in the last lines | `journalctl -u employee-scheduling -n 60 --no-pager` |
 | *"Driver does not support the provided URL"* | Jar built for the other engine | Reinstall with the jar matching `--engine`, or rebuild with `-Dquarkus.profile=<engine>` |
 | Starts, then no tables and odd behaviour, no errors | Jar built with **no** profile: Flyway never ran | Rebuild with an explicit `-Dquarkus.profile` |
-| 500 on every sign-in | `AUTH_SESSION_KEY` of 16 characters or fewer | Set a longer one and restart |
+| 500 on every sign-in | `AUTH_SESSION_KEY` shorter than 16 characters | Set a longer one and restart |
 | Backup page dead, `/backup` answers 503 | `BACKUP_ADMIN_TOKEN` empty or shorter than 32 bytes | Set a proper token in the environment file |
 | *"PostgreSQL appears started but the server does not respond"* | On Debian the real service is the cluster, not `postgresql.service` | `pg_lsclusters`, then `sudo pg_ctlcluster <version> main start` |
 | Connection refused with correct credentials | `pg_hba.conf` missing the local rule | Add `host all all 127.0.0.1/32 scram-sha-256` |
 | *"A previous package installation was left halfway through"* | An interrupted `apt` | `sudo dpkg --configure -a` — re-running the installer does not fix it |
 | Port 8080 already in use | Another program | Install on another port with `--port 8090`; below 1024 is not possible |
-| Empty application after a reboot, data still on disk | Data directory on a disk mounted after the service started | Check `RequiresMountsFor` is in the unit; the wizard adds it |
+| Empty application after a reboot, data still on disk | Data directory on a disk mounted after the service started | Check `RequiresMountsFor` is in the unit; both installers add it |
 
 The wizard writes everything it does to `/var/log/employee-scheduling-setup.log`: every
 command and its outcome. In browser mode that file is the only trace left after closing the

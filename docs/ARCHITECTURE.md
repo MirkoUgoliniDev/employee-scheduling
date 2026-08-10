@@ -52,6 +52,11 @@ and no cache tier, because the deployment target is a Raspberry Pi in a clinic a
 additional moving part is one more thing that can be found broken on a Monday morning by
 somebody who is not an administrator.
 
+One exception, and it is worth knowing about: on PostgreSQL, backup and restore shell out to
+`pg_dump` and `pg_restore`, which must be installed with a major version at least that of the
+server. Without them the feature disables itself rather than failing later — but it is a
+versioned coupling that lives outside the process.
+
 ---
 
 ## 2. One artifact, built in one order
@@ -73,11 +78,16 @@ jar built before the frontend build ships the *previous* interface — and the d
 you fixed is still there, in a package that looks correct.
 
 **The profile is build-time.** `quarkus.datasource.db-kind` and `quarkus.flyway.locations`
-are fixed when the jar is built; no environment variable changes them afterwards. Building
-without a profile is the worst case because it is silent: the default profile has
-`quarkus.flyway.active=false`, so migrations never run, no tables are created, and the
-application misbehaves without a single error pointing at the cause. Both installers read the
-engine baked into the jar and refuse a mismatch before touching the machine.
+are fixed when the jar is built; no environment variable changes them afterwards. A jar built
+without a profile is broken on both engines: the default profile has
+`quarkus.flyway.active=false`, so no migration ever runs. On PostgreSQL it dies at connection
+time; on SQLite the legacy bootstrap partially builds the schema and then
+`validateRequiredSchema()` aborts startup naming the first missing table. Loud, but only after
+the package has been installed.
+
+The Linux installer reads the engine baked into the jar and refuses a mismatch before touching
+the machine. The Windows script does not need to: it builds the jar itself with the selected
+profile.
 
 ---
 
@@ -95,7 +105,7 @@ laptop and produces a code-split bundle without configuration archaeology.
 | `src/components/` | Modals, navbar, timeline, backup and solver panels |
 | `src/api/` | The single HTTP client; every call goes through it, including error-code mapping |
 | `src/auth/` | `AuthContext`: session, roles, sign-in and sign-out |
-| `src/store/` | Zustand — the selected organisation, and little else |
+| `src/store/` | Zustand — selected organisation, language, and a small cache of per-structure UI settings whose source of truth is the backend |
 | `src/i18n/` | i18next in five languages, catalogue fetched from the backend |
 
 In development the Vite server on :5173 proxies to Quarkus on :8080, so there is one origin
@@ -114,9 +124,9 @@ fetched rather than compiled in.
 flowchart TB
     R["rest/ — JAX-RS resources<br/>authorization, validation, HTTP status"]
     D["dto/ — transport shapes<br/>the REST contract, decoupled from the schema"]
-    P["persistence/ — Panache entities<br/>25 tables, structure ownership"]
+    P["persistence/ — Panache entities<br/>25 entities over 30 tables, structure ownership"]
     S["solver/ + domain/ — planning model<br/>separate from the persisted model"]
-    C["config/ — startup<br/>data directory, single instance, config sources"]
+    C["config/ — startup and boot-time config sources<br/>data directory, single instance, SPA fallback filter"]
 
     R --> D
     R --> P
@@ -124,11 +134,13 @@ flowchart TB
     C -.->|"before Quarkus boots"| R
 ```
 
-Four packages, one rule: the REST layer never returns an entity. DTOs exist so that a column
+Eight packages — the five above plus `security/` (HTML sanitisation) and `utils/` (lenient
+JSON deserialisation) — and one rule: the REST layer never returns an entity. DTOs exist so that a column
 rename does not become a breaking API change, and so that a lazily-loaded association cannot
 serialise half the database by accident.
 
-The solver model in `domain/` is **deliberately not** the persistence model. Timefold needs a
+The planning model lives in `domain/` and `dto/` — the transport shapes double as problem
+facts — and is **deliberately not** the persistence model. Timefold needs a
 graph it can copy cheaply thousands of times per second; JPA entities carry proxies, dirty
 tracking and a session. Keeping them apart costs a mapping step and buys a solver that never
 touches the database mid-solve.
@@ -150,12 +162,16 @@ What the change bought, concretely:
 - **Transactions that actually span an operation.** Multi-request operations — saving a week
   of assignments, applying a template — are atomic. Before, a failure halfway left rows
   behind.
-- **Ownership enforced in one place.** Every entity that belongs to an organisation is
-  filtered by structure in the repository, not in each endpoint. Cross-organisation reads
-  were a real class of bug before.
+- **Ownership filtered in the queries.** Every entity that belongs to an organisation is
+  filtered by structure in the repository. Endpoints still validate that the caller's
+  `structureId` owns the requested record before delegating — belt and braces, because
+  cross-organisation reads were a real class of bug before.
 
-The remaining direct JDBC is deliberate and narrow: compatibility DDL for pre-Flyway
-databases, and the SQLite backup path, which needs `VACUUM INTO` on a real connection.
+Two kinds of direct JDBC remain. The deliberate ones are compatibility DDL for pre-Flyway
+databases and the SQLite backup path, which needs `VACUUM INTO` on a real connection. The rest
+is the superseded JDBC data layer still sitting in `DemoDataRepository`: every REST call now
+goes to an `*Orm` twin, so those methods are unreachable — dead weight pending deletion, not a
+second way of reaching the database.
 
 ---
 
@@ -216,7 +232,8 @@ reporting a false pass.
 
 Two settings deserve their reasoning:
 
-- **`baseline-on-migrate=false`.** Pointing the application at a populated database with no
+- **`baseline-on-migrate=false`**, set explicitly for SQLite and left at the Flyway default
+  for PostgreSQL. Pointing the application at a populated database with no
   `flyway_schema_history` fails loudly. With baselining on, that same database would be
   silently stamped at version 1 and later migrations would run against a schema that never
   received the earlier ones — corruption discovered weeks later.
@@ -234,16 +251,18 @@ classDiagram
         +List~Employee~ employees ProblemFact + ValueRange
         +List~Shift~ shifts PlanningEntity collection
         +List~Location~ locations ProblemFact
+        +SolverSettings solverSettings ProblemFact
         +HardSoftBigDecimalScore score PlanningScore
     }
     class Shift {
         <<PlanningEntity>>
-        +Long id PlanningId
+        +Integer id PlanningId
         +boolean pinned PlanningPin
         +Employee employee PlanningVariable
         +LocalDateTime start
         +LocalDateTime end
-        +Location location
+        +Integer location_id
+        +String location_desc
     }
     EmployeeSchedule "1" o-- "many" Shift
 ```
@@ -252,8 +271,10 @@ The shift is the planning entity and the assigned employee is the only planning 
 times and locations are given, people are what the solver decides. Three details matter.
 
 **`allowsUnassigned = true`.** A shift may stay empty. Without it, an understaffed week has no
-feasible solution at all and the solver returns nothing useful; with it, the schedule comes
+feasible solution at all and the solver returns nothing useful; with it, the schedule can come
 back with the gaps visible and a penalty attached, which is the answer a planner can act on.
+Whether a gap is penalised or forbidden is then a per-organisation setting, *Allow unassigned
+shifts*, and it is **off by default**: out of the box an empty shift is a hard violation.
 
 **`@PlanningPin`.** Shifts already decided — and shifts just outside the planning window —
 are pinned. This is what fixed the "blindness at the window edges": solving a week in
@@ -288,10 +309,11 @@ may have to break — and a hard constraint there would return "no feasible solu
 when the planner most needs an answer.
 
 Every soft weight is editable per organisation from the Solver Parameters page. The unit is
-deliberate: counted violations are multiplied by a weight and by `SOFT_UNIT_MINUTES` (480, a
-working day) so that they are commensurable with the penalties naturally expressed in minutes.
-Before that, three soft constraints were inert — present in the code, worth nothing in the
-score.
+deliberate: in the weekly and rest-pattern constraints, counted violations are multiplied by a
+weight and by `SOFT_UNIT_MINUTES` (480, a working day) so that they are commensurable with the
+penalties naturally expressed in minutes. Before that, three of them were inert — present in
+the code, worth nothing in the score. *Same location continuity* and *Balance night shifts*
+are scaled by their weight alone, and are correspondingly gentler.
 
 ### Solving is asynchronous
 
@@ -302,23 +324,27 @@ sequenceDiagram
     participant SM as SolverManager
     participant DB as Database
 
-    UI->>API: POST /schedule/solve
-    API->>DB: load the window + pinned context
-    API->>SM: solveAndListen(problemId, problem)
-    API-->>UI: 202 job accepted
+    UI->>API: GET /demo-data/generate (window + pinned context)
+    API->>DB: load
+    API-->>UI: the problem
+    UI->>API: POST /schedules (the whole problem as JSON)
+    API->>SM: solveAndListen(jobId, problem)
+    API-->>UI: 200 text/plain jobId
     loop while solving
         SM-->>API: best solution event
-        UI->>API: GET /schedule/status (polling)
-        API-->>UI: score, assignments so far
+        UI->>API: GET /schedules/{jobId} (polling)
+        API-->>UI: score and best solution so far
     end
     UI->>API: POST save assignments
     API->>DB: persist, transactionally, scoped to the structure
 ```
 
 `SolverManager` runs the solve on its own thread with a termination limit (30 seconds by
-default, configurable per organisation). The HTTP request never blocks; the interface shows
-the best solution found so far and the user decides when to keep it. Nothing is written until
-they do.
+default, overridden per organisation and clamped to 5-600 s). The HTTP request never blocks;
+the interface shows the best solution found so far and the user decides when to keep it.
+Nothing is written until they do — the POST carries the problem in its body and touches no
+table. There is also `GET /schedules/{jobId}/status`, which returns score and solver status
+without the assignments; the interface polls the full-solution endpoint instead.
 
 ---
 
@@ -357,8 +383,11 @@ account the MSI uninstaller runs as.
 
 Backups are scheduled and also taken before every destructive operation. Restore is not a
 file copy: the backup is staged, validated, its schema compared against the live one, and a
-pre-restore snapshot is taken — then the restore either applies completely or leaves the
-database untouched, and reports which of those happened as a typed outcome.
+pre-restore snapshot is taken. It then reports a typed outcome — `RESTORED`, `REJECTED`
+(nothing was written), `ROLLED_BACK` (the previous state was recovered), or, if promotion and
+rollback both fail, `INCONSISTENT`, which names a recovery file for manual repair. That fourth
+case is the honest part: the guarantee is "all or nothing, and you are told which", not "all
+or nothing, always".
 
 ---
 
@@ -368,8 +397,10 @@ database untouched, and reports which of those happened as a typed outcome.
   load is a handful of concurrent planners.
 - **No container by default.** The target user installs an MSI or runs one shell script;
   asking them for Docker would lose them.
-- **No Timefold 2.x.** The score analysis it adds is an Enterprise feature; the Community
-  Edition on 1.33 covers what this application needs.
+- **No Timefold 2.x.** Not for want of score analysis — the application already uses
+  `SolutionManager.analyze` on Community 1.33 to build the constraint breakdown. What
+  Enterprise adds is multithreaded solving (`move-thread-count`), which this workload does not
+  need; and an upgrade would touch every constraint for no benefit yet.
 - **No in-place MSI upgrade.** Uninstall and reinstall, with the data untouched because it
   lives elsewhere. Simple, and honest about it.
 

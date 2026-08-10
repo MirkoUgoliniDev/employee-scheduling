@@ -54,9 +54,9 @@ git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
 cd employee-scheduling/frontend && npm install && npm run build && cd ..
 
 # 2. Start the backend (SQLite, single machine)
-#    The profile is mandatory: without it Flyway stays inactive and startup
-#    fails on a missing schema. It works without it only on a machine whose
-#    project-local .env already supplies QUARKUS_PROFILE — see the note below.
+#    Pass the profile explicitly: it is a BUILD-TIME choice that fixes the
+#    Flyway locations, and a project-local .env can otherwise supply it
+#    silently, so the same command produces a different jar on another machine.
 mvn quarkus:dev -Dquarkus.profile=sqlite
 
 # 3. Open the application
@@ -78,10 +78,11 @@ mvn quarkus:dev -Dquarkus.profile=sqlite
 
 ![Solver settings](assets/readme/Screenshot17.png)
 
-<p align="center"><em>Solver parameters, per organisation: processing limits, hard scheduling rules, and the weights that tune preferences against balance.</em></p>
+<p align="center"><em>Solver parameters, per organisation: processing limits, daily and weekly rules, and the weights that tune preferences against balance.</em></p>
 
-> **The complete walkthrough** — twenty-two screenshots from sign-in to publishing a roster —
-> is in [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md).
+> **The walkthrough** — twenty-two screenshots from sign-in to publishing a roster — is in
+> [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Backup and e-mail templates are covered in
+> [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) instead.
 
 ---
 
@@ -160,9 +161,9 @@ flowchart TB
 ```
 
 **The shift is the planning entity and the assigned employee is the only planning variable**:
-times and locations are given, people are what the solver decides. A shift may stay
-unassigned on purpose — an understaffed week then comes back with the gaps visible and
-penalised, instead of "no feasible solution".
+times and locations are given, people are what the solver decides. A shift can be allowed to
+stay unassigned, so that an understaffed week comes back with the gaps visible and penalised
+instead of "no feasible solution" — a per-organisation setting, off by default.
 
 > **Why it is built this way** — the two database engines, the per-engine Flyway sets, the
 > planning model, the configuration precedence and the trade-offs that were declined:
@@ -269,7 +270,7 @@ The README is the shop window; each document below answers one question, for one
 
 | Document | Answers |
 |---|---|
-| [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) | *How do I use it?* — the complete walkthrough, twenty-two screenshots from sign-in to a published roster |
+| [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) | *How do I use it?* — the main workflow, twenty-two screenshots from sign-in to a published roster |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | *Why is it built this way?* — the single artifact, two database engines, per-engine Flyway sets, the Timefold planning model, declined trade-offs |
 | [`docs/INSTALLATION-WINDOWS.md`](docs/INSTALLATION-WINDOWS.md) | *How do I install it on Windows?* — MSI, jpackage, manual build |
 | [`docs/INSTALLATION-LINUX.md`](docs/INSTALLATION-LINUX.md) | *How do I install it on Linux?* — the one-line script, the systemd unit by hand, backups, uninstalling |

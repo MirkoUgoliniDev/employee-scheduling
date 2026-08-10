@@ -100,8 +100,6 @@ confirmation first.
 
 ## 3. Prerequisites
 
-### Windows 11
-
 | Component | Version | Download |
 |---|---|---|
 | **JDK (Temurin)** | 21+ | https://adoptium.net → `.msi` x64 |
@@ -125,8 +123,6 @@ If `mvn` is not recognized: add Maven's `bin` directory to the system PATH
 ---
 
 ## 4. Running the wizard
-
-### Windows 11
 
 ```powershell
 cd <your-clone-of>\employee-scheduling
@@ -221,11 +217,16 @@ there is no email and no OTP — see [`AUTHENTICATION.md`](AUTHENTICATION.md).
 
 Create the database (once):
 
-```bash
-# local PostgreSQL
-sudo -u postgres psql -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'choose-a-strong-password';"
-sudo -u postgres psql -c "CREATE DATABASE employee_scheduling OWNER employee_scheduling;"
+```powershell
+# the Windows PostgreSQL installer puts psql on the PATH; there is no sudo here
+psql -U postgres -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'choose-a-strong-password';"
+psql -U postgres -c "CREATE DATABASE employee_scheduling OWNER employee_scheduling;"
+psql -U postgres -d employee_scheduling -c "ALTER SCHEMA public OWNER TO employee_scheduling;"
 ```
+
+The third command is not optional on PostgreSQL 15 and later: a role that does not own the
+`public` schema cannot write to it, and Flyway's first migration fails with a permissions
+error that reads like a credentials problem and is not.
 
 **Rebuild the jar for this engine first.** The one produced in § 5.3 was built with
 `-Dquarkus.profile=sqlite`, and no environment variable can change that afterwards: the engine
@@ -372,8 +373,6 @@ safely live in `C:\Program Files` and uninstallation takes nothing of yours with
 
 ---
 
----
-
 ## 7. First startup and initial configuration
 
 1. Open `http://localhost:8080` (or the server machine's address);
@@ -435,7 +434,6 @@ installation carrying the **same** version number is not reliable.
 | Empty lists with no error at all after a reinstall | Selected structure left in `localStorage` and no longer existing | Fixed since 5 August 2026; on earlier versions, reselect the structure from the top bar |
 | `.ps1` opens in Notepad | `.ps1` files do not run on a double-click | Use `uninstall.cmd`, not the script directly |
 | The OTP never arrives | SMTP in mock mode or not configured | Check the log; configure SMTP (§ 5.5) |
-| `Unrecognized configuration key` | Wrong profile | Use an explicit `QUARKUS_PROFILE=sqlite` or `postgresql` |
+| `Unrecognized configuration key` | Jar built for the other engine | Rebuild with `-Dquarkus.profile=sqlite\|postgresql`. Setting the variable at runtime does not change the engine |
 | Login blocked ("pending") | CAPOSALA not approved | The ADMIN approves them from Users |
 | Backup disabled (PostgreSQL) | `pg_dump` not found | Install the PostgreSQL client tools or set `backup.postgresql.bin-dir` |
-| The app does not start as a service | `.env` file not readable | Check mode 600 and absolute paths |
