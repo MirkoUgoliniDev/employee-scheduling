@@ -11,9 +11,9 @@ import { backendErrorText } from '../i18n/backendErrors'
 import { useAuth } from '../auth/AuthContext'
 import ConfirmModal from '../components/ConfirmModal'
 
-const ROLES: { value: 'ADMIN' | 'CAPOSALA'; label: string }[] = [
-  { value: 'ADMIN', label: 'Administrator' },
-  { value: 'CAPOSALA', label: 'Caposala' },
+const ROLES: { value: 'ADMIN' | 'CAPOSALA' }[] = [
+  { value: 'ADMIN' },
+  { value: 'CAPOSALA' },
 ]
 
 export default function UsersPage() {
@@ -241,7 +241,7 @@ export default function UsersPage() {
                 type="email"
                 value={form.email}
                 onChange={e => setForm({ ...form, email: e.target.value })}
-                placeholder="mario.rossi@example.com"
+                placeholder={t('placeholder.email', 'nome@esempio.it')}
                 maxLength={200}
               />
             </Form.Group>

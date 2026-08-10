@@ -80,6 +80,33 @@ function isHardViolated(score: unknown): boolean {
   return m ? parseFloat(m[1]) < 0 : isViolated(score)
 }
 
+/**
+ * @brief Derives a `constraint.*` translation key from the raw Timefold constraint name.
+ * @details Lowercases the backend string and replaces every run of non-alphanumeric
+ *          characters with a single underscore, trimming leading/trailing underscores —
+ *          e.g. "Minimum weekly shifts (empty week)" → "minimum_weekly_shifts_empty_week".
+ *          Kept as a rule rather than a hand-written 21-entry map: the solver gains
+ *          constraints over time and a literal map would silently go stale.
+ */
+function constraintNameToKey(name: string): string {
+  return `constraint.${name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')}`
+}
+
+/**
+ * @brief Translates a raw Timefold constraint name for display.
+ * @param t react-i18next translation function
+ * @param name Raw constraint name from the backend, or `undefined`/`null`
+ * @returns Translated label, or the raw backend name when no translation exists
+ *          (never blank), or "—" when `name` itself is missing.
+ */
+function translateConstraintName(t: (key: string, fallback: string) => string, name?: string | null): string {
+  if (!name) return '—'
+  return t(constraintNameToKey(name), name)
+}
+
 export default function SolveResultModal({ show, analysis, onSave, onDiscard, saving = false }: Props) {
   const { t } = useTranslation()
   const structureId = useAppStore(s => s.currentStructure?.id ?? 0)
@@ -179,7 +206,7 @@ export default function SolveResultModal({ show, analysis, onSave, onDiscard, sa
                 {violated.map((c, i) => (
                   <tr key={i} onClick={() => openSolverSettings(c.name)} style={{ cursor: 'pointer' }}
                       title={t('tooltip.openSolverSettings', 'Apri i Parametri Solver in una nuova scheda')}>
-                    <td className="text-decoration-underline">{c.name ?? '—'}</td>
+                    <td className="text-decoration-underline">{translateConstraintName(t, c.name)}</td>
                     <td><code>{formatScoreForDisplay(c.weight)}</code></td>
                     <td><Badge bg="danger">{formatScoreForDisplay(c.score)}</Badge></td>
                     <td>{c.matchCount ?? '—'}</td>
@@ -216,7 +243,7 @@ export default function SolveResultModal({ show, analysis, onSave, onDiscard, sa
                 {satisfied.map((c, i) => (
                   <tr key={i} onClick={() => openSolverSettings(c.name)} style={{ cursor: 'pointer' }}
                       title={t('tooltip.openSolverSettings', 'Apri i Parametri Solver in una nuova scheda')}>
-                    <td className="text-decoration-underline">{c.name ?? '—'}</td>
+                    <td className="text-decoration-underline">{translateConstraintName(t, c.name)}</td>
                     <td><code>{formatScoreForDisplay(c.weight)}</code></td>
                     <td><Badge bg={isViolated(c.score) ? 'secondary' : 'success'}>{formatScoreForDisplay(c.score)}</Badge></td>
                   </tr>

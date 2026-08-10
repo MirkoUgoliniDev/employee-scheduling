@@ -67,9 +67,9 @@ export default function ShiftDaysCalendar({ shiftDays, value, onChange }: Props)
   return (
     <div style={{ width: 250, fontSize: '0.8rem', userSelect: 'none' }}>
       <div className="d-flex align-items-center justify-content-between mb-1">
-        <button type="button" style={btn} onClick={() => shiftMonth(-1)} aria-label="prev">‹</button>
+        <button type="button" style={btn} onClick={() => shiftMonth(-1)} aria-label={t('nav.prevPeriod', 'Periodo precedente')}>‹</button>
         <span className="fw-semibold">{MONTHS[view.getMonth()]} {view.getFullYear()}</span>
-        <button type="button" style={btn} onClick={() => shiftMonth(1)} aria-label="next">›</button>
+        <button type="button" style={btn} onClick={() => shiftMonth(1)} aria-label={t('nav.nextPeriod', 'Periodo successivo')}>›</button>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, textAlign: 'center' }}>
         {DOW.map((d, i) => (

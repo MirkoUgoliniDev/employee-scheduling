@@ -150,7 +150,7 @@ export default function LabelModal({ show, label, onClose, onSaved }: Props) {
                 <Form.Control
                   value={key}
                   onChange={e => setKey(e.target.value)}
-                  placeholder="es. btn.save"
+                  placeholder={t('placeholder.labelKey', 'es. btn.save')}
                   required={!isEntity}
                   readOnly={isEntity}
                   plaintext={isEntity}
@@ -161,7 +161,7 @@ export default function LabelModal({ show, label, onClose, onSaved }: Props) {
                 <Form.Control
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  placeholder="Descrizione leggibile"
+                  placeholder={t('placeholder.labelDescription', 'Descrizione leggibile')}
                   required={!isEntity}
                   readOnly={isEntity}
                   plaintext={isEntity}

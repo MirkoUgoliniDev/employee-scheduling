@@ -102,7 +102,7 @@ export default function EmailSettingsSection() {
           <Form.Label className="fw-semibold">{t('emailSet.host', 'Server SMTP')}</Form.Label>
           <Form.Control
             value={form.host}
-            placeholder="smtp.esempio.com"
+            placeholder={t('placeholder.smtpHost', 'smtp.esempio.com')}
             onChange={e => set('host', e.target.value.replace(/\s+/g, ''))}
           />
         </Col>

@@ -207,13 +207,26 @@ confirm.deleteStructure	Conferma eliminazione struttura	Eliminare questa struttu
 confirm.saveToTemplate	Conferma sostituzione template dalla settimana	Sostituire il template settimanale con i turni della settimana visibile? Vengono salvati solo i turni (senza operatori assegnati).	Replace the weekly template with the visible week's shifts? Only shifts are saved (without assigned operators).	Remplacer le modèle hebdomadaire par les quarts de la semaine visible ? Seuls les quarts sont enregistrés (sans opérateurs affectés).	¿Sustituir la plantilla semanal por los turnos de la semana visible? Solo se guardan los turnos (sin operadores asignados).	Die Wochenvorlage durch die Schichten der sichtbaren Woche ersetzen? Es werden nur die Schichten gespeichert (ohne zugewiesene Operatoren).
 confirm.title	Titolo dialog conferma	Conferma	Confirm	Confirmer	Confirmar	Bestätigen
 constraint.at_least_10_hours_between_2_shifts	Vincolo almeno 10 ore tra 2 turni	Almeno 10 ore tra 2 turni	At least 10 hours between 2 shifts	Au moins 10 heures entre 2 quarts	Al menos 10 horas entre 2 turnos	Mindestens 10 Stunden zwischen 2 Schichten
+constraint.avoid_specialist	Vincolo specialista da evitare	Specialista da evitare	Avoid specialist	Spécialiste à éviter	Especialista a evitar	Spezialist zu vermeiden
+constraint.balance_employee_hours	Vincolo bilanciamento ore operatore	Bilanciamento ore operatore	Balance operator hours	Équilibrage des heures de l'opérateur	Equilibrio de horas del operador	Ausgleich der Mitarbeiterstunden
 constraint.balance_employee_shift_assignments	Vincolo bilanciamento assegnazioni turni	Bilanciamento assegnazioni turni	Balance operator shift assignments	Équilibrage des affectations de quarts	Equilibrio de asignaciones de turnos	Ausgleich der Schichtzuweisungen
+constraint.balance_night_shifts	Vincolo bilanciamento turni notturni	Bilanciamento turni notturni	Balance night shifts	Équilibrage des quarts de nuit	Equilibrio de turnos nocturnos	Ausgleich der Nachtschichten
 constraint.desired_day_for_employee	Vincolo giorno desiderato per dipendente	Giorno desiderato per operatore	Desired day for operator	Jour souhaité pour l'opérateur	Día deseado para el operador	Gewünschter Tag für Mitarbeiter
+constraint.incompatible_specialist	Vincolo specialista incompatibile	Specialista incompatibile	Incompatible specialist	Spécialiste incompatible	Especialista incompatible	Unvereinbarer Spezialist
 constraint.max_one_shift_per_day	Vincolo massimo un turno al giorno	Massimo un turno al giorno	Max one shift per day	Maximum un quart par jour	Máximo un turno por día	Maximal eine Schicht pro Tag
+constraint.maximum_consecutive_days	Vincolo massimo giorni consecutivi	Massimo giorni consecutivi	Maximum consecutive days	Maximum de jours consécutifs	Máximo de días consecutivos	Maximale aufeinanderfolgende Tage
+constraint.maximum_weekly_hours	Vincolo massimo ore settimanali	Massimo ore settimanali	Maximum weekly hours	Heures hebdomadaires maximales	Horas semanales máximas	Maximale Wochenstunden
+constraint.minimum_days_off_per_week	Vincolo minimo giorni liberi a settimana	Minimo giorni liberi a settimana	Minimum days off per week	Minimum de jours de repos par semaine	Mínimo de días libres por semana	Mindestanzahl freier Tage pro Woche
+constraint.minimum_weekly_shifts_empty_week	Vincolo minimo turni settimanali per settimana vuota	Minimo turni settimanali (settimana vuota)	Minimum weekly shifts (empty week)	Minimum de quarts hebdomadaires (semaine vide)	Mínimo de turnos semanales (semana vacía)	Mindestanzahl wöchentlicher Schichten (leere Woche)
 constraint.missing_required_skill	Vincolo competenza richiesta mancante	Competenza richiesta mancante	Missing required skill	Compétence requise manquante	Competencia requerida faltante	Erforderliche Fähigkeit fehlt
+constraint.optional_skill_match	Vincolo corrispondenza competenza opzionale	Corrispondenza competenza opzionale	Optional skill match	Correspondance de compétence facultative	Coincidencia de competencia opcional	Optionale Fähigkeitsübereinstimmung
 constraint.overlapping_shift	Vincolo turni sovrapposti	Turni sovrapposti	Overlapping shift	Quarts qui se chevauchent	Turnos superpuestos	Überlappende Schicht
+constraint.same_location_continuity	Vincolo continuità stessa sede	Continuità stessa sede	Same location continuity	Continuité du même lieu	Continuidad en la misma ubicación	Kontinuität am selben Standort
+constraint.unassigned_shift_forbidden	Vincolo turno non assegnato vietato	Turno non assegnato vietato	Unassigned shift forbidden	Quart non attribué interdit	Turno sin asignar prohibido	Nicht zugewiesene Schicht verboten
+constraint.unassigned_shift_penalty	Vincolo penalità turno non assegnato	Penalità turno non assegnato	Unassigned shift penalty	Pénalité pour quart non attribué	Penalización por turno sin asignar	Strafe für nicht zugewiesene Schicht
 constraint.unavailable_employee	Vincolo dipendente non disponibile	Operatore non disponibile	Unavailable operator	Opérateur indisponible	Operador no disponible	Nicht verfügbarer Mitarbeiter
 constraint.undesired_day_for_employee	Vincolo giorno indesiderato per dipendente	Giorno indesiderato per operatore	Undesired day for operator	Jour indésirable pour l'opérateur	Día no deseado para el operador	Unerwünschter Tag für Mitarbeiter
+constraint.weekly_shift_range	Vincolo intervallo turni settimanali	Intervallo turni settimanali	Weekly shift range	Plage de quarts hebdomadaire	Rango de turnos semanales	Wöchentlicher Schichtbereich
 ctx.addShift	Voce menu contestuale Aggiungi turno	Aggiungi turno	Add shift	Ajouter un quart	Añadir turno	Schicht hinzufügen
 ctx.delete	Voce menu contestuale Elimina	Elimina	Delete	Supprimer	Eliminar	Löschen
 ctx.deleteShift	Voce menu contestuale Elimina turno	Elimina turno	Delete shift	Supprimer le quart	Eliminar turno	Schicht löschen
@@ -268,6 +281,9 @@ emailTpl.insertPlaceholder	Etichetta chip inserimento segnaposto	Segnaposto:	Pla
 emailTpl.placeholdersHint	Suggerimento sui segnaposto del template email	I segnaposto verranno sostituiti con i dati reali al momento dell'invio.	Placeholders will be replaced with real data when the email is sent.	Les espaces réservés seront remplacés par les données réelles lors de l'envoi.	Los marcadores se sustituirán por los datos reales al enviar el correo.	Platzhalter werden beim Versand durch echte Daten ersetzt.
 emailTpl.subject	Etichetta campo Oggetto del template email	Oggetto	Subject	Objet	Asunto	Betreff
 emailTpl.subjectPlaceholder	Placeholder campo Oggetto del template email	Oggetto della mail…	Email subject…	Objet de l'e-mail…	Asunto del correo…	Betreff der E-Mail…
+empty.body	Messaggio corpo turni vuoto (pagina Turni)	Questa vista si popola appena crei il primo turno.	This view fills up as soon as you create the first shift.	Cette vue se remplit dès que vous créez le premier quart.	Esta vista se llena en cuanto creas el primer turno.	Diese Ansicht füllt sich, sobald Sie die erste Schicht erstellen.
+empty.hint	Suggerimento turni vuoto (pagina Turni)	Scegli una struttura e aggiungi un turno per iniziare.	Choose a facility and add a shift to get started.	Choisissez une structure et ajoutez un quart pour commencer.	Elige una instalación y añade un turno para empezar.	Wählen Sie eine Einrichtung und fügen Sie eine Schicht hinzu, um zu beginnen.
+empty.title	Titolo turni vuoto (pagina Turni)	Nessun turno pianificato	No shift planned	Aucun quart planifié	Ningún turno planificado	Keine Schicht geplant
 error.email.auth	Errore invio: credenziali SMTP rifiutate	Il server di posta ha rifiutato le credenziali: verifica utente e password SMTP nella configurazione.	The mail server rejected the credentials: check the SMTP username and password in the configuration.	Le serveur de messagerie a refusé les identifiants : vérifiez l'utilisateur et le mot de passe SMTP dans la configuration.	El servidor de correo rechazó las credenciales: verifica el usuario y la contraseña SMTP en la configuración.	Der Mailserver hat die Zugangsdaten abgelehnt: SMTP-Benutzer und -Passwort in der Konfiguration prüfen.
 error.email.badData	Errore invio: dati non validi	Dati non validi: rigenera i PDF e riprova.	Invalid data: regenerate the PDFs and try again.	Données non valides : régénérez les PDF et réessayez.	Datos no válidos: regenera los PDF e inténtalo de nuevo.	Ungültige Daten: PDFs neu erstellen und erneut versuchen.
 error.email.connection	Errore invio: server di posta non raggiungibile	Impossibile raggiungere il server di posta: controlla la connessione a Internet e riprova.	Cannot reach the mail server: check your Internet connection and try again.	Impossible de joindre le serveur de messagerie : vérifiez la connexion Internet et réessayez.	No se puede contactar con el servidor de correo: comprueba la conexión a Internet e inténtalo de nuevo.	Mailserver nicht erreichbar: Internetverbindung prüfen und erneut versuchen.
@@ -554,11 +570,31 @@ option.undesired	Opzione Non Preferito	Non Preferito	Undesired	Non Souhaité	No 
 pagination.labels	Testo paginazione etichette	etichette	labels	étiquettes	etiquetas	Beschriftungen
 pagination.page	Testo paginazione pagina	Pag.	Page	Page	Pág.	Seite
 pagination.results	Testo paginazione risultati	risultati	results	résultats	resultados	Ergebnisse
+pdf.col.day	PDF intestazione colonna giorno	Giorno	Day	Jour	Día	Tag
+pdf.col.employee	PDF intestazione colonna operatore (report copertura)	Operatore	Operator	Opérateur	Operador	Mitarbeiter
+pdf.col.end	PDF intestazione colonna fine turno	Fine	End	Fin	Fin	Ende
+pdf.col.location	PDF intestazione colonna sede	Sede	Location	Lieu	Ubicación	Standort
+pdf.col.start	PDF intestazione colonna inizio turno	Inizio	Start	Début	Inicio	Beginn
+pdf.dow.fri	PDF abbreviazione giorno venerdì (3 lettere)	Ven	Fri	Ven	Vie	Fr
+pdf.dow.mon	PDF abbreviazione giorno lunedì (3 lettere)	Lun	Mon	Lun	Lun	Mo
+pdf.dow.sat	PDF abbreviazione giorno sabato (3 lettere)	Sab	Sat	Sam	Sáb	Sa
+pdf.dow.sun	PDF abbreviazione giorno domenica (3 lettere)	Dom	Sun	Dim	Dom	So
+pdf.dow.thu	PDF abbreviazione giorno giovedì (3 lettere)	Gio	Thu	Jeu	Jue	Do
+pdf.dow.tue	PDF abbreviazione giorno martedì (3 lettere)	Mar	Tue	Mar	Mar	Di
+pdf.dow.wed	PDF abbreviazione giorno mercoledì (3 lettere)	Mer	Wed	Mer	Mié	Mi
+pdf.filenameCompany	PDF prefisso filename azienda (fallback)	Azienda	Company	Entreprise	Empresa	Unternehmen
 pdf.filenameCoverage	PDF prefisso filename copertura	Copertura	Coverage	Couverture	Cobertura	Abdeckung
+pdf.filenameEmployee	PDF prefisso filename operatore (fallback)	Operatore	Operator	Opérateur	Operador	Mitarbeiter
+pdf.filenameLocation	PDF prefisso filename sede (fallback)	Sede	Location	Lieu	Ubicación	Standort
 pdf.filenameShifts	PDF prefisso filename turni	Turni	Shifts	Quarts	Turnos	Schichten
+pdf.footer.generated	PDF piè di pagina generato automaticamente	Generato il {{date}} – Pagina {{page}} di {{total}}	Generated on {{date}} – Page {{page}} of {{total}}	Généré le {{date}} – Page {{page}} sur {{total}}	Generado el {{date}} – Página {{page}} de {{total}}	Erstellt am {{date}} – Seite {{page}} von {{total}}
+pdf.noShiftsPeriod	PDF messaggio nessun turno nel periodo	Nessun turno assegnato per questo periodo.	No shift assigned for this period.	Aucun quart attribué pour cette période.	Ningún turno asignado para este período.	Für diesen Zeitraum ist keine Schicht zugewiesen.
 pdf.titleCoverage	PDF titolo copertura turni	Copertura Turni	Coverage Shifts	Couverture des Quarts	Cobertura de Turnos	Schichtdeckung
-pdf.titleMonthlyShifts	PDF titolo turni mensili	Turni Mensili	Monthly Shifts	Quarts Mensuels	Turnos Mensuales	Monatliche Schichten
+pdf.titleMonthlyShifts	PDF titolo turni mensili	Report Turni	Shift Report	Rapport des quarts	Informe de turnos	Schichtbericht
 pdf.totalHours	PDF ore totali	Ore totali	Total hours	Heures totales	Horas totales	Gesamtstunden
+pdf.totalShifts	PDF etichetta totale turni	Totale turni	Total shifts	Total des quarts	Total de turnos	Schichten insgesamt
+pdf.uncovered	PDF etichetta turno scoperto	— SCOPERTO —	— UNCOVERED —	— NON COUVERT —	— SIN CUBRIR —	— NICHT BESETZT —
+pdf.uncoveredCount	PDF etichetta conteggio turni scoperti	Turni scoperti	Uncovered shifts	Quarts non couverts	Turnos sin cubrir	Nicht besetzte Schichten
 pdfTpl.addTitle	Titolo nuovo template PDF	Nuovo template PDF	New PDF template	Nouveau modèle PDF	Nueva plantilla PDF	Neue PDF-Vorlage
 pdfTpl.chooseLogo	Pulsante scegli logo	Scegli logo	Choose logo	Choisir un logo	Elegir logotipo	Logo auswählen
 pdfTpl.color	Etichetta colore principale PDF	Colore principale	Main color	Couleur principale	Color principal	Hauptfarbe
@@ -579,6 +615,8 @@ pdfTpl.structure	Etichetta azienda template PDF	Azienda	Company	Entreprise	Empre
 pdfTpl.structureLocked	Nota azienda non modificabile in modifica	L’azienda associata non può essere cambiata durante la modifica.	The associated company cannot be changed while editing.	L’entreprise associée ne peut pas être changée pendant la modification.	La empresa asociada no se puede cambiar durante la edición.	Das zugeordnete Unternehmen kann während der Bearbeitung nicht geändert werden.
 placeholder.address	Placeholder indirizzo	Inserisci indirizzo	Enter address	Entrer l'adresse	Ingrese dirección	Adresse eingeben
 placeholder.email	Placeholder Email	nome@esempio.it	name@example.com	nom@exemple.fr	nombre@ejemplo.es	name@beispiel.de
+placeholder.labelDescription	Placeholder descrizione etichetta	Descrizione leggibile	Readable description	Description lisible	Descripción legible	Lesbare Beschreibung
+placeholder.labelKey	Placeholder chiave etichetta	es. btn.save	e.g. btn.save	ex. btn.save	p. ej. btn.save	z. B. btn.save
 placeholder.locationCode	Placeholder codice sede	Inserisci codice sede	Enter location code	Entrez le code du lieu	Ingrese código ubicación	Ortscode eingeben
 placeholder.locationName	Placeholder nome sede	Inserisci nome sede	Enter location name	Entrez le nom du lieu	Ingrese nombre ubicación	Ortsname eingeben
 placeholder.locationOrder	Placeholder ordine sede	Inserisci ordine sede	Enter location order	Entrez l'ordre du lieu	Ingrese orden ubicación	Ortsreihenfolge eingeben
@@ -589,6 +627,7 @@ placeholder.selectFacility	Placeholder seleziona struttura	Seleziona struttura..
 placeholder.selectLocation	Placeholder seleziona sede	Seleziona Sede	Select Location	Sélectionner Lieu	Seleccionar Ubicación	Ort auswählen
 placeholder.selectNurse	Placeholder seleziona infermiera	Seleziona infermiera...	Select nurse...	Sélectionner infirmière...	Seleccionar enfermera...	Krankenschwester auswählen...
 placeholder.skillName	Placeholder nome skill	Nome Skill	Skill Name	Nom Compétence	Nombre Habilidad	Kompetenzname
+placeholder.smtpHost	Placeholder host SMTP	smtp.esempio.com	smtp.example.com	smtp.exemple.fr	smtp.ejemplo.es	smtp.beispiel.de
 placeholder.structureName	Placeholder nome struttura	Inserisci nome struttura	Enter structure name	Nom de la structure	Nombre de la estructura	Strukturname eingeben
 placeholder.templateDescription	Placeholder descrizione template	Descrizione del template…	Template description…	Description du modèle…	Descripción de la plantilla…	Beschreibung der Vorlage…
 report.allEmployees	Opzione filtro tutti i dipendenti (Report)	— Tutti gli operatori —	— All operators —	— Tous les opérateurs —	— Todos los operadores —	— Alle Mitarbeiter —

@@ -14,13 +14,25 @@
  * - Riepilogo ore totali
  * - Footer with page number and generation date (`addFooters`)
  *
- * Day/month labels were originally hardcoded in Italian (they do not use the i18n system
- * because the PDF is generated client-side).
+ * Day/month labels, and every other user-visible string in the generated PDF, go through
+ * the `Translator` passed in by the caller: this module runs outside React (jsPDF draws
+ * directly onto a canvas-like document), so there is no `useTranslation()` hook here.
+ * `ReportPage.tsx` — the only caller — already has `const { t } = useTranslation()` and
+ * simply forwards it; that keeps a single source of truth for "what does `t()` do when a
+ * key is missing" (see `i18n/index.ts`: it falls back to the second argument), instead of
+ * reimplementing a parallel lookup in this file.
  */
 
 import { jsPDF } from 'jspdf'
 import type { Shift, ScheduleData } from '../api/shifts'
 import type { PdfTemplate } from '../api/pdfTemplates'
+
+/**
+ * @brief Shape of `react-i18next`'s `t()` that this module needs.
+ * @details Deliberately narrow (two required positional args) so callers can pass their
+ *          `t` directly without adapting it.
+ */
+export type Translator = (key: string, fallback: string, options?: Record<string, unknown>) => string
 
 export type PdfBranding = Pick<PdfTemplate, 'header_text' | 'footer_text' | 'logo_data_url' | 'primary_color'> & {
   structure_name?: string
@@ -40,14 +52,21 @@ function rgb(hex?: string): [number, number, number] {
 }
 
 // ─── i18n-aware day/month labels ─────────────────────────────────────────────
-const DAYS_SHORT   = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab']
-const MONTHS_LONG  = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
-                      'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
-const MONTHS_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic']
+const DOW_KEYS = ['pdf.dow.sun', 'pdf.dow.mon', 'pdf.dow.tue', 'pdf.dow.wed', 'pdf.dow.thu', 'pdf.dow.fri', 'pdf.dow.sat']
+const DAYS_SHORT_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab']
 
-export const rptDay    = (idx: number) => DAYS_SHORT[idx]
-export const rptMonth  = (idx: number) => MONTHS_LONG[idx]
-export const rptMonthS = (idx: number) => MONTHS_SHORT[idx]
+const MONTH_LONG_KEYS = ['month.january', 'month.february', 'month.march', 'month.april', 'month.may', 'month.june',
+                          'month.july', 'month.august', 'month.september', 'month.october', 'month.november', 'month.december']
+const MONTHS_LONG_IT = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+                        'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
+
+const MONTH_SHORT_KEYS = ['month.jan.s', 'month.feb.s', 'month.mar.s', 'month.apr.s', 'month.may.s', 'month.jun.s',
+                            'month.jul.s', 'month.aug.s', 'month.sep.s', 'month.oct.s', 'month.nov.s', 'month.dec.s']
+const MONTHS_SHORT_IT = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']
+
+export const rptDay    = (t: Translator, idx: number) => t(DOW_KEYS[idx], DAYS_SHORT_IT[idx])
+export const rptMonth  = (t: Translator, idx: number) => t(MONTH_LONG_KEYS[idx], MONTHS_LONG_IT[idx])
+export const rptMonthS = (t: Translator, idx: number) => t(MONTH_SHORT_KEYS[idx], MONTHS_SHORT_IT[idx])
 
 export function formatTime(d: Date): string {
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
@@ -87,7 +106,7 @@ function addHeader(doc: jsPDF, title: string, subtitle: string, monthLabel: stri
 }
 
 // ─── Footer ──────────────────────────────────────────────────────────────────
-function addFooters(doc: jsPDF, branding?: PdfBranding) {
+function addFooters(doc: jsPDF, t: Translator, branding?: PdfBranding) {
   const pageW   = doc.internal.pageSize.getWidth()
   const pageH   = doc.internal.pageSize.getHeight()
   const total   = doc.getNumberOfPages()
@@ -98,7 +117,7 @@ function addFooters(doc: jsPDF, branding?: PdfBranding) {
     doc.setFontSize(8)
     doc.setFont('helvetica', 'italic')
     doc.setTextColor(130, 130, 130)
-    const automatic = `Generato il ${dateStr}  –  Pagina ${p} di ${total}`
+    const automatic = t('pdf.footer.generated', `Generato il ${dateStr}  –  Pagina ${p} di ${total}`, { date: dateStr, page: p, total })
     const custom = branding?.footer_text?.trim()
     if (custom) {
       doc.text(custom.substring(0, 140), pageW / 2, pageH - 9, { align: 'center', maxWidth: pageW - 30 })
@@ -125,7 +144,8 @@ export function generateEmployeePdf(
   shifts: Shift[],
   monthLabel: string,
   monthValue: string,
-  branding?: PdfBranding,
+  branding: PdfBranding | undefined,
+  t: Translator,
 ) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
@@ -133,18 +153,18 @@ export function generateEmployeePdf(
   const marginL = 15, marginR = 15
   const contentW = pageW - marginL - marginR
 
-  addHeader(doc, 'Report Turni', employee.fullName, monthLabel, branding)
+  addHeader(doc, t('pdf.titleMonthlyShifts', 'Report Turni'), employee.fullName, monthLabel, branding)
 
   let y = 52
   if (shifts.length === 0) {
     doc.setFontSize(12); doc.setTextColor(150, 0, 0)
-    doc.text('Nessun turno assegnato per questo periodo.', pageW / 2, y, { align: 'center' })
+    doc.text(t('pdf.noShiftsPeriod', 'Nessun turno assegnato per questo periodo.'), pageW / 2, y, { align: 'center' })
   } else {
     const COLS = [
-      { x: marginL, label: 'Giorno' },
-      { x: 65,      label: 'Location' },
-      { x: 145,     label: 'Inizio' },
-      { x: 170,     label: 'Fine' },
+      { x: marginL, label: t('pdf.col.day', 'Giorno') },
+      { x: 65,      label: t('pdf.col.location', 'Sede') },
+      { x: 145,     label: t('pdf.col.start', 'Inizio') },
+      { x: 170,     label: t('pdf.col.end', 'Fine') },
     ]
     const ROW_H = 9
     y = addTableHeader(doc, y, COLS, contentW, marginL, branding)
@@ -159,7 +179,7 @@ export function generateEmployeePdf(
       }
       if (i % 2 === 0) { doc.setFillColor(235, 245, 255); doc.rect(marginL, y - 6, contentW, ROW_H, 'F') }
       const s = new Date(shift.start), e = new Date(shift.end)
-      const dayStr = `${rptDay(s.getDay())} ${String(s.getDate()).padStart(2,'0')} ${rptMonthS(s.getMonth())}`
+      const dayStr = `${rptDay(t, s.getDay())} ${String(s.getDate()).padStart(2,'0')} ${rptMonthS(t, s.getMonth())}`
       doc.text(dayStr,           COLS[0].x, y)
       doc.text((shift.location_desc ?? '').substring(0, 42), COLS[1].x, y)
       doc.text(formatTime(s),    COLS[2].x, y)
@@ -170,15 +190,15 @@ export function generateEmployeePdf(
     doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.3)
     doc.line(marginL, y, pageW - marginR, y); y += 7
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10)
-    doc.text(`Totale turni: ${shifts.length}`, marginL, y)
+    doc.text(`${t('pdf.totalShifts', 'Totale turni')}: ${shifts.length}`, marginL, y)
     const mins = shifts.reduce((a, s) => a + Math.round((new Date(s.end).getTime() - new Date(s.start).getTime()) / 60000), 0)
-    doc.text(`Ore totali: ${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}min`, marginL + 60, y)
+    doc.text(`${t('pdf.totalHours', 'Ore totali')}: ${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}min`, marginL + 60, y)
   }
 
-  addFooters(doc, branding)
-  const label = safeFilePart(branding?.filename_shifts || 'Turni', 'Turni')
-  const company = safeFilePart(branding?.structure_name || 'Azienda', 'Azienda')
-  const safeName = safeFilePart(employee.fullName || 'Impiegato', 'Impiegato')
+  addFooters(doc, t, branding)
+  const label = safeFilePart(branding?.filename_shifts || t('pdf.filenameShifts', 'Turni'), 'Turni')
+  const company = safeFilePart(branding?.structure_name || t('pdf.filenameCompany', 'Azienda'), 'Azienda')
+  const safeName = safeFilePart(employee.fullName || t('pdf.filenameEmployee', 'Operatore'), 'Operatore')
   const filename = `${label}_${company}_${safeName}_${monthValue}.pdf`
   return { blob: doc.output('blob') as Blob, filename }
 }
@@ -194,7 +214,8 @@ export function generateCoveragePdf(
   shifts: Shift[],
   monthLabel: string,
   monthValue: string,
-  branding?: PdfBranding,
+  branding: PdfBranding | undefined,
+  t: Translator,
 ) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
@@ -202,18 +223,18 @@ export function generateCoveragePdf(
   const marginL = 15, marginR = 15
   const contentW = pageW - marginL - marginR
 
-  addHeader(doc, 'Copertura Turni', location.name, monthLabel, branding)
+  addHeader(doc, t('pdf.titleCoverage', 'Copertura Turni'), location.name, monthLabel, branding)
 
   let y = 52
   if (shifts.length === 0) {
     doc.setFontSize(12); doc.setTextColor(150, 0, 0)
-    doc.text('Nessun turno assegnato per questo periodo.', pageW / 2, y, { align: 'center' })
+    doc.text(t('pdf.noShiftsPeriod', 'Nessun turno assegnato per questo periodo.'), pageW / 2, y, { align: 'center' })
   } else {
     const COLS = [
-      { x: marginL, label: 'Giorno' },
-      { x: 75,      label: 'Impiegato' },
-      { x: 215,     label: 'Inizio' },
-      { x: 250,     label: 'Fine' },
+      { x: marginL, label: t('pdf.col.day', 'Giorno') },
+      { x: 75,      label: t('pdf.col.employee', 'Operatore') },
+      { x: 215,     label: t('pdf.col.start', 'Inizio') },
+      { x: 250,     label: t('pdf.col.end', 'Fine') },
     ]
     const ROW_H = 9
     y = addTableHeader(doc, y, COLS, contentW, marginL, branding)
@@ -230,11 +251,11 @@ export function generateCoveragePdf(
       if (uncovered) { doc.setFillColor(252, 224, 224); doc.rect(marginL, y - 6, contentW, ROW_H, 'F') }
       else if (i % 2 === 0) { doc.setFillColor(235, 245, 255); doc.rect(marginL, y - 6, contentW, ROW_H, 'F') }
       const s = new Date(shift.start), e = new Date(shift.end)
-      const dayStr = `${rptDay(s.getDay())} ${String(s.getDate()).padStart(2,'0')} ${rptMonthS(s.getMonth())}`
+      const dayStr = `${rptDay(t, s.getDay())} ${String(s.getDate()).padStart(2,'0')} ${rptMonthS(t, s.getMonth())}`
       doc.text(dayStr, COLS[0].x, y)
       if (uncovered) {
         doc.setTextColor(180, 0, 0); doc.setFont('helvetica', 'bold')
-        doc.text('— SCOPERTO —', COLS[1].x, y)
+        doc.text(t('pdf.uncovered', '— SCOPERTO —'), COLS[1].x, y)
         doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal')
       } else {
         doc.text((shift.employee?.fullName ?? '').substring(0, 60), COLS[1].x, y)
@@ -247,21 +268,21 @@ export function generateCoveragePdf(
     doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.3)
     doc.line(marginL, y, pageW - marginR, y); y += 7
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10)
-    doc.text(`Totale turni: ${shifts.length}`, marginL, y)
+    doc.text(`${t('pdf.totalShifts', 'Totale turni')}: ${shifts.length}`, marginL, y)
     const mins = shifts.reduce((a, s) => a + Math.round((new Date(s.end).getTime() - new Date(s.start).getTime()) / 60000), 0)
-    doc.text(`Ore totali: ${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}min`, marginL + 70, y)
+    doc.text(`${t('pdf.totalHours', 'Ore totali')}: ${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}min`, marginL + 70, y)
     const uncoveredCount = shifts.filter(s => !s.employee).length
     if (uncoveredCount > 0) {
       doc.setTextColor(180, 0, 0)
-      doc.text(`Turni scoperti: ${uncoveredCount}`, marginL + 140, y)
+      doc.text(`${t('pdf.uncoveredCount', 'Turni scoperti')}: ${uncoveredCount}`, marginL + 140, y)
       doc.setTextColor(0, 0, 0)
     }
   }
 
-  addFooters(doc, branding)
-  const label = safeFilePart(branding?.filename_coverage || 'Copertura', 'Copertura')
-  const company = safeFilePart(branding?.structure_name || 'Azienda', 'Azienda')
-  const safeLoc = safeFilePart(location.name || 'Sede', 'Sede')
+  addFooters(doc, t, branding)
+  const label = safeFilePart(branding?.filename_coverage || t('pdf.filenameCoverage', 'Copertura'), 'Copertura')
+  const company = safeFilePart(branding?.structure_name || t('pdf.filenameCompany', 'Azienda'), 'Azienda')
+  const safeLoc = safeFilePart(location.name || t('pdf.filenameLocation', 'Sede'), 'Sede')
   const filename = `${label}_${company}_${safeLoc}_${monthValue}.pdf`
   return { blob: doc.output('blob') as Blob, filename }
 }

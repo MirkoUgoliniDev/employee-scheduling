@@ -273,7 +273,7 @@ export default function ReportPage() {
         for (const location of targets) {
           const locShifts = inPeriod.filter(s => s.location_id === location.id)
           const uncovered = locShifts.filter(s => !s.employee).length
-          const { blob, filename } = generateCoveragePdf(location, locShifts, periodText, slug, branding)
+          const { blob, filename } = generateCoveragePdf(location, locShifts, periodText, slug, branding, t)
           newRows.push({
             key: `loc-${location.id}`, coverage: true,
             label: location.name,
@@ -296,7 +296,7 @@ export default function ReportPage() {
 
       for (const employee of involved) {
         const personal = inPeriod.filter(s => s.employee?.id === employee.id)
-        const { blob, filename } = generateEmployeePdf(employee, personal, periodText, slug, branding)
+        const { blob, filename } = generateEmployeePdf(employee, personal, periodText, slug, branding, t)
         newRows.push({
           key: `emp-${employee.id}`, coverage: false, employeeId: employee.id,
           label: employee.fullName,

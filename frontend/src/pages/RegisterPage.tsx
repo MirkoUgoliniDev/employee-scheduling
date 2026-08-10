@@ -266,7 +266,7 @@ export default function RegisterPage() {
                     autoComplete="email"
                     autoFocus
                     disabled={busy}
-                    placeholder="nome@esempio.it"
+                    placeholder={t('placeholder.email', 'nome@esempio.it')}
                     required
                     isInvalid={normalizedEmail.length > 0 && !emailIsValid}
                     className="border-start-0"
