@@ -6,7 +6,7 @@ regole e riferimenti che Claude deve seguire lavorando su questo repository.
 ## Stack
 
 - **Backend**: Java 21 + Quarkus 3.37.4 + Timefold Solver **1.33.0**, dati via Hibernate ORM/Panache
-- **Database**: doppio motore supportato — **SQLite** (`databases/large_data.db`, profilo di default)
+- **Database**: doppio motore supportato — **SQLite** (`databases/employee_scheduling.db`, profilo di default)
   e **PostgreSQL** (profilo `postgresql`). Schema creato da Flyway, migrazioni separate per motore
   in `src/main/resources/db/migration/{sqlite,postgresql}`.
 - **Frontend**: React 19 + TypeScript 5.9 + Vite 8 (`frontend/`), build servita da Quarkus su :8080
@@ -59,15 +59,25 @@ chi ci arriva da lì non legge l'italiano. Ma non tutto va tradotto, e la distin
   perché Flyway include i commenti nel checksum e modificarli impedisce l'avvio sui
   database esistenti. I commenti delle nuove migrazioni devono nascere in inglese.
 - `README.md`, `LICENSE`, `NOTICE` — la vetrina pubblica.
+- **I messaggi degli installer e del wizard** — `echo`, `Write-Host`, `print()`,
+  `die`, `info`, `warn`, `runner.log()`, i nomi e le descrizioni degli step, la
+  pagina web del wizard Raspberry, l'help di `argparse` — **e tutta la
+  documentazione distribuita**: `setup/INSTALL.md`, `docs/INSTALLATION.md`,
+  `docs/PACKAGING-WINDOWS-MSI.md`. Regola cambiata il 9 agosto 2026: fino a quel
+  giorno erano in italiano, ma l'installer è la prima cosa che vede chi arriva
+  dal quickstart pubblico, e un wizard italiano lo blocca prima ancora di vedere
+  l'applicazione. Lo stesso giorno `docs/` ha smesso di essere un archivio
+  interno: handoff, diari e rapporti datati sono stati cancellati (restano nella
+  history git) e ci sono rimasti solo due documenti manutenuti, entrambi linkati
+  dal README. Quello che si pubblica si scrive in inglese.
 
 **In italiano:**
 
-- **Tutto ciò che l'utente legge**: testo dell'interfaccia, messaggi di errore,
-  toast, e il secondo argomento di `t('chiave', 'testo di ripiego')`.
-- **I messaggi degli installer e del wizard**: `echo`, `Write-Host`, `print()`,
-  `die`, `info`, `warn`, `runner.log()`. Li legge chi installa, che è italiano.
-- **La documentazione operativa**: `docs/`, `setup/INSTALL.md`, questo file.
-  La legge chi lavora al progetto.
+- **Tutto ciò che l'utente legge nell'applicazione**: testo dell'interfaccia,
+  messaggi di errore, toast, e il secondo argomento di
+  `t('chiave', 'testo di ripiego')`.
+- **Questo file**, che è memoria di lavoro condivisa e non documentazione
+  distribuita.
 
 Tradurre un commento **non** significa accorciarlo. I commenti di questo progetto
 spiegano il *perché*, spesso citando il difetto concreto che hanno evitato e i
@@ -77,22 +87,44 @@ una frase generica ha perso il suo unico motivo di esistere.
 Dopo una traduzione massiva, l'unica prova che non è stato toccato del codice per
 sbaglio è che `mvn -B test` e `npx tsc -b` restino verdi.
 
+Attenzione: quei due comandi **non guardano `setup/`**. Il wizard è Python e non
+viene né compilato né importato da Maven o da tsc, quindi un f-string rotto lì
+passa entrambi i controlli senza un rumore. Per le modifiche sotto `setup/` la
+prova equivalente è quella che gira anche in CI
+(`.github/workflows/release.yml`):
+
+```
+python3 -m compileall -q setup
+python3 setup/wizard.py --help
+```
+
 ## Regole di lavoro
 
 - **Localizzare SEMPRE il testo UI**: ogni stringa aggiunta va con `t()` + traduzione in tutte
   e 5 le lingue (it/en/fr/es/de). Regola tassativa.
 - **Le localizzazioni devono restare allineate su ENTRAMBI i database** (SQLite e PostgreSQL).
   Regola tassativa, vedi la sezione dedicata qui sotto.
-- **File `.db` runtime**: `databases/large_data.db` va **sempre committato** (regola dal
-  2 agosto 2026, prima era escluso). Durante checkout/merge fare `git stash push -- databases/`.
-  Attenzione: dopo lo stash il file torna alla versione committata e l'applicazione, se in
-  esecuzione, lo riscrive subito — verificare **le dimensioni** del file prima di dichiarare
-  finito, non solo `git status`.
+- **Nome del database, allineato fra i due motori** (dal 9 agosto 2026): il file SQLite è
+  `databases/employee_scheduling.db`, lo stesso nome del database e del ruolo PostgreSQL. Prima
+  si chiamava `large_data.db`, un nome ereditato dal quickstart che non diceva niente.
+  `LegacyDatabaseName`, chiamata da `AppMain.main()` **prima che Quarkus parta**, rinomina il
+  vecchio file dove lo trova: senza quella migrazione un'installazione esistente si troverebbe
+  Flyway che crea un database nuovo e vuoto, con i dati veri ancora sul disco e nessun errore.
+  Se sposti quel codice, deve restare prima di Flyway.
+- **File `.db`: committato solo quello di prova.** `databases/employee_scheduling.db` è
+  tracciato apposta (`.gitignore` lo esclude e poi lo riammette con `!`): è il database
+  dimostrativo pubblicato, con nomi ed email di fantasia, `app_users` **vuota** perché il primo
+  avvio possa creare l'amministratore, e nessuna credenziale SMTP. Tutti gli altri `.db` —
+  snapshot `_pre-*`, `standalone-test.db`, backup — restano fuori. Prima di committarlo dopo
+  averci lavorato sopra, ripassare la checklist qui sotto: il file viene riscritto a runtime e
+  può essersi ripopolato di dati tuoi.
 
-## Anonimizzazione: nessun dato personale nei database versionati
+## Anonimizzazione: nessun dato personale nel database pubblicato
 
-I database sono in git, quindi **non devono contenere dati personali reali**. Vale per
-**entrambi i motori**: quello che si fa su SQLite va fatto identico su PostgreSQL.
+`databases/employee_scheduling.db` è in un repository pubblico, e qualunque database che esca
+dalla macchina — allegato a una segnalazione, passato a un collega — ha lo stesso vincolo:
+**nessun dato personale reale**. Vale per **entrambi i motori**: quello che si fa su SQLite va
+fatto identico su PostgreSQL.
 
 Da anonimizzare, in ogni database:
 
@@ -102,6 +134,7 @@ Da anonimizzare, in ogni database:
 | `structures` | `name`, `address`, `phone` |
 | `email_log` | `sent_to`, `filename` (contiene nome e cognome nel nome del PDF) |
 | `email_settings` | `host`, `username`, `password`, `mail_from` — **è una credenziale SMTP valida** |
+| `app_users` | **svuotarla del tutto**: `password_hash` è una credenziale, e un ADMIN già presente impedisce al primo avvio di creare l'amministratore, lasciando chi installa fuori dalla propria applicazione |
 
 Regole apprese sul campo:
 
@@ -115,7 +148,7 @@ Regole apprese sul campo:
 4. **`VACUUM` alla fine**, sempre. Senza, le stringhe vecchie restano leggibili nelle pagine
    libere e un `grep` sul `.db` committato le ritrova comunque.
 5. **Verificare sul binario**, non solo sulle tabelle:
-   `grep -a -c -i "<stringa>" databases/large_data.db` deve dare 0 per ogni dato reale noto, e
+   `grep -a -c -i "<stringa>" databases/employee_scheduling.db` deve dare 0 per ogni dato reale noto, e
    `grep -a -o -E "[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+"` non deve restituire domini diversi da
    `example.com` (i segnaposto `esempio.it`/`exemple.fr`/`ejemplo.es`/`beispiel.de` sono testo
    delle traduzioni UI, non dati).

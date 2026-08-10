@@ -54,7 +54,10 @@ git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
 cd employee-scheduling/frontend && npm install && npm run build && cd ..
 
 # 2. Start the backend (SQLite, single machine)
-mvn quarkus:dev
+#    The profile is mandatory: without it Flyway stays inactive and startup
+#    fails on a missing schema. It works without it only on a machine whose
+#    project-local .env already supplies QUARKUS_PROFILE — see the note below.
+mvn quarkus:dev -Dquarkus.profile=sqlite
 
 # 3. Open the application
 #    → http://localhost:8080
@@ -284,7 +287,7 @@ an audit or historical association.
 The installer asks for the database mode, the HTTP port and — in server mode only — the SMTP
 settings, then generates the secrets, builds the application and produces the native package.
 
-**The data directory is not configurable, by design.** The database, backups, logs and local
+**The data directory cannot be changed from `config.properties`, by design.** The database, backups, logs and local
 configuration live in `%LOCALAPPDATA%\EmployeeScheduling`, outside the installation directory.
 Upgrades and uninstallation never touch them, and the application itself can safely sit in
 `C:\Program Files`. Anything that differs between deployments — port, SMTP, registration mode —
@@ -297,7 +300,7 @@ confirmation).
 
 > Windows packaging has a dedicated document covering the manual procedure, the configuration
 > source precedence, field-tested pitfalls and a pre-release checklist:
-> [`docs/Consolidati/PACKAGING-WINDOWS-MSI.md`](docs/Consolidati/PACKAGING-WINDOWS-MSI.md).
+> [`docs/PACKAGING-WINDOWS-MSI.md`](docs/PACKAGING-WINDOWS-MSI.md).
 
 ### Linux
 
@@ -344,9 +347,10 @@ selected with `--jar`, and `--from-source` remains available for development.
 | **ADMIN** | Configuration, backup and restore, labels, organisations, SMTP, solver parameters, **user management and approval** |
 | **HEAD NURSE** | Shifts, employees, locations, specialists, affinities, date preferences, reports, shift e-mails |
 
-The **skills** catalogue is administered from Configuration and is therefore reserved to
-administrators; head nurses assign skills to employees and locations but cannot create or
-rename them.
+The **skills** catalogue is administered from Configuration, which the interface opens to
+administrators only; head nurses assign skills to employees and locations and are not offered
+the catalogue itself. This one is a UI restriction rather than an enforced one: the underlying
+endpoints still accept both roles.
 
 ### Registration flow
 
@@ -431,7 +435,7 @@ First launch (no accounts yet)          Subsequent registrations
 
 | Directory | Responsibility |
 |---|---|
-| `src/pages/` | Pages: Shifts, Employees, Locations, Skills, Dates, Report, Config, Users, Login, Register |
+| `src/pages/` | Pages: Home, Shifts, Employees, Locations, Specialists, Structures, Skills, Labels, Dates, Report, Config, Users, Login, Register |
 | `src/components/` | Reusable components: modals, navbar, timeline, backup, solver |
 | `src/api/` | HTTP client for the REST API |
 | `src/auth/` | `AuthContext` — session state, roles, sign-in and sign-out |
@@ -449,6 +453,7 @@ First launch (no accounts yet)          Subsequent registrations
 | `solver/` | Timefold constraints, hard and soft |
 | `config/` | Application entry point, data directory resolution, single-instance guard, Jackson |
 | `security/` | HTML sanitisation |
+| `utils/` | Lenient JSON deserialisation of numeric fields |
 
 ---
 
@@ -483,15 +488,16 @@ Key environment variables:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `AUTH_SESSION_KEY` | Session cookie encryption. Must be at least 16 characters: below that, every request fails with an opaque 500 | development only |
-| `QUARKUS_PROFILE` | `sqlite` or `postgresql` | desktop default |
-| `APP_DATABASE_PATH` | SQLite file location | `databases/large_data.db` |
+| `AUTH_SESSION_KEY` | Session cookie encryption. Must be **more** than 16 characters (32+ recommended); at or below that, sign-in fails with an opaque 500 | development only |
+| `QUARKUS_PROFILE` | `sqlite` or `postgresql`. **Build-time**: it selects the Flyway locations baked into the jar, so it must be passed to `mvn`/`quarkus:dev`. Setting it against an already-built jar does not change engine | desktop default |
+| `APP_DATABASE_PATH` | SQLite file location (`sqlite` and `legacy-sqlite` profiles only; the default profile hardcodes the path) | `databases/employee_scheduling.db` |
 | `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | PostgreSQL connection | — |
 | `QUARKUS_MAILER_*` | SMTP for passcodes and notifications | mocked in development |
 | `BACKUP_ADMIN_TOKEN` | Required by the backup API | — |
 
-> The databases committed to this repository are **anonymised**: fictional names and addresses,
-> and no SMTP credentials.
+> **No database is committed**: `databases/*.db` is git-ignored and created at first startup.
+> Only `databases/schema.sql` is tracked. Any database that does get shared must be
+> **anonymised** first — fictional names and addresses, no SMTP credentials.
 
 **Where the data lives.** During development, in `databases/`. In the installed Windows
 application, in `%LOCALAPPDATA%\EmployeeScheduling`, resolved at startup from
@@ -543,13 +549,13 @@ mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sq
 ### Tests
 
 ```bash
-mvn -B test "-Dquarkus.test.profile=test-sqlite"        # 174 tests
+mvn -B test "-Dquarkus.test.profile=test-sqlite"        # 181 tests, 18 skipped
 mvn -B test "-Dquarkus.test.profile=test-postgresql"    # requires PostgreSQL
 ```
 
-> `application.properties` declares `backup.admin-token=${BACKUP_ADMIN_TOKEN:}`. If the variable
-> is unset the value is an empty string and the suite will not start at all. Set it before
-> running the tests.
+> Do **not** export `BACKUP_ADMIN_TOKEN` for the test run: the test profiles supply their own
+> token. If it is already set in your shell it must be at least 32 bytes, otherwise the backup
+> filter rejects it and eight tests fail with 503 where they expect 401 or 200.
 
 ---
 
@@ -566,8 +572,8 @@ mvn -B test "-Dquarkus.test.profile=test-postgresql"    # requires PostgreSQL
 - An administrative token guards every `/backup/*` endpoint
 - PostgreSQL passwords never appear in a process command line — only in `PGPASSWORD`
 - Partial backups are removed on any failure
-- Multi-request operations are **atomic** across five transactional batch endpoints
-- Cross-organisation races are guarded by an ownership check on every solve and save
+- Multi-request operations are **atomic** across the transactional batch endpoints
+- Cross-organisation races are guarded by an ownership check on every save of solver results
 
 ---
 
@@ -593,8 +599,7 @@ no commercial restriction. The Enterprise Edition — not used here — requires
 
 | Document | Contents |
 |---|---|
-| [`docs/Consolidati/`](docs/Consolidati/README.md) | **Maintained documents** describing how things stand today. Where they contradict anything else under `docs/`, these prevail |
-| [`docs/Consolidati/PACKAGING-WINDOWS-MSI.md`](docs/Consolidati/PACKAGING-WINDOWS-MSI.md) | Windows packaging: prerequisites, manual procedure, configuration source precedence, pitfalls with symptom and remedy, pre-release checklist, uninstallation |
+| [`docs/PACKAGING-WINDOWS-MSI.md`](docs/PACKAGING-WINDOWS-MSI.md) | Windows packaging: prerequisites, manual procedure, configuration source precedence, pitfalls with symptom and remedy, pre-release checklist, uninstallation |
 | [`setup/INSTALL.md`](setup/INSTALL.md) | Linux server installation: wizard, options, what each step does, troubleshooting |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | Detailed installation for Windows and Linux: jpackage, systemd, SMTP, backup |
 

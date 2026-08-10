@@ -1,117 +1,119 @@
-# Installazione — Employee Scheduling
+# Installation — Employee Scheduling
 
-Guida di installazione **dettagliata** per Windows 11 e Linux, con wizard automatici.
+**Detailed** installation guide for Windows 11 and Linux, with automated wizards.
 
 ---
 
-## 0. Modalità di installazione
+## 0. Installation modes
 
-L'applicazione supporta due motori database e tre forme di distribuzione:
+The application supports two database engines and three distribution forms:
 
-| Modalità | Database | Dove | Ideale per |
+| Mode | Database | Where | Ideal for |
 |---|---|---|---|
-| **Desktop** | SQLite (file singolo) | Macchina locale | Uso singolo (Windows o Linux) |
-| **Server** | PostgreSQL | Macchina centralizzata | Multiutente, accesso da più PC |
+| **Desktop** | SQLite (single file) | Local machine | Single user (Windows or Linux) |
+| **Server** | PostgreSQL | Centralized machine | Multi-user, access from several PCs |
 
-Forme di distribuzione:
+Distribution forms:
 
-| Forma | Windows | Linux |
+| Form | Windows | Linux |
 |---|---|---|
-| **Sviluppo** | `mvn quarkus:dev` + `npm run dev` | idem |
-| **Servizio** | `install-windows.ps1` (jpackage: app nativa con JRE incluso + scorciatoia) | `install-linux.sh` + systemd |
-| **Standalone** | `java -jar` con JRE installato | `java -jar` o systemd |
+| **Development** | `mvn quarkus:dev` + `npm run dev` | same |
+| **Service** | `install-windows.ps1` (jpackage: native app with bundled JRE + shortcut) | `install-linux.sh` + systemd |
+| **Standalone** | `java -jar` with a JRE installed | `java -jar` or systemd |
 
-> **Windows "come una normale app"**: il wizard usa **jpackage** (strumento ufficiale Java) che
-> produce un installer `.msi` con JRE incluso, icona, voce nel menu Start e disinstallazione.
-> L'utente finale **non deve installare Java**: tutto è nel pacchetto.
+> **Windows "like a normal app"**: the wizard uses **jpackage** (the official Java tool), which
+> produces an `.msi` installer with a bundled JRE, an icon, a Start menu entry, and
+> uninstallation. The end user **does not have to install Java**: everything is in the package.
 
 ---
 
-## 0.1 Consegnare l'applicazione a qualcun altro
+## 0.1 Handing the application to someone else
 
-Chi installa **non ha bisogno del repository né di alcuno strumento di sviluppo**: niente JDK,
-Maven, Node o WiX. Riceve un solo file, l'MSI, e configura ciò che cambia da installazione a
-installazione con un file di testo.
+Whoever installs it **needs neither the repository nor any development tool**: no JDK, Maven,
+Node, or WiX. They receive a single file, the MSI, and configure whatever differs between
+installations in a text file.
 
-### Lato tuo — una volta per versione
+### On your side — once per version
 
 ```powershell
-.\scripts\install-windows.ps1        # scegli 2 = installer MSI
+.\scripts\install-windows.ps1        # choose 2 = MSI installer
 ```
 
-Produce `dist\EmployeeScheduling-1.1.0.msi` (~125 MB, JRE incluso). Pubblicalo dove preferisci:
-GitHub Releases, cartella condivisa, chiavetta. **Lo stesso file vale per tutte le installazioni**:
-porta, SMTP e modalità di registrazione non sono più cablati nel pacchetto.
+This produces `dist\EmployeeScheduling-<version>.msi` (~125 MB, JRE included). Publish it
+wherever you like: GitHub Releases, a shared folder, a USB stick. **The same file works for
+every installation**: port and SMTP are written into the package as `-D` options, but whoever
+installs it overrides them from `config.properties`, which wins (ordinal 450). The registration
+mode is not baked in at all — it is derived from the engine at runtime.
 
-### Lato di chi installa
+### On the installer's side
 
-1. Doppio clic sull'MSI e scelta della cartella (va bene anche `C:\Program Files`).
-2. L'applicazione parte e apre il browser da sola.
-3. La prima persona che si registra diventa l'amministratore.
+1. Double-click the MSI and choose the directory (`C:\Program Files` is fine).
+2. The application starts and opens the browser by itself.
+3. The first person who registers becomes the administrator.
 
-### Configurazione locale, senza ricompilare nulla
+### Local configuration, without rebuilding anything
 
-Al primo avvio l'applicazione crea:
+On first startup the application creates:
 
 ```
 %LOCALAPPDATA%\EmployeeScheduling\config.properties
 ```
 
-Contiene **tutte le voci modificabili, già commentate e spiegate**: porta, server SMTP,
-modalità di registrazione, chiave di sessione, token di backup, livello del log. Si toglie il
-`#` dalla riga che interessa, si salva e si riavvia l'applicazione.
+It contains **every adjustable setting, already commented and explained**: port, SMTP server,
+registration mode, session key, backup token, log level. Remove the `#` from the line you care
+about, save, and restart the application.
 
-Quel file **vince sulle impostazioni scelte in fase di pacchettizzazione** (ordinale 450 contro
-400 delle system properties): è pensato apposta perché chi installa possa correggere, per
-esempio, una porta 8080 già occupata da un altro programma senza dipendere da te.
+That file **wins over the settings chosen at packaging time** (ordinal 450 against the 400 of
+system properties): it exists precisely so that whoever installs the application can fix, say,
+a port 8080 already taken by another program without depending on you.
 
-L'unica voce che non si può cambiare da lì è `app.data.dir`: quando il file viene letto la
-cartella dati è già stata risolta.
+The only setting that cannot be changed from there is `app.data.dir`: by the time the file is
+read, the data directory has already been resolved.
 
-### Dove stanno i dati
+### Where the data lives
 
-Tutto in `%LOCALAPPDATA%\EmployeeScheduling`: `large_data.db`, `backups\`, `app.log`,
-`config.properties`. **Fuori dalla cartella di installazione**, quindi aggiornamenti e
-disinstallazione non li toccano.
+Everything in `%LOCALAPPDATA%\EmployeeScheduling`: `employee_scheduling.db`, `backups\`, `app.log`,
+`config.properties`. **Outside the installation directory**, so updates and uninstallation do
+not touch it.
 
-Per spostare un'installazione su un altro PC basta copiare quella cartella dopo aver
-installato l'MSI.
+To move an installation to another PC, install the MSI there and copy that directory over.
 
-### Disinstallazione
+### Uninstallation
 
-Doppio clic su `uninstall.cmd` nella cartella `app\` dell'installazione (per esempio
-`C:\Program Files\EmployeeScheduling\app\uninstall.cmd`). Chiude l'applicazione, rimuove il
-programma e **conserva i dati**; con `-RemoveData` toglie anche quelli, chiedendo conferma.
+Double-click `uninstall.cmd` in the installation's `app\` directory (for example
+`C:\Program Files\EmployeeScheduling\app\uninstall.cmd`). It closes the application, removes
+the program, and **keeps the data**; with `-RemoveData` it removes the data too, asking for
+confirmation first.
 
-> Il `.cmd` è un lanciatore: i file `.ps1` non partono con un doppio clic, Windows li apre in
-> un editor. Funziona anche `Impostazioni > App > EmployeeScheduling > Disinstalla`, purché
-> l'applicazione sia chiusa.
+> The `.cmd` is a launcher: `.ps1` files do not run on a double-click, Windows opens them in an
+> editor. `Settings > Apps > EmployeeScheduling > Uninstall` works too, as long as the
+> application is closed.
 
 ---
 
-## 1. Prerequisiti
+## 1. Prerequisites
 
 ### Windows 11
 
-| Componente | Versione | Download |
+| Component | Version | Download |
 |---|---|---|
 | **JDK (Temurin)** | 21+ | https://adoptium.net → `.msi` x64 |
 | **Maven** | 3.9+ | https://maven.apache.org/download.cgi → `apache-maven-3.9.x-bin.zip` |
 | **Node.js** | 20+ LTS | https://nodejs.org |
-| **Git** | qualsiasi | https://git-scm.com/download/win |
-| **WiX Toolset** (solo installer MSI) | 3.14 | https://wixtoolset.org (installer `wix314.exe`) |
-| **PostgreSQL** (solo modalità server) | 14+ | https://www.postgresql.org/download/windows/ |
+| **Git** | any | https://git-scm.com/download/win |
+| **WiX Toolset** (only for the manual procedure) | 3.14 | https://wixtoolset.org (`wix314.exe`). The wizard downloads it by itself into `C:\tools\wix314` |
+| **PostgreSQL** (server mode only) | 14+ | https://www.postgresql.org/download/windows/ |
 
-Dopo l'installazione di JDK e Maven, aprire un terminale e verificare:
+After installing the JDK and Maven, open a terminal and verify:
 
 ```powershell
-java -version        # deve mostrare 21.x
-mvn -version         # deve mostrare 3.9.x
+java -version        # must show 21.x
+mvn -version         # must show 3.9.x
 git --version
 ```
 
-Se `mvn` non è riconosciuto: aggiungere la cartella `bin` di Maven al PATH di sistema
-(Pannello di controllo → Variabili d'ambiente → Path → Nuovo).
+If `mvn` is not recognized: add Maven's `bin` directory to the system PATH
+(Control Panel → Environment Variables → Path → New).
 
 ### Linux (Debian/Ubuntu/Raspberry Pi OS)
 
@@ -122,17 +124,17 @@ java -version
 mvn -version
 ```
 
-Su distribuzioni senza pacchetto JDK 21 (es. vecchie versioni di Ubuntu):
+On distributions without a JDK 21 package (for example older Ubuntu releases):
 
 ```bash
-# Installazione manuale di Temurin 21
+# Manual installation of Temurin 21
 wget -qO- https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg
 echo "deb https://packages.adoptium.net/artifactory/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
 sudo apt update
 sudo apt install -y temurin-21-jdk maven
 ```
 
-PostgreSQL (solo modalità server):
+PostgreSQL (server mode only):
 
 ```bash
 sudo apt install -y postgresql postgresql-client
@@ -141,38 +143,43 @@ sudo systemctl enable --now postgresql
 
 ---
 
-## 2. Esecuzione dei wizard
+## 2. Running the wizards
 
 ### Windows 11
 
 ```powershell
-cd C:\Lavori\VSCode\employee-scheduling
+cd <your-clone-of>\employee-scheduling
 powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
 ```
 
-Il wizard chiede, in ordine:
+The wizard asks, in order:
 
-1. **Modalità database** — `1` = SQLite desktop, `2` = PostgreSQL server (con URL JDBC, utente
-   e password);
-2. **Porta HTTP** — default `8080`;
-3. **SMTP** — se usare il **mock** (email scritte nel log, nessun invio reale) oppure host,
-   porta, utente, password e mittente;
-4. **Packaging** — `1` = app-image (cartella con JRE inclusa, veloce), `2` = installer MSI
-   (menu Start + disinstallazione; **WiX viene scaricato automaticamente** la prima volta,
-   ~39 MB in `C:\tools\wix314`), `3` = solo build.
+1. **Database mode** — `1` = SQLite desktop, `2` = PostgreSQL server (with JDBC URL, username,
+   and password);
+2. **Sample data** — whether to load the demo dataset for testing (default: no);
+3. **HTTP port** — default `8080`;
+4. **SMTP** — **only in PostgreSQL mode**: whether to use the **mock** (emails written to the
+   log, nothing actually sent) or host, port, username, password, and sender. In SQLite mode
+   nothing is asked and the mock is implicit, because standalone registration needs no email;
+5. **Packaging** — `1` = app-image (directory with a bundled JRE, fast), `2` = MSI installer
+   (Start menu + uninstallation; **WiX is downloaded automatically** the first time, ~39 MB
+   into `C:\tools\wix314`), `3` = build only. This one is asked **after** the frontend and
+   Maven builds, which take several minutes: do not walk away expecting it to be finished.
+   It is skipped entirely when `-Package` is passed on the command line.
 
-Chiave di sessione e token di backup sono **generati automaticamente**, non vengono chiesti.
+The session key and the backup token are **generated automatically**; you are not asked for
+them.
 
-La **cartella dati non viene più chiesta**: nel pacchetto i dati vanno sempre in
-`%LOCALAPPDATA%\EmployeeScheduling` (vedi § 0.1), mentre in sviluppo restano in `databases\`.
+The **data directory is no longer asked for**: in a package the data always goes to
+`%LOCALAPPDATA%\EmployeeScheduling` (see § 0.1), while in development it stays in `databases\`.
 
-Al termine crea `.env` (che serve solo a `mvn quarkus:dev`), compila e genera il pacchetto in
-`dist\`.
+At the end it creates `.env` (needed only by `mvn quarkus:dev`), builds, and generates the
+package in `dist\`.
 
-> **Per il confezionamento Windows esiste un documento dedicato e più dettagliato**:
-> [`docs/Consolidati/PACKAGING-WINDOWS-MSI.md`](Consolidati/PACKAGING-WINDOWS-MSI.md) — procedura
-> manuale, ordine delle sorgenti di configurazione, trappole incontrate con sintomo e rimedio,
-> lista di verifica prima della consegna. In caso di contraddizione, vale quello.
+> **Windows packaging has a dedicated, more detailed document**:
+> [`docs/PACKAGING-WINDOWS-MSI.md`](PACKAGING-WINDOWS-MSI.md) — manual
+> procedure, precedence of configuration sources, pitfalls encountered with symptom and remedy,
+> pre-release checklist. Where the two contradict each other, that one wins.
 
 ### Linux
 
@@ -182,340 +189,408 @@ cd employee-scheduling
 sudo ./scripts/install-linux.sh --engine postgresql
 ```
 
-Lo script scarica automaticamente il JAR PostgreSQL più recente da GitHub
-Releases, installa Java e PostgreSQL e registra il servizio systemd. Non servono
-compilazione o trasferimenti manuali dal PC.
+The script automatically downloads the most recent PostgreSQL JAR from GitHub Releases,
+installs Java and PostgreSQL, and registers the systemd service. No compilation and no manual
+transfer from a PC are needed.
 
-Opzioni principali:
+Main options:
 
-- **Servizio systemd** — se rispondi `s`, viene creato e avviato
-  `employee-scheduling.service` (riavvio automatico al boot, log in journald);
-- **Dati** — default `/var/lib/employee-scheduling` (serve sudo per scriverci).
+- **systemd service** — `employee-scheduling.service` is created and started by default
+  (automatic restart at boot, logs in journald); `--no-service` skips it, and it is skipped
+  automatically when `systemctl` is absent;
+- **Data** — default `/var/lib/employee-scheduling` (writing there requires sudo).
+
+For a Raspberry Pi, the browser-based wizard is documented in
+[`setup/INSTALL.md`](../setup/INSTALL.md).
 
 ---
 
-## 2.1 Modalità di registrazione (differenziata)
+## 2.1 Registration modes (differentiated)
 
-L'applicazione distingue due modalità di registrazione, selezionate da `app.registration.mode`
-nel `.env` (default `auto`):
+The application distinguishes two registration modes, selected by `app.registration.mode` in
+`.env` (default `auto`):
 
-| Modalità | Database tipico | Flusso registrazione | Email/OTP |
+| Mode | Typical database | Registration flow | Email/OTP |
 |---|---|---|---|
-| **standalone** | SQLite (desktop Windows/Linux) | username+password diretti | **Nessuna** — nessun server email richiesto |
-| **server** | PostgreSQL (multiutente) | email → OTP 6 cifre → token → profilo | **Obbligatoria** per verifica e notifiche |
-| **auto** (default) | derivata dal database | sqlite → standalone, postgresql → server | — |
+| **standalone** | SQLite (Windows/Linux desktop) | username+password directly | **None** — no email server required |
+| **server** | PostgreSQL (multi-user) | email → 6-digit OTP → token → profile | **Mandatory** for verification and notifications |
+| **auto** (default) | derived from the database | sqlite → standalone, postgresql → server | — |
 
 In **standalone**:
-- il **primo utente** crea l'ADMIN attivo con solo username+password;
-- gli utenti successivi nascono CAPOSALA **in attesa di approvazione** (l'ADMIN li attiva
-  da Utenti, senza email);
-- gli endpoint OTP rispondono `OTP_NOT_REQUIRED` (la UI li nasconde automaticamente).
+- the **first user** creates the active ADMIN with only a username and password;
+- later users are created as CAPOSALA **awaiting approval** (the ADMIN activates them from
+  Users, with no email involved);
+- the OTP endpoints answer `OTP_NOT_REQUIRED` (the UI hides them automatically).
 
 In **server**:
-- registrazione con verifica email via OTP (come da sezione 6);
-- i CAPOSALA nascono in attesa con **notifica email** agli ADMIN attivi.
+- registration with email verification via OTP (as in section 6);
+- CAPOSALA users are created as pending, with an **email notification** to the active ADMINs.
 
-Il valore si imposta nel `.env` (`APP_REGISTRATION_MODE=standalone|server|auto`) o nei
-profilo application-*.properties. I wizard scelgono automaticamente: SQLite → standalone,
-PostgreSQL → server.
+The value can be set in `.env` (`APP_REGISTRATION_MODE=standalone|server|auto`) or in the
+`application-*.properties` profiles, but **the wizards never write it**: the `auto` default
+derives it from the engine at runtime — SQLite → standalone, PostgreSQL → server. Set it by
+hand only to override that.
 
 ---
 
-## 3. Installazione manuale (senza wizard)
+## 3. Manual installation (without the wizards)
 
-### 3.1 Clonare e compilare
+### 3.1 Clone and build
 
 ```bash
 git clone https://github.com/MirkoUgoliniDev/employee-scheduling.git
 cd employee-scheduling
 ```
 
-### 3.2 Frontend (necessario prima della prima build)
+### 3.2 Frontend (required before the first build)
 
 ```bash
 cd frontend
 npm install
-npm run build      # produce gli asset statici serviti da Quarkus
+npm run build      # produces the static assets served by Quarkus
 cd ..
 ```
 
-### 3.3 Backend — modalità SQLite desktop
+### 3.3 Backend — SQLite desktop mode
 
-La build va fatta con l'opzione **uber-jar** (il fast-jar di default di Quarkus 3 non
-produce il file eseguibile standalone):
+The build must use the **uber-jar** option (the default fast-jar of Quarkus 3 does not produce
+a standalone executable file):
 
 ```bash
 mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sqlite
 ```
 
-**`-Dquarkus.profile` non è opzionale.** Il motore dati (`quarkus.datasource.db-kind`)
-e le cartelle delle migrazioni Flyway sono fissati alla **compilazione**: nessuna
-variabile d'ambiente può cambiarli dopo. Compilando senza profilo, Flyway trova la
-stessa migrazione in `db/migration/sqlite` e in `db/migration/postgresql` e si ferma
-con *"Found more than one migration with version 1"*. Per un server PostgreSQL usare
-`-Dquarkus.profile=postgresql`.
+**`-Dquarkus.profile` is not optional.** The data engine (`quarkus.datasource.db-kind`) and the
+Flyway migration directories are fixed at **build time**: no environment variable can change
+them afterwards. Building without a profile makes Flyway find the same migration in both
+`db/migration/sqlite` and `db/migration/postgresql`, and it stops with *"Found more than one
+migration with version 1"*. For a PostgreSQL server use `-Dquarkus.profile=postgresql`.
 
-Il JAR eseguibile è `target/employee-scheduling-1.1-SNAPSHOT-runner.jar`.
+The executable JAR is `target/employee-scheduling-<version>-SNAPSHOT-runner.jar`.
 
-**Windows** — eseguire:
+**Windows** — run:
 
 ```powershell
-set AUTH_SESSION_KEY=una-chiave-criptografica-lunga-almeno-32-char!!
-java -jar target\employee-scheduling-1.1-SNAPSHOT-runner.jar
+$env:AUTH_SESSION_KEY = "a-cryptographic-key-of-at-least-32-characters!!"
+java -jar target\employee-scheduling-<version>-SNAPSHOT-runner.jar
 ```
 
-**Linux** — eseguire:
+**Linux** — run:
 
 ```bash
-export AUTH_SESSION_KEY=una-chiave-criptografica-lunga-almeno-32-char!!
-java -jar target/employee-scheduling-1.1-SNAPSHOT-runner.jar
+export AUTH_SESSION_KEY=a-cryptographic-key-of-at-least-32-characters!!
+java -jar target/employee-scheduling-<version>-SNAPSHOT-runner.jar
 ```
 
-Aprire il browser su `http://localhost:8080` → **prima registrazione** = crea l'ADMIN
-(email + OTP; in modalità mock il codice è nel log del terminale).
+Open the browser at `http://localhost:8080` → the **first registration** creates the ADMIN with
+a username and a password only. With the `sqlite` profile the mode resolves to *standalone*, so
+there is no email and no OTP — see § 2.1.
 
-### 3.4 Backend — modalità PostgreSQL
+### 3.4 Backend — PostgreSQL mode
 
-Creare il database (una volta sola):
+Create the database (once):
 
 ```bash
-# PostgreSQL locale
-sudo -u postgres psql -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'scegli-una-password-forte';"
+# local PostgreSQL
+sudo -u postgres psql -c "CREATE ROLE employee_scheduling LOGIN PASSWORD 'choose-a-strong-password';"
 sudo -u postgres psql -c "CREATE DATABASE employee_scheduling OWNER employee_scheduling;"
 ```
 
-Eseguire con il profilo esplicito:
+**Rebuild the jar for this engine first.** The one produced in § 3.3 was built with
+`-Dquarkus.profile=sqlite`, and no environment variable can change that afterwards: the engine
+and the Flyway locations are fixed at build time. Setting `QUARKUS_PROFILE=postgresql` on a
+SQLite jar makes the service start and die with *"Driver does not support the provided URL"*.
+
+```bash
+mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=postgresql
+```
+
+Then run it. `QUARKUS_PROFILE` below is belt-and-braces — the value that counts is the one
+baked in above:
 
 ```bash
 export QUARKUS_PROFILE=postgresql
 export DATABASE_URL=jdbc:postgresql://localhost:5432/employee_scheduling
 export DATABASE_USERNAME=employee_scheduling
-export DATABASE_PASSWORD=la-password-scelta
-export AUTH_SESSION_KEY=una-chiave-criptografica-lunga-almeno-32-char!!
-export BACKUP_ADMIN_TOKEN=un-token-lungo-e-casuale
-java -jar target/employee-scheduling-1.1-SNAPSHOT-runner.jar
+export DATABASE_PASSWORD=the-password-you-chose
+export AUTH_SESSION_KEY=a-cryptographic-key-of-at-least-32-characters!!
+export BACKUP_ADMIN_TOKEN=a-long-random-token
+java -jar target/employee-scheduling-<version>-SNAPSHOT-runner.jar
 ```
 
-Le migrazioni Flyway creano lo schema automaticamente al primo avvio.
+The Flyway migrations create the schema automatically on first startup.
 
-### 3.5 Configurazione email (OTP)
+### 3.5 Email configuration (OTP)
 
-L'app invia OTP e notifiche via SMTP. Tre modi:
+The app sends OTPs and notifications over SMTP. Which route applies depends on how it was
+installed — and the two are not interchangeable:
 
-**A. File `.env`** (accanto al JAR, nella working directory del processo):
+**A. For an installed package (MSI): `%LOCALAPPDATA%\EmployeeScheduling\config.properties`**,
+the only route that overrides what was baked in at packaging time (ordinal 450 against 400).
+The `quarkus.mailer.*` keys are runtime configuration, so the override does take effect.
+
+**B. `.env` file** (next to the JAR, in the process working directory) — development and
+`java -jar` only. Its ordinal is 295, **below** the packaged `-D` options, so it cannot correct
+an MSI installation:
 
 ```ini
-QUARKUS_MAILER_HOST=smtp.esempio.com
+QUARKUS_MAILER_HOST=smtp.example.com
 QUARKUS_MAILER_PORT=587
-QUARKUS_MAILER_USERNAME=no-reply@esempio.com
-QUARKUS_MAILER_PASSWORD=password-smtp
-QUARKUS_MAILER_FROM=no-reply@esempio.com
+QUARKUS_MAILER_USERNAME=no-reply@example.com
+QUARKUS_MAILER_PASSWORD=smtp-password
+QUARKUS_MAILER_FROM=no-reply@example.com
 QUARKUS_MAILER_MOCK=false
 ```
 
-**B. Dall'interfaccia** — Configurazione → Parametri Email (effetto immediato, nessun riavvio).
+**C. From the interface** — Configuration → Email parameters (takes effect immediately, no
+restart). **Careful: this does not cover the OTP.** Those settings are used for reports and
+notifications, which build their own mail client from the database row; registration codes go
+through the Quarkus `Mailer`, that is `quarkus.mailer.*`. On a package, an SMTP server
+configured only from the interface delivers reports and never delivers a single OTP.
 
-**C. Mock (solo sviluppo/test)** — `QUARKUS_MAILER_MOCK=true` o assente in dev: le email
-finiscono nei **log**, mai inviate.
+**D. Mock (development/testing only)** — `QUARKUS_MAILER_MOCK=true`, or absent in dev mode:
+emails end up in the **logs** and are never sent.
 
-> **Attenzione**: con `QUARKUS_MAILER_MOCK=true` gli OTP sono leggibili nel log. Va bene in
-> sviluppo; in produzione va sempre `false` con SMTP reale.
+> **Careful**: with `QUARKUS_MAILER_MOCK=true` the OTPs are readable in the log. That is fine in
+> development; in production it must always be `false` with a real SMTP server.
 
 ---
 
-## 4. Applicazione Windows nativa (jpackage)
+## 4. Native Windows application (jpackage)
 
-> Sezione di sintesi. La versione completa — con le trappole incontrate, i loro sintomi e la
-> lista di verifica prima della consegna — è in
-> [`docs/Consolidati/PACKAGING-WINDOWS-MSI.md`](Consolidati/PACKAGING-WINDOWS-MSI.md).
+> Summary section. The complete version — with the pitfalls encountered, their symptoms, and
+> the pre-release checklist — is in
+> [`docs/PACKAGING-WINDOWS-MSI.md`](PACKAGING-WINDOWS-MSI.md).
 
-Il wizard automatizza tutto; i passi manuali, **in quest'ordine**, sono:
+The wizard automates everything; the manual steps, **in this order**, are:
 
 ```powershell
-# 1. Frontend PRIMA del jar: la build finisce in src\main\resources\META-INF\resources
+# 1. Frontend BEFORE the jar: the build lands in src\main\resources\META-INF\resources
 cd frontend; npm install; npm run build; cd ..
 
-# 2. Uber-jar. Due cose obbligatorie:
-#    - uber-jar: il fast-jar predefinito NON produce *-runner.jar
-#    - profilo in fase di BUILD: quarkus.flyway.locations e' build-time, senza questo
-#      il pacchetto include le migrazioni di entrambi i motori e non parte
+# 2. Uber-jar. Two mandatory things:
+#    - uber-jar: the default fast-jar does NOT produce *-runner.jar
+#    - profile at BUILD time: quarkus.flyway.locations is build-time; without it
+#      the package includes the migrations of both engines and does not start
 mvn -B -ntp package -DskipTests "-Dquarkus.package.jar.type=uber-jar" "-Dquarkus.profile=sqlite"
 
-# 3. Staging: jpackage copia TUTTA la cartella --input dentro l'applicazione
+# 3. Staging: jpackage copies the WHOLE --input directory into the application
 New-Item -ItemType Directory -Force -Path target\jpackage-input | Out-Null
-Copy-Item target\employee-scheduling-1.1-SNAPSHOT-runner.jar target\jpackage-input\
-Copy-Item uninstall-windows.ps1, uninstall.cmd target\jpackage-input\
+Copy-Item target\employee-scheduling-<version>-SNAPSHOT-runner.jar target\jpackage-input\
+# these two live in scripts\, not in the repository root: a wrong path here produces
+# a package with NO uninstaller, silently
+Copy-Item scripts\uninstall-windows.ps1, scripts\uninstall.cmd target\jpackage-input\
 
-# 4. Chiave di sessione casuale: sotto i 16 caratteri l'applicazione risponde 500 a ogni accesso
+# 4. Random session key: below 16 characters the application answers 500 on every login.
+#    The backup token is just as mandatory: without it /backup answers 503 and the
+#    Backup page is dead, while scheduled backups keep running — a silent failure.
+# RNGCryptoServiceProvider and not [RandomNumberGenerator]::Fill: the static
+#    Fill overload is .NET Core only, and powershell.exe runs on .NET Framework,
+#    where the line fails and leaves $key empty. Nor Get-Random, which is a
+#    time-seeded System.Random: both these values are secrets.
 $bytes = New-Object byte[] 32
-[System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+$rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+$rng.GetBytes($bytes)
 $key = -join ($bytes | ForEach-Object { $_.ToString('x2') })
+$tokenBytes = New-Object byte[] 32
+$rng.GetBytes($tokenBytes)
+$rng.Dispose()
+$backupToken = -join ($tokenBytes | ForEach-Object { $_.ToString('x2') })
 
-# 5. Installer MSI (WiX 3.14 in C:\tools\wix314, scaricato dal wizard la prima volta)
+# 5. MSI installer (WiX 3.14 in C:\tools\wix314, downloaded by the wizard the first time)
 $env:Path = "C:\tools\wix314;" + $env:Path
-jpackage --type msi --name "EmployeeScheduling" --app-version 1.1.0 `
+jpackage --type msi --name "EmployeeScheduling" --app-version <version> `
   --input target\jpackage-input `
-  --main-jar employee-scheduling-1.1-SNAPSHOT-runner.jar `
-  --dest dist --win-menu --win-dir-chooser `
+  --main-jar employee-scheduling-<version>-SNAPSHOT-runner.jar `
+  --dest dist --win-menu --win-dir-chooser --win-shortcut --win-shortcut-prompt `
   --java-options "-Dapp.data.dir=auto" `
   --java-options "-Dquarkus.http.port=8080" `
   --java-options "-Dquarkus.mailer.mock=true" `
+  --java-options "-Dbackup.admin-token=$backupToken" `
   --java-options "-Dquarkus.http.auth.session.encryption-key=$key" `
   --java-options "-Dquarkus.log.file.enable=true" `
   --java-options "-Dquarkus.log.file.level=INFO" `
+  --java-options "-Dapp.demo-data.enabled=false" `
   --java-options "-Dapp.open-browser-on-start=true"
 ```
 
-Per la cartella portabile: identico con `--type app-image`, senza `--win-menu` e
-`--win-dir-chooser`.
+The version is not typed by hand: `Get-AppVersion` reads it from `pom.xml` and strips
+`-SNAPSHOT`.
 
-Risultato:
+For the portable directory: identical with `--type app-image`, without **any** `--win-*`
+option — they are installer-only and jpackage rejects them on an app-image.
 
-- `dist\EmployeeScheduling-1.1.0.msi` (installer) oppure `dist\EmployeeScheduling\EmployeeScheduling.exe` (portabile);
-- voce "EmployeeScheduling" nel menu Start;
-- disinstallazione con `<install>\app\uninstall.cmd` o da Impostazioni → App.
+Result:
 
-**Configurazione dell'app installata.** Si passa con `-D` singole, che jpackage scrive nel file
-`<install>\app\EmployeeScheduling.cfg`. Chi installa può poi correggere qualunque valore in
-`%LOCALAPPDATA%\EmployeeScheduling\config.properties`, che **ha la precedenza** su quelle `-D`
-(vedi § 0.1).
+- `dist\EmployeeScheduling-<version>.msi` (installer) or `dist\EmployeeScheduling\EmployeeScheduling.exe` (portable);
+- an "EmployeeScheduling" entry in the Start menu;
+- uninstallation via `<install>\app\uninstall.cmd` or from Settings → Apps.
 
-> **Non usare `-Dquarkus.config.locations=...\.env`**: in Quarkus 3.37 quella proprietà non
-> accetta URI `file:///` e il valore viene cercato come nome di classe
-> (`ClassNotFoundException`). Le versioni precedenti di questa guida lo suggerivano: era
-> sbagliato.
+**Configuring the installed app.** Settings are passed as individual `-D` options, which
+jpackage writes into `<install>\app\EmployeeScheduling.cfg`. Whoever installs it can then
+correct any value in `%LOCALAPPDATA%\EmployeeScheduling\config.properties`, which **takes
+precedence** over those `-D` options (see § 0.1).
 
-**Dove finiscono i dati**: `%LOCALAPPDATA%\EmployeeScheduling` (database, backup, log,
-`config.properties`), **mai** nella cartella di installazione. Per questo l'installazione può
-stare tranquillamente in `C:\Program Files` e la disinstallazione non porta via nulla di tuo.
+> **Do not use `-Dquarkus.config.locations=...\.env`**: in Quarkus 3.37 that property does not
+> accept `file:///` URIs, and the value is looked up as a class name
+> (`ClassNotFoundException`). Earlier versions of this guide suggested it: that was wrong.
+
+**Where the data ends up**: `%LOCALAPPDATA%\EmployeeScheduling` (database, backups, log,
+`config.properties`), **never** in the installation directory. That is why the installation can
+safely live in `C:\Program Files` and uninstallation takes nothing of yours with it.
 
 ---
 
-## 5. Installazione come servizio Linux (systemd)
+## 5. Installing as a Linux service (systemd)
 
-Il wizard genera il file, ma a mano:
+The wizard generates the file, but by hand:
 
 ```bash
-# Cartella dati
+# Data directory, owned by the service user
+sudo useradd --system --no-create-home --home-dir /var/lib/employee-scheduling \
+     --shell /usr/sbin/nologin employee-scheduling
 sudo mkdir -p /var/lib/employee-scheduling
-sudo chown "$USER":"$USER" /var/lib/employee-scheduling
+sudo chown -R employee-scheduling:employee-scheduling /var/lib/employee-scheduling
 ```
 
 `/etc/systemd/system/employee-scheduling.service`:
 
 ```ini
 [Unit]
-Description=Employee Scheduling (turni del personale)
-After=network.target
+Description=Employee Scheduling (staff shifts)
+# network-online.target on both lines: pulling it in with Wants while
+# ordering After=network.target means never actually waiting for the network.
+After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=employee
-Group=employee
-WorkingDirectory=/opt/employee-scheduling
+User=employee-scheduling
+Group=employee-scheduling
+WorkingDirectory=/var/lib/employee-scheduling
 EnvironmentFile=/etc/employee-scheduling.env
-ExecStart=/usr/bin/java -jar /opt/employee-scheduling/employee-scheduling-1.1-SNAPSHOT-runner.jar
+# -Dapp.data.dir and the APP_DATA_DIR variable in the environment file are
+# equivalent: AppDataDirectory reads the system property first, then the
+# variable. The generated units set both, so that the uninstaller can also
+# find a non-default directory. What matters is that ONE of the two is
+# present: it is what moves database, backups and settings together, instead
+# of writing them relative to WorkingDirectory.
+ExecStart=/usr/bin/java -Dapp.data.dir=/var/lib/employee-scheduling -jar /opt/employee-scheduling/employee-scheduling-<version>-SNAPSHOT-runner.jar
 Restart=on-failure
 RestartSec=5
-# Hardening (opzionale ma consigliato)
+# Hardening. ProtectSystem=strict makes the whole filesystem read-only, so
+# ReadWritePaths is mandatory alongside it, or the service cannot write anything.
 NoNewPrivileges=true
 PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/employee-scheduling
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-`/etc/employee-scheduling.env` (permessi 600, solo root):
+`/etc/employee-scheduling.env` (mode 600, root only):
 
 ```ini
-AUTH_SESSION_KEY=una-chiave-criptografica-lunga-almeno-32-char!!
+AUTH_SESSION_KEY=a-cryptographic-key-of-at-least-32-characters!!
 QUARKUS_PROFILE=sqlite
-APP_DATABASE_PATH=/var/lib/employee-scheduling/large_data.db
-BACKUP_ADMIN_TOKEN=un-token-lungo-e-casuale
-QUARKUS_MAILER_HOST=smtp.esempio.com
+APP_DATA_DIR=/var/lib/employee-scheduling
+BACKUP_ADMIN_TOKEN=a-long-random-token
+QUARKUS_MAILER_HOST=smtp.example.com
 QUARKUS_MAILER_PORT=587
-QUARKUS_MAILER_USERNAME=no-reply@esempio.com
-QUARKUS_MAILER_PASSWORD=password-smtp
-QUARKUS_MAILER_FROM=no-reply@esempio.com
+QUARKUS_MAILER_USERNAME=no-reply@example.com
+QUARKUS_MAILER_PASSWORD=smtp-password
+QUARKUS_MAILER_FROM=no-reply@example.com
 QUARKUS_MAILER_MOCK=false
 ```
 
-Abilitare e avviare:
+Enable and start:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now employee-scheduling
 sudo systemctl status employee-scheduling
-journalctl -u employee-scheduling -f     # log in tempo reale
+journalctl -u employee-scheduling -f     # live log
 ```
 
-> Se si usa PostgreSQL basta cambiare le variabili `QUARKUS_PROFILE=postgresql` +
+> With PostgreSQL it is enough to change the variables to `QUARKUS_PROFILE=postgresql` plus
 > `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`.
 
----
-
-## 6. Primo avvio e configurazione iniziale
-
-1. Aprire `http://localhost:8080` (o l'indirizzo della macchina server);
-2. Cliccare **Registrati**;
-3. Inserire l'email → ricevere l'OTP (in mock: nel log del server);
-4. Inserire il codice → scegliere username e password;
-5. **Primo utente = ADMIN attivo** (la pagina lo dice); gli utenti successivi nascono
-   CAPOSALA in attesa di approvazione (notifica via email agli ADMIN);
-6. Da **Utenti** l'ADMIN approva i CAPOSALA e (in futuro) assegna la struttura.
+> Writing this unit by hand is rarely worth it: `scripts/install-linux.sh` and the Raspberry
+> wizard generate an **equivalent** unit and stay in sync with the code. Theirs adds further
+> confinement (`ProtectHome`, `ProtectKernelTunables`, `ProtectKernelModules`,
+> `ProtectControlGroups`, `RestrictSUIDSGID`, `RestrictNamespaces`, `LockPersonality`,
+> `TimeoutStopSec`, and `RequiresMountsFor` in the Python wizard) and writes `QUARKUS_HTTP_PORT`
+> and `APP_DEMO_DATA` into the environment file. Read the generated file for the authoritative
+> version; use this section to understand what it produces, or to adapt it.
 
 ---
 
-## 7. Backup e aggiornamento
+## 6. First startup and initial configuration
+
+1. Open `http://localhost:8080` (or the server machine's address);
+2. Click **Register**;
+3. **Server mode only** (PostgreSQL): enter the email → receive the OTP (in mock mode: in the
+   server log) → enter the code. In standalone mode (SQLite, the Windows desktop package) these
+   two screens never appear;
+4. Choose a username and password;
+5. **First user = active ADMIN** (the page says so); later users are created as CAPOSALA
+   awaiting approval (in server mode, with an email notification to the ADMINs);
+6. From **Users**, the ADMIN approves the CAPOSALA users and (in the future) assigns the
+   structure.
+
+---
+
+## 7. Backup and updating
 
 ### Backup
 
-- **SQLite**: backup automatico in `<dati>/backups` (default ogni 30 min, retention 48 file,
-  configurabile da Configurazione → Backup); si può anche copiare il file `.db` a caldo
-  (modalità WAL).
-- **PostgreSQL**: `pg_dump` automatico nella stessa cartella; il ripristino dal pannello è
-  protetto da token.
+- **SQLite**: automatic backup in `<data>/backups` (default every 30 minutes, retention 48
+  files, configurable from Configuration → Backup). Take a hot copy from the Backup panel,
+  which uses `VACUUM INTO` — atomic and consistent. **Do not copy the `.db` file by hand while
+  the application runs**: without the `-wal`/`-shm` files the copy is not consistent.
+- **PostgreSQL**: automatic `pg_dump` into the same directory; restoring from the panel is
+  protected by a token.
 
-### Aggiornamento
+### Updating
 
 ```bash
 git pull
 cd frontend && npm install && npm run build && cd ..
-# Stesso profilo dell'installazione esistente: sqlite oppure postgresql.
+# Same profile as the existing installation: sqlite or postgresql.
 mvn package -DskipTests -Dquarkus.package.jar.type=uber-jar -Dquarkus.profile=sqlite
-# poi: riavviare il servizio (systemd) o rigenerare il pacchetto jpackage
+# then: restart the service (systemd) or regenerate the jpackage package
 ```
 
-**I dati non vengono mai toccati**: database, backup e configurazione locale vivono fuori dalla
-cartella dell'applicazione — su Windows in `%LOCALAPPDATA%\EmployeeScheduling`.
+**The data is never touched**: database, backups, and local configuration live outside the
+application directory — on Windows in `%LOCALAPPDATA%\EmployeeScheduling`.
 
-> Per un'installazione jpackage (app-image o MSI) non si "sostituisce un JAR": si rigenera
-> l'intero pacchetto rieseguendo la sezione 4.
+> For a jpackage installation (app-image or MSI) you do not "replace a JAR": you regenerate the
+> whole package by running section 4 again.
 
-**Aggiornare un'installazione Windows esistente**:
+**Updating an existing Windows installation**:
 
-1. `<install>\app\uninstall.cmd` — chiude l'applicazione, disinstalla e conserva i dati;
-2. installare l'MSI nuovo;
-3. l'applicazione ritrova database, backup e `config.properties` dove li aveva lasciati.
+1. `<install>\app\uninstall.cmd` — closes the application, uninstalls, and keeps the data;
+2. install the new MSI;
+3. the application finds the database, backups, and `config.properties` where it left them.
 
-Disinstallare prima è necessario: `--app-version` è fisso a `1.1.0` e installare sopra la stessa
-versione non è affidabile.
+Uninstalling first is necessary: `--app-version` comes from `pom.xml`, and installing over an
+installation carrying the **same** version number is not reliable.
 
 ---
 
-## 8. Risoluzione problemi
+## 8. Troubleshooting
 
-| Sintomo | Causa probabile | Soluzione |
+| Symptom | Likely cause | Fix |
 |---|---|---|
-| `Port 8080 already in use` | Altro processo sulla porta | **App installata**: `quarkus.http.port=8081` in `%LOCALAPPDATA%\EmployeeScheduling\config.properties` e riavvio. **Sviluppo**: `QUARKUS_HTTP_PORT=8081` nel `.env` |
-| "Server non raggiungibile" al login, 500 su `/auth/me` | Chiave di sessione sotto i 16 caratteri | Rigenerare il pacchetto con una chiave lunga — [PACKAGING-WINDOWS-MSI § 7.1](Consolidati/PACKAGING-WINDOWS-MSI.md) |
-| Disinstallazione bloccata (`app.log` in uso, o `GetLastError: 5`) | Applicazione aperta, o permessi riscritti da una versione vecchia | Usare `<install>\app\uninstall.cmd` — [§ 7.3 e § 7.4](Consolidati/PACKAGING-WINDOWS-MSI.md) |
-| Interfaccia sempre in italiano, selettore lingua inerte | Quota di `localStorage` esaurita dalle cache vecchie | Console del browser: rimuovere le chiavi `i18n_cache*` e ricaricare — [§ 7.11](Consolidati/PACKAGING-WINDOWS-MSI.md) |
-| Elenchi vuoti senza alcun errore dopo una reinstallazione | Struttura selezionata rimasta in `localStorage` e non più esistente | Corretto dal 5 agosto 2026; su versioni precedenti riselezionare la struttura dalla barra in alto |
-| `.ps1` si apre nel Blocco note | I `.ps1` non partono con un doppio clic | Usare `uninstall.cmd`, non lo script direttamente |
-| OTP non arriva | SMTP in mock o non configurato | Controllare il log; configurare SMTP (sezione 3.5) |
-| `Unrecognized configuration key` | Profilo sbagliato | Usare `QUARKUS_PROFILE=sqlite` o `postgresql` espliciti |
-| Login bloccato ("in attesa") | CAPOSALA non approvato | L'ADMIN lo approva da Utenti |
-| Backup disattivato (PostgreSQL) | `pg_dump` non trovato | Installare i client PostgreSQL o impostare `backup.postgresql.bin-dir` |
-| L'app non parte come servizio | File `.env` non leggibile | Verificare permessi 600 e percorsi assoluti |
+| `Port 8080 already in use` | Another process on the port | **Installed app**: `quarkus.http.port=8081` in `%LOCALAPPDATA%\EmployeeScheduling\config.properties`, then restart. **Development**: `QUARKUS_HTTP_PORT=8081` in `.env` |
+| "Server unreachable" at login, 500 on `/auth/me` | Session key shorter than 16 characters | Regenerate the package with a long key — [PACKAGING-WINDOWS-MSI § 7.1](PACKAGING-WINDOWS-MSI.md) |
+| Uninstallation blocked (`app.log` in use, or `GetLastError: 5`) | Application still open, or permissions rewritten by an old version | Use `<install>\app\uninstall.cmd` — [§ 7.3 and § 7.4](PACKAGING-WINDOWS-MSI.md) |
+| Interface always in Italian, language selector inert | `localStorage` quota exhausted by old caches | In the browser console: remove the `i18n_cache*` keys and reload — [§ 7.11](PACKAGING-WINDOWS-MSI.md) |
+| Empty lists with no error at all after a reinstall | Selected structure left in `localStorage` and no longer existing | Fixed since 5 August 2026; on earlier versions, reselect the structure from the top bar |
+| `.ps1` opens in Notepad | `.ps1` files do not run on a double-click | Use `uninstall.cmd`, not the script directly |
+| The OTP never arrives | SMTP in mock mode or not configured | Check the log; configure SMTP (section 3.5) |
+| `Unrecognized configuration key` | Wrong profile | Use an explicit `QUARKUS_PROFILE=sqlite` or `postgresql` |
+| Login blocked ("pending") | CAPOSALA not approved | The ADMIN approves them from Users |
+| Backup disabled (PostgreSQL) | `pg_dump` not found | Install the PostgreSQL client tools or set `backup.postgresql.bin-dir` |
+| The app does not start as a service | `.env` file not readable | Check mode 600 and absolute paths |
