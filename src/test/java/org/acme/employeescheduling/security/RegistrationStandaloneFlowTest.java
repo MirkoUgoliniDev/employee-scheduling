@@ -12,6 +12,7 @@ import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.acme.employeescheduling.persistence.AppUserEntity;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,26 @@ class RegistrationStandaloneFlowTest {
                 .statusCode(200)
                 .body("mode", equalTo("standalone"))
                 .body("otpRequired", equalTo(false));
+    }
+
+    /**
+     * @brief The session must advertise the desktop deployment, not only the registration flow.
+     *
+     * @details The frontend uses this flag to keep "Chiudi applicazione" visible to a head nurse
+     *          here, while {@code SystemExitAuthorizationTest} proves the same request is refused
+     *          on a server. If the flag stopped being sent, the menu entry would disappear from
+     *          every desktop installation — a regression nobody would think to report as a
+     *          security problem, because it fails in the safe direction.
+     *
+     *          <p>The permitted call itself is deliberately not made: a successful
+     *          {@code POST /system-info/exit} stops the JVM running this suite.</p>
+     */
+    @Test
+    @TestSecurity(user = "capo", roles = "CAPOSALA")
+    void sessionReportsAStandaloneInstallation() {
+        given().when().get("/auth/me").then()
+                .statusCode(200)
+                .body("standalone", equalTo(true));
     }
 
     @Test

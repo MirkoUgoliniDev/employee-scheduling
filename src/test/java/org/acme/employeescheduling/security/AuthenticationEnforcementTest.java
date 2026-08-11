@@ -54,6 +54,12 @@ class AuthenticationEnforcementTest {
     }
 
     @Test
+    void anonymousCannotShutDownTheApplication() {
+        given().contentType("application/json").body("{}")
+                .when().post("/system-info/exit").then().statusCode(401);
+    }
+
+    @Test
     @TestSecurity(user = "capo", roles = "CAPOSALA")
     void caposalaWorksOnShiftsButNotOnAdministration() {
         given().when().get("/demo-data/getlocations").then().statusCode(200);

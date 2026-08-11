@@ -19,6 +19,14 @@ export interface SessionInfo {
   displayName?: string
   roles?: string[]
   admin?: boolean
+  /**
+   * @brief true on the single-PC desktop package, false on a shared server installation.
+   * @details Only sent when authenticated. Drives actions whose meaning changes with the
+   *          deployment: closing the application is closing a window on a desktop and a service
+   *          outage on a server, so a CAPOSALA may do it only on the former — see
+   *          `SystemInfoResource.exit()`, which answers 403 EXIT_REQUIRES_ADMIN otherwise.
+   */
+  standalone?: boolean
   /** @brief Failure reason when authenticated=false: INACTIVE for pending/disabled accounts. */
   reason?: string
 }

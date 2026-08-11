@@ -14,8 +14,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.acme.employeescheduling.config.DeploymentMode;
 import org.acme.employeescheduling.persistence.AppUserEntity;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -65,11 +65,8 @@ public class RegistrationResource {
     private final Mailer mailer;
     private final OtpStore store;
 
-    @ConfigProperty(name = "app.registration.mode", defaultValue = "auto")
-    String registrationMode;
-
-    @ConfigProperty(name = "app.database.kind", defaultValue = "sqlite")
-    String databaseKind;
+    @Inject
+    DeploymentMode deployment;
 
     @Inject
     HttpServerRequest serverRequest;
@@ -80,10 +77,13 @@ public class RegistrationResource {
         this.store = store;
     }
 
-    /** @brief true if the mode requires email verification through OTP. */
+    /**
+     * @brief true if the mode requires email verification through OTP.
+     * @details Delegates to {@link DeploymentMode}, which is also what decides who may shut the
+     *          application down: the two answers must not be able to drift apart.
+     */
     boolean isServerMode() {
-        return "server".equals(registrationMode)
-                || ("auto".equals(registrationMode) && "postgresql".equals(databaseKind));
+        return deployment.isServerMode();
     }
 
     /**

@@ -3,6 +3,8 @@ package org.acme.employeescheduling.rest;
 import jakarta.annotation.security.RolesAllowed;
 import ai.timefold.solver.core.api.solver.SolverManager;
 import io.quarkus.runtime.Quarkus;
+import io.quarkus.security.identity.SecurityIdentity;
+import org.acme.employeescheduling.config.DeploymentMode;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -68,6 +70,13 @@ public class SystemInfoResource {
 
     @Inject
     DataSource dataSource;
+
+    @Inject
+    DeploymentMode deployment;
+
+    /** @brief Needed by {@link #exit()}: the role decides only on a server deployment. */
+    @Inject
+    SecurityIdentity identity;
 
     @ConfigProperty(name = "quarkus.application.version")
     String applicationVersion;
@@ -142,13 +151,32 @@ public class SystemInfoResource {
     }
 
     /**
-     * @brief Closes the application (desktop package only).
-     * @details Restricted to ADMIN users: stops the process after responding with 200.
+     * @brief Closes the application.
+     *
+     * @details Stops the process after responding with 200.
+     *
+     *          <p><b>Who may call it depends on the deployment.</b> On the desktop package
+     *          ({@link DeploymentMode#isStandalone()}) closing the application is closing the
+     *          window of the program in front of you, and the operator sitting at the PC — a
+     *          {@code CAPOSALA} — must be able to do it. On a shared server the identical
+     *          request is a service outage for every connected user, so it requires
+     *          {@code ADMIN}.</p>
+     *
+     *          <p>The method-level annotation deliberately widens the class-level
+     *          {@code @RolesAllowed("ADMIN")}; the narrowing back to ADMIN on servers is the
+     *          explicit check below, because {@code @RolesAllowed} cannot express a condition.
+     *          Before this, the widening was unconditional and undocumented: any CAPOSALA could
+     *          shut down a production server, repeatedly, and the Javadoc two lines above
+     *          claimed the opposite of what the code did.</p>
      */
     @POST
     @Path("/exit")
     @RolesAllowed({"ADMIN", "CAPOSALA"})
     public Response exit() {
+        if (deployment.isServerMode() && !identity.hasRole("ADMIN"))
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", "EXIT_REQUIRES_ADMIN")).build();
+
         new Thread(() -> {
             try {
                 Thread.sleep(300);

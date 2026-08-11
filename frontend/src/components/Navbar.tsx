@@ -200,10 +200,15 @@ export default function Navbar() {
                 {isAdmin ? t('user.roleAdmin', 'Amministratore') : t('user.roleCaposala', 'Gestione turni')}
               </NavDropdown.Header>
               <NavDropdown.Divider />
-              <NavDropdown.Item onClick={() => setExitConfirmOpen(true)}>
-                <FontAwesomeIcon icon={faPowerOff} className="me-2" />
-                {t('user.exitApp', 'Chiudi applicazione')}
-              </NavDropdown.Item>
+              {/* Shown to a CAPOSALA only on the desktop package, where closing the application
+                  is closing the window in front of them. On a shared server it would take the
+                  service down for everyone, and the backend answers 403 EXIT_REQUIRES_ADMIN. */}
+              {(isAdmin || session?.standalone) && (
+                <NavDropdown.Item onClick={() => setExitConfirmOpen(true)}>
+                  <FontAwesomeIcon icon={faPowerOff} className="me-2" />
+                  {t('user.exitApp', 'Chiudi applicazione')}
+                </NavDropdown.Item>
+              )}
               <NavDropdown.Item onClick={() => { void logout() }}>
                 <FontAwesomeIcon icon={faRightFromBracket} className="me-2" />
                 {t('user.logout', 'Esci')}
