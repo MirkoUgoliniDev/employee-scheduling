@@ -68,11 +68,11 @@ public class DatabaseConfigValidator {
 
         if (!declared.equals(effective))
             throw new IllegalStateException(
-                    "Configurazione database incoerente: app.database.kind=" + declared
-                    + " ma quarkus.datasource.db-kind=" + effective
-                    + ". L'applicazione userebbe il percorso di backup e di bootstrap del motore sbagliato."
-                    + " Allineare le due proprieta' oppure selezionare il profilo corretto"
-                    + " (-Dquarkus.profile=sqlite oppure -Dquarkus.profile=postgresql).");
+                    "Inconsistent database configuration: app.database.kind=" + declared
+                    + " but quarkus.datasource.db-kind=" + effective
+                    + ". The application would use the backup and bootstrap paths of the wrong"
+                    + " engine. Align the two properties, or select the correct profile"
+                    + " (-Dquarkus.profile=sqlite or -Dquarkus.profile=postgresql).");
 
         if (!SQLITE.equals(effective)) return;
 
@@ -81,21 +81,21 @@ public class DatabaseConfigValidator {
             // SQLite URL that cannot be mapped to a file (for example, :memory:): a file backup
             // would have no consistent source to capture anyway.
             throw new IllegalStateException(
-                    "Configurazione database incoerente: quarkus.datasource.jdbc.url=" + jdbcUrl
-                    + " non punta a un file SQLite, mentre demo.db.name=" + dbName
-                    + " indica il file che il servizio di backup salva e ripristina.");
+                    "Inconsistent database configuration: quarkus.datasource.jdbc.url=" + jdbcUrl
+                    + " does not point to a SQLite file, while demo.db.name=" + dbName
+                    + " names the file the backup service saves and restores.");
         }
 
         Path fromName = absolute(Path.of(dbName.trim()));
         if (!fromUrl.equals(fromName))
             throw new IllegalStateException(
-                    "Configurazione database incoerente: quarkus.datasource.jdbc.url punta a "
-                    + fromUrl + " mentre demo.db.name punta a " + fromName
-                    + ". I backup fotograferebbero un database diverso da quello in uso e un"
-                    + " ripristino sovrascriverebbe il file sbagliato. Impostare demo.db.name e"
-                    + " lasciare che l'URL derivi da esso (jdbc:sqlite:${demo.db.name}).");
+                    "Inconsistent database configuration: quarkus.datasource.jdbc.url points to "
+                    + fromUrl + " while demo.db.name points to " + fromName
+                    + ". Backups would capture a database other than the live one, and a restore"
+                    + " would overwrite the wrong file. Set demo.db.name and let the URL derive"
+                    + " from it (jdbc:sqlite:${demo.db.name}).");
 
-        logger.fine(() -> "Configurazione database coerente: " + effective + " su " + fromUrl);
+        logger.fine(() -> "Database configuration is consistent: " + effective + " on " + fromUrl);
     }
 
     private static String normalizeKind(String value) {
