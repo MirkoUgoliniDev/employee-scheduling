@@ -43,9 +43,33 @@ runs in `.github/workflows/release.yml`. On Windows the interpreter may be `pyth
 
 ## Reporting
 
-For each check: passed / failed / not run, and for failures the actual test name and
-error output — not a paraphrase. If a failure looks pre-existing rather than caused by
-recent work, check with `git stash` or by reading the test, and say which it is.
+Emit the report in exactly this shape. The status of each check is one of three words —
+`PASSED`, `FAILED`, `NOT RUN` — and nothing else: a check that could not run is
+`NOT RUN`, never `PASSED`, and never a sentence that reads like one.
+
+<output_format>
+## Verdict: <GREEN | RED | INCOMPLETE>
+
+| Check | Status | Notes |
+|---|---|---|
+| Backend (SQLite) | PASSED/FAILED/NOT RUN | tests run, failures |
+| Backend (PostgreSQL) | PASSED/FAILED/NOT RUN | if NOT RUN, why |
+| Frontend (lint + build) | PASSED/FAILED/NOT RUN | warning count |
+| setup/ (Python) | PASSED/FAILED/NOT RUN | |
+
+### Failures
+For each failure, in this order:
+- **Test or command**: the exact name
+- **Output**: the real error text, verbatim, in a fenced block — never a paraphrase
+- **Pre-existing or new**: which, and how you determined it
+</output_format>
+
+`INCOMPLETE` is the verdict whenever any check is `NOT RUN`, even if everything that did
+run passed — most often the PostgreSQL profile with no reachable server. Do not round
+that up to `GREEN`.
+
+If a failure looks pre-existing rather than caused by recent work, check with
+`git stash` or by reading the test, and say which it is.
 
 Environment notes: Maven is at `C:\Program Files\Maven\apache-maven-3.9.13\`, JDK 21
 Temurin, Node 24. The pom targets `maven.compiler.release=17`, so a Java 18+ API shows

@@ -63,4 +63,30 @@ working notes where they remain.
 Confirm the checks in the `build-verifier` agent were run and green. A release audit on
 an unverified tree is worth little; say so if that is the situation.
 
-Report as a ranked list, worst first, each finding with the file and line.
+## Reporting
+
+Emit the report in exactly this shape, findings ranked worst first.
+
+<output_format>
+## Release audit: <SAFE TO PUBLISH | DO NOT PUBLISH>
+
+### Findings
+For each, worst first:
+- **[BLOCKER | WARNING | NOTE]** one-line statement of the problem
+  - **Where**: `path/to/file:line` (or the table and column, for the database)
+  - **Evidence**: the command you ran and its actual output
+  - **Why it matters**: what leaks, breaks, or locks a user out if this ships
+
+### Checks with nothing to report
+One line each, so the author can see what was actually looked at:
+secrets · demo database · app_users · version coherence · language of published files ·
+build health
+</output_format>
+
+`BLOCKER` means the repository is public and this must not go out with a tag on it: a
+real credential, real personal data, a non-empty `app_users`. Anything that is a
+`BLOCKER` makes the verdict `DO NOT PUBLISH` — do not soften it because it looks small.
+
+The two logged accepted risks (cleartext secrets in the Windows `.cfg`, the
+unauthenticated localhost web wizard) are reported as `NOTE`, not `BLOCKER`: they are
+known and already decided.
