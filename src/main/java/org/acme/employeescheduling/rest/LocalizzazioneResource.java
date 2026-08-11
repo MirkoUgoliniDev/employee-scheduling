@@ -16,6 +16,7 @@ import org.acme.employeescheduling.persistence.LabelEntity;
 import org.acme.employeescheduling.persistence.LanguageEntity;
 import org.acme.employeescheduling.persistence.LocationEntity;
 import org.acme.employeescheduling.persistence.SkillEntity;
+import org.acme.employeescheduling.security.RichHtmlSanitizer;
 
 /**
  * @brief Per-entity translations (UI labels, skill/location names) — migrated to ORM (Panache).
@@ -89,7 +90,9 @@ public class LocalizzazioneResource {
             entity.entityId = entityId;
             entity.fieldName = loc.getFieldName() != null ? loc.getFieldName() : "value";
             entity.languageId = loc.getLanguageId();
-            entity.value = loc.getValue();
+            // Values are served to anonymous clients (/translations) and rendered with
+            // dangerouslySetInnerHTML on the home page: sanitize on write (server authority).
+            entity.value = RichHtmlSanitizer.sanitize(loc.getValue());
             entity.persist();
         }
         // UI labels + dynamic names (skills, locations) all live in the /translations map.

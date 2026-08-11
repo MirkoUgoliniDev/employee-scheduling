@@ -173,7 +173,7 @@ function PdfTemplateModal({ show, template, structures, usedStructureIds, onClos
           <div className="border shadow-sm bg-white mx-auto" style={{ aspectRatio: '210 / 297', maxWidth: 390, position: 'relative', overflow: 'hidden' }}>
             <div className="d-flex align-items-center px-4 text-white" style={{ height: '20%', background: form.primary_color }}>
               {form.logo_data_url && <img src={form.logo_data_url} alt="Logo" style={{ width: '24%', height: '70%', objectFit: 'contain' }} />}
-              <div className="text-center flex-grow-1"><div className="fw-bold">{form.header_text || selectedStructure?.name}</div><small>Report Turni</small></div>
+              <div className="text-center flex-grow-1"><div className="fw-bold">{form.header_text || selectedStructure?.name}</div><small>{t('pdf.titleMonthlyShifts', 'Report Turni')}</small></div>
             </div>
             <div className="p-4">{[0, 1, 2, 3].map(i => <div key={i} className="mb-2" style={{ height: 18, background: i % 2 ? '#fff' : `${form.primary_color}18`, borderBottom: '1px solid #ddd' }} />)}</div>
             <div className="position-absolute bottom-0 w-100 text-center text-muted small px-3 pb-2">{form.footer_text || t('pdfTpl.previewFooter', 'Data di generazione e numero pagina')}</div>

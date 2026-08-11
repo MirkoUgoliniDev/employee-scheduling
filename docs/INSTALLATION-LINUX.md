@@ -280,6 +280,12 @@ directory — which is rarely where you meant.
 4. Later accounts are created as head nurses awaiting approval; an administrator activates
    them from the Users page.
 
+> **Register before exposing the port.** The first-account rule is a race: whoever reaches
+> the registration page first owns the instance. On a fresh installation (`app_users` empty),
+> complete your own registration at the first start *before* opening the port to the network;
+> from that moment the window is closed for good. On a desktop this is a non-issue — the app
+> listens on `localhost` by default.
+
 Without SMTP configured, the registration code appears only in the service log
 (`journalctl -u employee-scheduling`) — which is why standalone mode exists at all.
 

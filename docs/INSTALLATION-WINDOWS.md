@@ -85,6 +85,49 @@ not touch it.
 
 To move an installation to another PC, install the MSI there and copy that directory over.
 
+### Where the secrets live
+
+The package contains four secrets, all generated **randomly at installation time**
+(48-character strings from `RNGCryptoServiceProvider`), so no two installations share them:
+
+| Secret | Purpose |
+|---|---|
+| `quarkus.http.auth.session.encryption-key` | encrypts the login session cookie |
+| `backup.admin-token` | protects the backup administration API |
+| `quarkus.mailer.password` (server mode) | SMTP authentication |
+| `quarkus.datasource.password` (server mode) | PostgreSQL password |
+
+They are written in two places, and **both are readable by any local process**:
+
+1. `app\EmployeeScheduling.cfg` under the installation directory (ACL-restricted to the
+   installing user on Windows);
+2. the **JVM command line** — `--java-options` become arguments of the `EmployeeScheduling.exe`
+   process, visible to every process on the machine via
+   `Get-CimInstance Win32_Process | Where-Object Name -eq 'EmployeeScheduling.exe'` or
+   `WMIC process where name='EmployeeScheduling.exe' get commandline`.
+
+This is a Windows/JVM limitation, not an oversight: a desktop app started by the user cannot
+hide its own arguments from that user's other processes. It is acceptable because the values
+are per-installation and meaningless elsewhere. On a machine shared by multiple users, prefer
+installing with the standard MSI flow (per-user installation), which keeps the configuration
+and the process under the same Windows user.
+
+The PostgreSQL password is handled more strictly *inside* the application: it is never placed
+in the environment of child processes — `pg_dump`/`pg_restore` receive it via the
+`PGPASSWORD` variable of the spawned process only, which other processes cannot read.
+
+### First start: register before exposing the port
+
+The first account created on a fresh installation becomes the **active ADMIN** — that is how
+the installer flow works, on purpose. On a fresh database (`app_users` empty) there is a race
+window: **whoever reaches the registration page first owns the instance**. Everyone registered
+afterwards is created inactive and cannot be approved without an ADMIN.
+
+The application listens on `localhost` by default, so on a personal desktop this is a non-issue.
+If you install it on a server or forward the port, complete your own registration at the first
+start **before** opening the port to the network: from that moment the first-account window is
+closed for good.
+
 ### Uninstallation
 
 Double-click `uninstall.cmd` in the installation's `app\` directory (for example

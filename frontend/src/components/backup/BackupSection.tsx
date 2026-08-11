@@ -45,6 +45,10 @@ export default function BackupSection() {
   const [deleting, setDeleting] = useState(false)
   const [settings, setSettings] = useState<BackupSettings | null>(null)
   const [savingSettings, setSavingSettings] = useState(false)
+  /** @brief Last PERSISTED rotation values: lowering them is destructive (see saveSettings). */
+  const [savedSettings, setSavedSettings] = useState<BackupSettings | null>(null)
+  /** @brief Rotation settings awaiting confirmation because they lower retention/keep. */
+  const [pendingSettings, setPendingSettings] = useState<BackupSettings | null>(null)
   /** @brief Engine capability, not a setting: determines whether restore is offered. */
   const [restoreSupported, setRestoreSupported] = useState(false)
   /** @brief Reason the backup is unavailable, exactly as received from the server. */
@@ -99,7 +103,11 @@ export default function BackupSection() {
 
   useEffect(() => {
     backupApi.settings()
-      .then(response => { setSettings(response); setRestoreSupported(response.restoreSupported !== false) })
+      .then(response => {
+        setSettings(response)
+        setSavedSettings(response)
+        setRestoreSupported(response.restoreSupported !== false)
+      })
       .catch(e => {
         if (isAuthRequired(e)) setAuthRequired(true)
         else if (isAdminMisconfigured(e)) setUnavailable(errorText(e, 'toast.errorLoad', 'Errore nel caricamento.'))
@@ -107,11 +115,31 @@ export default function BackupSection() {
       })
   }, [t, errorText])
 
+  /**
+   * @brief The rotation applies DELETE rules: lowering retention days or max backups
+   *        destroys files at the next rotation. Saved only after explicit confirmation;
+   *        interval-only changes save immediately.
+   */
   async function saveSettings() {
     if (!settings || settingsError) return
+    const destructive = savedSettings != null && (
+      settings.autoRetentionDays < savedSettings.autoRetentionDays ||
+      settings.otherRetentionDays < savedSettings.otherRetentionDays ||
+      settings.autoKeep < savedSettings.autoKeep ||
+      settings.otherKeep < savedSettings.otherKeep)
+    if (destructive) {
+      setPendingSettings(settings)
+      return
+    }
+    await persistSettings(settings)
+  }
+
+  async function persistSettings(toSave: BackupSettings) {
     setSavingSettings(true)
     try {
-      setSettings(await backupApi.saveSettings(settings))
+      const saved = await backupApi.saveSettings(toSave)
+      setSettings(saved)
+      setSavedSettings(saved)
       toast.success(t('toast.backupSettingsSaved', 'Parametri backup salvati.'))
       load()
     } catch {
@@ -119,6 +147,13 @@ export default function BackupSection() {
     } finally {
       setSavingSettings(false)
     }
+  }
+
+  async function confirmSettingsSave() {
+    if (!pendingSettings) return
+    const toSave = pendingSettings
+    setPendingSettings(null)
+    await persistSettings(toSave)
   }
 
   async function runNow() {
@@ -376,6 +411,15 @@ export default function BackupSection() {
         loading={deleting}
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+      <ConfirmModal
+        show={pendingSettings !== null}
+        title={t('backup.confirmRetentionTitle', 'Conferma rotazione')}
+        message={t('backup.confirmRetentionMsg', 'Stai riducendo la conservazione o il numero massimo di backup: alla prossima rotazione i file oltre i nuovi limiti verranno eliminati definitivamente. Continuare?')}
+        confirmVariant="danger"
+        loading={savingSettings}
+        onConfirm={confirmSettingsSave}
+        onClose={() => setPendingSettings(null)}
       />
     </div>
   )
