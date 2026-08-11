@@ -77,7 +77,7 @@ export default function LocationShiftsModal({ show, locationId, locationName, sh
     <>
       <Modal show={show} onHide={onClose} size="xl" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Turni — {locationName}</Modal.Title>
+          <Modal.Title>{t('modal.shiftsList', 'Lista Turni')} — {locationName}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body style={{ maxHeight: '65vh', overflowY: 'auto' }}>

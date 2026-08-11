@@ -54,6 +54,12 @@ class AuthenticationEnforcementTest {
     }
 
     @Test
+    void anonymousCannotShutDownTheApplication() {
+        given().contentType("application/json").body("{}")
+                .when().post("/system-info/exit").then().statusCode(401);
+    }
+
+    @Test
     @TestSecurity(user = "capo", roles = "CAPOSALA")
     void caposalaWorksOnShiftsButNotOnAdministration() {
         given().when().get("/demo-data/getlocations").then().statusCode(200);
@@ -78,6 +84,29 @@ class AuthenticationEnforcementTest {
         given().contentType("application/json").body("{\"name\":\"x\"}")
                 .when().put("/structures/1").then().statusCode(403);
         given().when().delete("/structures/1").then().statusCode(403);
+    }
+
+    /**
+     * Email and PDF template appearance are configuration, not operations: a head nurse
+     * must be able to VIEW them (they appear in the same pages she uses) but not to
+     * change the texts sent to every operator or the look of every report. Same rule as
+     * {@code HomeUiSettingsResource}: read for both roles, write for ADMIN only.
+     */
+    @Test
+    @TestSecurity(user = "capo", roles = "CAPOSALA")
+    void caposalaCannotChangeEmailAndPdfTemplates() {
+        // Reads stay open to both roles; whether structure 1 exists is irrelevant here.
+        given().when().get("/demo-data/email-template?structureId=1")
+                .then().statusCode(org.hamcrest.Matchers.not(equalTo(403)));
+        given().when().get("/demo-data/pdf-template?structureId=1")
+                .then().statusCode(org.hamcrest.Matchers.not(equalTo(403)));
+        given().contentType("application/json")
+                .body("{\"subject\":\"x\",\"body\":\"y\"}")
+                .when().put("/demo-data/email-template?structureId=1").then().statusCode(403);
+        given().contentType("application/json")
+                .body("{\"headerText\":\"x\",\"footerText\":\"y\",\"logoDataUrl\":\"\",\"primaryColor\":\"#000000\"}")
+                .when().put("/demo-data/pdf-template?structureId=1").then().statusCode(403);
+        given().when().delete("/demo-data/pdf-template?structureId=1").then().statusCode(403);
     }
 
     /**

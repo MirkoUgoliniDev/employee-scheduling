@@ -564,34 +564,44 @@ public class PostgresqlBackupService implements DatabaseBackupService {
     }
 
     /**
-     * @brief Pre-destructive-operation backup: best effort; does not block the operation on failure.
-     * @details On SQLite this was a millisecond-long `VACUUM INTO`; here it is a complete
-     *          `pg_dump`, and all three callers run inside a user's REST request. To keep
-     *          "nonblocking" true for time as well as errors: use a limited lock wait (no queueing
-     *          behind an automatic dump) and a lower duration limit.
+     * @brief Snapshot before an operation that rewrites shifts in bulk.
+     *
+     * @details On SQLite this is a millisecond-long `VACUUM INTO`; here it is a complete
+     *          `pg_dump`, and all three callers run inside a user's REST request. Hence the
+     *          limited lock wait (no queueing behind an automatic dump) and the lower duration
+     *          limit.
+     *
+     *          <p>The operation is <b>blocked</b> when this does not return
+     *          {@link SafetyBackupOutcome#OK} — the previous wording here claimed the opposite
+     *          ("best effort; does not block"), while all three callers answered 503. Each of the
+     *          four exits below is a distinct outcome because they demand opposite reactions from
+     *          the user; see {@link SafetyBackupOutcome}.</p>
      */
     @Override
-    public boolean safetyBackup(String tag) {
-        if (!isAvailable())
-            return false;
+    public SafetyBackupOutcome safetyBackup(String tag) {
+        if (!isAvailable()) {
+            logger.severe("Backup di sicurezza impossibile: pg_dump assente o piu' vecchio del server."
+                    + " L'operazione e' annullata: installare i client tool PostgreSQL.");
+            return SafetyBackupOutcome.CLIENT_TOOLS_MISSING;
+        }
         try {
             if (!lock.tryLock(PREOP_LOCK_WAIT_SECONDS, TimeUnit.SECONDS)) {
                 logger.warning("Backup di sicurezza saltato: operazione annullata per backup in corso");
-                return false;
+                return SafetyBackupOutcome.BUSY;
             }
             try {
                 performBackup(tag, preopTimeoutSeconds);
-                return true;
+                return SafetyBackupOutcome.OK;
             } finally {
                 lock.unlock();
             }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             logger.warning("Backup di sicurezza interrotto: operazione annullata");
-            return false;
+            return SafetyBackupOutcome.BUSY;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Backup di sicurezza non riuscito: operazione annullata", e);
-            return false;
+            return SafetyBackupOutcome.FAILED;
         }
     }
 
@@ -1377,7 +1387,8 @@ public class PostgresqlBackupService implements DatabaseBackupService {
             if (!policies.equals(actual.policies))
                 return "policy RLS differenti";
             if (!java.util.Objects.equals(flyway, actual.flyway))
-                return "versione Flyway differente";
+                return "storia delle migrazioni (Flyway) differente: il backup è precedente o successivo "
+                        + "a un aggiornamento dello schema dell'applicazione";
             return "differenza strutturale non identificata";
         }
     }

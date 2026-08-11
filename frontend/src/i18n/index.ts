@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file i18n/index.ts
  * @brief Initializes react-i18next with translations loaded from the backend.
  *
@@ -32,7 +32,7 @@ import { api } from '../api/client'
  *       forcing a new `/translations` fetch on the next load.
  */
 const CACHE_PREFIX = 'i18n_cache'
-const CACHE_KEY = `${CACHE_PREFIX}-v55`
+const CACHE_KEY = `${CACHE_PREFIX}-v59`
 /** @brief Cache TTL in milliseconds (10 minutes). */
 const CACHE_TTL = 10 * 60 * 1000
 

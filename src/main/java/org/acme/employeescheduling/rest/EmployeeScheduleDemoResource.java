@@ -1301,6 +1301,23 @@ public Response addSavedTemplate(@QueryParam("structureId") @DefaultValue("0") i
 }
 
 /**
+ * @brief Takes the pre-operation snapshot; returns the response to send, or null to proceed.
+ *
+ * @details Shared by the three operations that rewrite shifts in bulk. Without a snapshot they
+ *          refuse to write — there would be nothing to go back to — but the refusal now names
+ *          which failure it was, because {@link SafetyBackupOutcome#CLIENT_TOOLS_MISSING} means
+ *          "this installation is missing pg_dump and will never work" while
+ *          {@link SafetyBackupOutcome#BUSY} means "press Save again in a minute". One shared 503
+ *          left the user unable to tell a call to the system administrator from patience.
+ */
+private Response safetyBackupFailure(String tag) {
+    SafetyBackupOutcome outcome = backupService.safetyBackup(tag);
+    if (outcome.isOk()) return null;
+    return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+            .entity(Map.of("error", outcome.errorCode())).build();
+}
+
+/**
  * @brief Applies a saved template to [start, end) (REPLACES shifts in the window).
  * @details Destructive operation on window shifts: confirmation is the frontend's responsibility.
  */
@@ -1318,9 +1335,8 @@ public Response applySavedTemplate(@PathParam("id") int headerId,
     if (ShiftTemplateHeaderEntity.count("id = ?1 and structureId = ?2", headerId, structureId) == 0)
         return Response.status(Response.Status.NOT_FOUND)
                 .entity(Map.of("error", "template non trovato per la struttura")).build();
-    if (!backupService.safetyBackup("preop"))
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                .entity(Map.of("error", "SAFETY_BACKUP_FAILED")).build();
+    Response safetyFailure = safetyBackupFailure("preop");
+    if (safetyFailure != null) return safetyFailure;
     int created = demoDataRepository.applySavedTemplateToWindowOrm(headerId, structureId, ws, we);
     if (created == -2) return Response.status(Response.Status.CONFLICT)
             .entity(Map.of("error", "template non valido: nessun turno modificato")).build();
@@ -1408,9 +1424,8 @@ public Response applyTemplate(@QueryParam("structureId") @DefaultValue("0") int 
     java.time.LocalDateTime we = parseWindowBound(end);
     if (structureId <= 0 || !validTemplateWindow(ws, we))
         return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", "start/end mancanti o non validi")).build();
-    if (!backupService.safetyBackup("preop"))
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                .entity(Map.of("error", "SAFETY_BACKUP_FAILED")).build();
+    Response safetyFailure = safetyBackupFailure("preop");
+    if (safetyFailure != null) return safetyFailure;
     int created = demoDataRepository.applyTemplateToWindowOrm(structureId, ws, we);
     if (created == -2) return Response.status(Response.Status.CONFLICT)
             .entity(Map.of("error", "template non valido: nessun turno modificato")).build();
@@ -1442,9 +1457,8 @@ public Response saveAssignments(List<org.acme.employeescheduling.dto.ShiftAssign
     LocalDateTime we = parseWindowBound(end);
     if (structureId <= 0 || ws == null || we == null || !ws.isBefore(we))
         return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", "struttura o finestra non valida")).build();
-    if (!backupService.safetyBackup("preop"))
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                .entity(Map.of("error", "SAFETY_BACKUP_FAILED")).build();
+    Response safetyFailure = safetyBackupFailure("preop");
+    if (safetyFailure != null) return safetyFailure;
     // Optional start/end restrict UPDATE to the solve window: they exclude context shifts from
     // adjacent windows even if the payload contains them.
     int updated = demoDataRepository.saveShiftAssignmentsOrm(assignments, structureId,
@@ -1475,6 +1489,7 @@ public Response getEmailTemplate(@QueryParam("structureId") @DefaultValue("0") i
 /** @brief Saves (upserts) the structure email template. */
 @PUT
 @Path("/email-template")
+@RolesAllowed("ADMIN")
 @Consumes(MediaType.APPLICATION_JSON)
 @Transactional
 public Response saveEmailTemplate(@QueryParam("structureId") @DefaultValue("0") int structureId,
@@ -1503,6 +1518,7 @@ public Response getPdfTemplate(@QueryParam("structureId") @DefaultValue("0") int
 
 @PUT
 @Path("/pdf-template")
+@RolesAllowed("ADMIN")
 @Consumes(MediaType.APPLICATION_JSON)
 @Transactional
 public Response savePdfTemplate(@QueryParam("structureId") @DefaultValue("0") int structureId,
@@ -1524,6 +1540,7 @@ public Response savePdfTemplate(@QueryParam("structureId") @DefaultValue("0") in
 
 @DELETE
 @Path("/pdf-template")
+@RolesAllowed("ADMIN")
 @Transactional
 public Response deletePdfTemplate(@QueryParam("structureId") @DefaultValue("0") int structureId) {
     if (structureId <= 0)

@@ -26,7 +26,16 @@ public interface DatabaseBackupService {
     Map<String, Object> getSettings();
     void saveSettings(int interval, int autoDays, int otherDays, int autoKeep, int otherKeep) throws Exception;
     Map<String, Object> performBackup(String tag) throws Exception;
-    boolean safetyBackup(String tag);
+
+    /**
+     * @brief Snapshot taken before an operation that rewrites shifts in bulk.
+     * @details Returns an outcome rather than a boolean for the same reason as
+     *          {@link #restore(Path)}: the caller must distinguish a missing prerequisite, which
+     *          no retry will fix, from a backup already running, which clears on its own. Callers
+     *          <b>do</b> refuse to write when this is not {@link SafetyBackupOutcome#OK} — the
+     *          contract is fail-closed, not best effort.
+     */
+    SafetyBackupOutcome safetyBackup(String tag);
     List<Map<String, Object>> listBackups();
     Path resolveBackup(String filename);
     boolean delete(Path backupFile) throws Exception;

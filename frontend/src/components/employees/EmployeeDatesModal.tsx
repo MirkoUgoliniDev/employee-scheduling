@@ -45,6 +45,12 @@ interface Props {
 
 export default function EmployeeDatesModal({ show, employeeId, employeeName, structureId, onClose }: Props) {
   const { t, i18n } = useTranslation()
+
+  /** @brief Localized availability-type label (DATE_TYPES ids are fixed: 1, 2, 3). */
+  const dateTypeLabel = (id: number, fallback: string) =>
+    id === 1 ? t('option.desired', fallback)
+      : id === 2 ? t('option.undesired', fallback)
+        : t('option.unavailable', fallback)
   const [rows, setRows] = useState<DateRow[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -163,7 +169,7 @@ export default function EmployeeDatesModal({ show, employeeId, employeeName, str
         <tbody>
           {filtered.map(row => (
             <tr key={row._key}>
-              <td className="text-muted align-middle small">{row.isNew ? 'Nuovo' : row.id}</td>
+              <td className="text-muted align-middle small">{row.isNew ? t('label.new', 'Nuovo') : row.id}</td>
               <td>
                 <Form.Control type="datetime-local" size="sm"
                   value={toInputValue(row.dateStart)}
@@ -177,7 +183,7 @@ export default function EmployeeDatesModal({ show, employeeId, employeeName, str
               <td>
                 <Form.Select size="sm" value={row.dateTypeId}
                   onChange={e => updateRow(row._key, 'dateTypeId', Number(e.target.value))}>
-                  {DATE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  {DATE_TYPES.map(t => <option key={t.id} value={t.id}>{dateTypeLabel(t.id, t.label)}</option>)}
                 </Form.Select>
               </td>
               <td className="text-center align-middle">
@@ -198,7 +204,7 @@ export default function EmployeeDatesModal({ show, employeeId, employeeName, str
     <>
       <Modal show={show} onHide={() => { if (!saving && !deleting) onClose() }} size="xl" centered>
         <Modal.Header closeButton={!saving && !deleting}>
-          <Modal.Title>Disponibilità — {employeeName}</Modal.Title>
+          <Modal.Title>{t('modal.availabilityDetail', 'Dettaglio Disponibilità')} — {employeeName}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body style={{ maxHeight: '65vh', overflowY: 'auto' }}>
@@ -211,7 +217,7 @@ export default function EmployeeDatesModal({ show, employeeId, employeeName, str
                 <DateTable typeId={0} />
               </Tab>
               {counts.map(({ id, label, bg, count }) => (
-                <Tab key={id} eventKey={String(id)} title={<>{label} <Badge bg={bg}>{count}</Badge></>}>
+                <Tab key={id} eventKey={String(id)} title={<>{dateTypeLabel(id, label)} <Badge bg={bg}>{count}</Badge></>}>
                   <DateTable typeId={id} />
                 </Tab>
               ))}

@@ -277,15 +277,18 @@ public class BackupService implements DatabaseBackupService {
     }
 
     /**
-     * @brief Pre-destructive-operation backup: best effort; does not block the operation on failure.
+     * @brief Snapshot before an operation that rewrites shifts in bulk.
+     * @details Only two outcomes are reachable here: {@code VACUUM INTO} needs no external tool,
+     *          so {@link SafetyBackupOutcome#CLIENT_TOOLS_MISSING} cannot happen, and this method
+     *          does not take the lock, so neither can {@link SafetyBackupOutcome#BUSY}.
      */
-    public boolean safetyBackup(String tag) {
+    public SafetyBackupOutcome safetyBackup(String tag) {
         try {
             performBackup(tag);
-            return true;
+            return SafetyBackupOutcome.OK;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Backup di sicurezza non riuscito: operazione annullata", e);
-            return false;
+            return SafetyBackupOutcome.FAILED;
         }
     }
 
@@ -423,9 +426,14 @@ public class BackupService implements DatabaseBackupService {
                     LinkOption.NOFOLLOW_LINKS)) {
                 Files.copy(source, staged, StandardCopyOption.REPLACE_EXISTING);
             }
-            if (!sqliteIntegrityOk(staged) || !expectedSchema.equals(sqliteSchema(staged)))
+            if (!sqliteIntegrityOk(staged))
+                return RestoreOutcome.rejected(RestoreOutcome.NOT_A_DATABASE,
+                        "Il file non è un database SQLite integro");
+            if (!expectedSchema.equals(sqliteSchema(staged)))
                 return RestoreOutcome.rejected(RestoreOutcome.INCOMPATIBLE_DATABASE,
-                        "Il backup SQLite non e' integro o non contiene lo schema applicativo atteso");
+                        "Lo schema del backup non coincide con quello dell'applicazione: di norma è un backup "
+                                + "precedente a una migrazione dello schema. Aggiorna l'applicazione e riprova, "
+                                + "oppure usa un backup più recente");
 
             snapshotName = (String) performBackup("prerestore").get("filename");
             snapshotFile = resolveBackup(snapshotName);

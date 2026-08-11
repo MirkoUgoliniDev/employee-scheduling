@@ -21,6 +21,7 @@ import org.acme.employeescheduling.persistence.LanguageEntity;
 import org.acme.employeescheduling.persistence.LocationEntity;
 import org.acme.employeescheduling.persistence.SkillEntity;
 import org.acme.employeescheduling.persistence.StructureEntity;
+import org.acme.employeescheduling.security.RichHtmlSanitizer;
 
 /**
  * @brief i18n label CRUD — migrated to ORM (Panache), contract unchanged.
@@ -97,6 +98,10 @@ public class LabelResource {
     public Response add(Label label) {
         if (label == null || blank(label.getKey()) || blank(label.getDescription()))
             return ApiErrors.badRequest("LABEL_KEY_DESCRIPTION_REQUIRED");
+        // Label texts are served to anonymous clients (/translations) and rendered with
+        // dangerouslySetInnerHTML on the home page: the server is the authority, the client
+        // (DOMPurify) is only a convenience layer.
+        label.setDescription(RichHtmlSanitizer.sanitize(label.getDescription()));
         LabelEntity entity = new LabelEntity();
         entity.applyDto(label);
         try {
@@ -117,6 +122,7 @@ public class LabelResource {
     public Response update(@PathParam("id") int id, Label label) {
         if (label == null || blank(label.getKey()) || blank(label.getDescription()))
             return ApiErrors.badRequest("LABEL_KEY_DESCRIPTION_REQUIRED");
+        label.setDescription(RichHtmlSanitizer.sanitize(label.getDescription()));
         LabelEntity entity = LabelEntity.findById(id);
         if (entity == null)
             return ApiErrors.notFound("LABEL_NOT_FOUND");
@@ -152,7 +158,7 @@ public class LabelResource {
             row.entityId = labelId;
             row.fieldName = "value";
             row.languageId = entry.getKey();
-            row.value = entry.getValue();
+            row.value = RichHtmlSanitizer.sanitize(entry.getValue());
             row.persist();
         }
     }

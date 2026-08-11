@@ -35,6 +35,12 @@ const BACKEND_ERRORS: Record<string, [key: string, fallback: string]> = {
     'Backup in corso: riprova al termine. Nessun dato è stato modificato.'],
   SAFETY_BACKUP_FAILED: ['msg.err.safetyBackupFailed',
     'Operazione annullata: non è stato possibile creare il backup di sicurezza.'],
+  // The two below are the same refusal as above, split because they need opposite reactions:
+  // one is a missing prerequisite that no retry will fix, the other clears by itself.
+  SAFETY_BACKUP_CLIENT_TOOLS_MISSING: ['msg.err.safetyBackupClientToolsMissing',
+    'Operazione annullata: pg_dump non è installato o è più vecchio del server, quindi non è possibile creare il backup di sicurezza. Contatta l\'amministratore di sistema: riprovare non risolve.'],
+  SAFETY_BACKUP_BUSY: ['msg.err.safetyBackupBusy',
+    'Operazione annullata: è in corso un altro backup. Riprova fra un minuto. Nessun dato è stato modificato.'],
   NOT_A_DATABASE: ['msg.err.notADatabase',
     'Il file selezionato non è un backup del database leggibile. Nessun dato è stato modificato.'],
   INCOMPATIBLE_DATABASE: ['msg.err.incompatibleDatabase',

@@ -15,6 +15,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import org.acme.employeescheduling.config.DeploymentMode;
 import org.acme.employeescheduling.persistence.AppUserEntity;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -31,6 +32,9 @@ public class AuthResource {
 
     @Inject
     SecurityIdentity identity;
+
+    @Inject
+    DeploymentMode deployment;
 
     @ConfigProperty(name = "quarkus.http.auth.form.cookie-name", defaultValue = "quarkus-credential")
     String sessionCookieName;
@@ -67,6 +71,10 @@ public class AuthResource {
             body.put("displayName", user != null && user.displayName != null
                     ? user.displayName : username);
             body.put("admin", user != null && user.isAdmin());
+            // Desktop package or shared server: the UI hides actions that only make sense on one
+            // of the two. Today that is "Chiudi applicazione", which a CAPOSALA may perform on a
+            // desktop but not on a server, where SystemInfoResource.exit() answers 403.
+            body.put("standalone", deployment.isStandalone());
             return Response.ok(body).build();
         }
         body.put("authenticated", false);

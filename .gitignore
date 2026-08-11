@@ -68,3 +68,7 @@ __pycache__/
 # Personal working diary: useful to the developer, noise to whoever reads the
 # repository. It stays on disk, outside version control.
 MEMORY.md
+
+# Audit handoff: describes unfixed security findings, so it must not reach the
+# public repository before those findings are closed.
+HANDOFF.md

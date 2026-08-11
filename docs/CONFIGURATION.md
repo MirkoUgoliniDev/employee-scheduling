@@ -56,6 +56,38 @@ installs the application can correct an occupied port without depending on whoev
 | **SQLite** | `VACUUM INTO` and the online backup API | `.db` |
 | **PostgreSQL** | `pg_dump -Fc` and `pg_restore --single-transaction` | `.dump` |
 
+### On PostgreSQL the client tools are an operational prerequisite, not an option
+
+`pg_dump` must be installed and its major version must be **greater than or equal to the
+server's** — it refuses to read a server newer than itself. `pg_restore` must sit beside it for
+restore to be offered at all; without it `getSettings()` reports `restoreSupported=false` and the
+UI hides the button.
+
+**This is not only about backups.** Three operations take a safety snapshot before they run,
+because each one rewrites shifts in bulk and there would otherwise be nothing to go back to:
+
+- applying a saved template to a window
+- applying a template to a window
+- **saving shift assignments** — the result of a solve
+
+Without a usable `pg_dump` the snapshot cannot be taken, and those three operations are
+**refused**, not silently degraded. An installation missing the client tools therefore cannot
+schedule shifts at all. The refusal is `503` with a specific code so the interface can tell the
+two situations apart:
+
+| Code | Meaning | What to do |
+|---|---|---|
+| `SAFETY_BACKUP_CLIENT_TOOLS_MISSING` | `pg_dump` absent, or older than the server | install or upgrade the client tools — retrying changes nothing |
+| `SAFETY_BACKUP_BUSY` | another backup holds the lock, usually the scheduled one | retry shortly; nothing was modified |
+| `SAFETY_BACKUP_FAILED` | the dump was attempted and failed | check the server log: disk, permissions, database |
+
+On Windows the binaries are **not on the PATH**: they are looked up in
+`C:\Program Files\PostgreSQL\<major>\bin`, taking the highest major, or wherever
+`backup.postgresql.bin-dir` points. On Debian and Ubuntu they come from `postgresql-client`.
+
+SQLite is unaffected: there the safety snapshot is a `VACUUM INTO`, with no external tool
+involved.
+
 Safeguards:
 
 - **Origin validation** — the backup's base name must match the configured database
@@ -78,6 +110,23 @@ And the other direction: **do not "back up" by copying the `.db` file by hand wh
 application is running**. Without its `-wal` and `-shm` companions the copy is not consistent,
 and the transactions still in the WAL are silently missing when you restore it months later.
 That is exactly why the panel uses `VACUUM INTO`.
+
+### Backups made before an application update become unrecoverable on purpose
+
+The schema comparison includes the **full Flyway migration history**
+(`flyway_schema_history` on PostgreSQL; the equivalent schema fingerprint on SQLite). After
+every release that adds a migration, every backup created before the update is refused as
+`INCOMPATIBLE_DATABASE` — exactly when a restore is needed most.
+
+This is a deliberate **fail-closed** choice, not a bug and not file corruption: restoring an
+old schema under the new application would leave the database structurally inconsistent. The
+refusal message says so explicitly ("backup made before a schema migration — update the
+application and try again, or use a more recent backup"), so it does not read as a corrupted
+file.
+
+Practical consequence: **make a fresh backup right after each update** (or keep at least one
+post-update automatic backup). The rotation protects the newest backup per tag, but an
+upgrade followed by weeks of operation can rotate it away before it is needed.
 
 ---
 
