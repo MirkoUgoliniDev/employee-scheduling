@@ -77,7 +77,10 @@ export function onUnauthorized(listener: () => void): () => void {
 
 function notifyUnauthorized(url: string, generation: number): void {
   // /auth/me returns 200 even for anonymous callers: its 401 would be a fault, not expiration.
-  if (url.startsWith('/auth/')) return
+  // /backup/* has its OWN credential (X-Backup-Admin-Token): its 401 means "token missing or
+  // wrong", which BackupSection handles by showing the unlock form — it is NOT session
+  // expiration, and treating it as such would log the user out on every visit to the page.
+  if (url.startsWith('/auth/') || url === '/backup' || url.startsWith('/backup/')) return
   if (generation !== sessionGeneration) return
   unauthorizedListeners.forEach(listener => listener())
 }
