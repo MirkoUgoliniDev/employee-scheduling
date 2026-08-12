@@ -74,8 +74,17 @@ try {
 
     Push-Location (Join-Path $projectRoot 'frontend')
     try {
-        & npm version $snapshotVersion --no-git-tag-version
-        Assert-LastCommand 'Updating the frontend version'
+        # npm refuses to "change" the version when package.json already has it
+        # ("Version not changed"). Publishing a version the repo already carries
+        # (pom/package at 1.2.9-SNAPSHOT while publishing v1.2.9) is legitimate:
+        # leave the files untouched instead of failing.
+        $packageJson = Get-Content -LiteralPath package.json -Raw | ConvertFrom-Json
+        if ($packageJson.version -ne $snapshotVersion) {
+            & npm version $snapshotVersion --no-git-tag-version
+            Assert-LastCommand 'Updating the frontend version'
+        } else {
+            Write-Host "frontend already at ${snapshotVersion}: version files left untouched." -ForegroundColor DarkYellow
+        }
     } finally {
         Pop-Location
     }
@@ -93,10 +102,17 @@ try {
 
     & git add -- pom.xml frontend/package.json frontend/package-lock.json
     Assert-LastCommand 'Staging the version files'
-    & git commit -m "chore: prepare release $tagName"
-    Assert-LastCommand 'Creating the release commit'
-    & git push origin main
-    Assert-LastCommand 'Pushing main to GitHub'
+    $staged = @(& git diff --cached --name-only)
+    if ($staged.Count -gt 0) {
+        & git commit -m "chore: prepare release $tagName"
+        Assert-LastCommand 'Creating the release commit'
+        & git push origin main
+        Assert-LastCommand 'Pushing main to GitHub'
+    } else {
+        # Nothing to change: the repository already carries this version. The tag alone
+        # marks the release — GitHub Actions builds from it.
+        Write-Host "Version files already at ${snapshotVersion}: no release commit needed (tag only)." -ForegroundColor DarkYellow
+    }
     & git tag -a $tagName -m "Employee Scheduling $tagName"
     Assert-LastCommand 'Creating the release tag'
     & git push origin $tagName

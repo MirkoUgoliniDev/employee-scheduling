@@ -1,1 +1,0 @@
-import{t as e}from"./client-BREEskyK.js";var t={list:()=>e.get(`/structures`),add:t=>e.post(`/structures`,t),update:(t,n)=>e.put(`/structures/${t}`,n),delete:t=>e.delete(`/structures/${t}`)};export{t};
