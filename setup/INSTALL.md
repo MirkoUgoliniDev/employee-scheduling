@@ -32,6 +32,10 @@ server shuts down automatically once installation finishes. From the page you
 can test SMTP delivery before installing and choose whether to load the sample
 data.
 
+The whole flow, step by step with screenshots, is in
+[*Installing with the web wizard, step by step*](#installing-with-the-web-wizard-step-by-step)
+below — read it before your first installation.
+
 **Optional steps, off by default:**
 
 - **HTTPS with Caddy (reverse proxy)** — installs Caddy and switches the app to
@@ -111,6 +115,74 @@ sudo python3 setup/wizard.py --tui --jar ~/employee-scheduling-runner.jar
 > profile is applied even without passing it to Maven — and on a clean clone,
 > where that file is absent, the same command produces a different jar. Always
 > pass it explicitly.
+
+---
+
+## Installing with the web wizard, step by step
+
+The recommended route: the launcher (`start-web-setup.sh`) runs the wizard in a
+browser page and shuts itself down when the installation finishes.
+
+### 1. Start the wizard on the server
+
+```bash
+sudo ./scripts/start-web-setup.sh --engine postgresql
+```
+
+![Output of start-web-setup.sh: address and temporary code](../assets/readme/Screenshot24.png)
+
+The terminal shows the address to open (`http://<server>:8899`) and the
+**temporary code**. Two things matter here:
+
+- **Do not press `Ctrl+C` to copy the code.** `Ctrl+C` is not "copy" on a
+  terminal: it sends an interrupt signal, **closes the SSH session, and stops
+  the wizard**. To copy the code, select it with the mouse (double-click or
+  drag) — the selection is in the clipboard as soon as you release the button.
+- The code is **per-process**: it changes at every start of the wizard, and it
+  is the only key to the page, which runs commands as root. Do not share it.
+
+### 2. Open the page and enter the code
+
+![Setup access page: paste the temporary code](../assets/readme/Screenshot25.png)
+
+From a PC on the same trusted local network, open the address printed by the
+launcher and paste the code. On an untrusted network, use an SSH tunnel instead
+of exposing the wizard:
+
+```bash
+ssh -L 8899:localhost:8899 pi@raspberrypi.local
+# then open http://localhost:8899
+```
+
+### 3. Fill the form and choose the exposure
+
+![Installation form: engine, ports, SMTP, exposure scenario, firewall](../assets/readme/Screenshot26.png)
+
+The form collects the data engine, the application port, the package path, the
+data directory, the sample data flag, and the SMTP configuration (with a test
+button that verifies delivery before anything is installed).
+
+Then choose the **exposure scenario** that best fits where the machine will
+live — the three options and when to pick each:
+
+| Scenario | When to choose it |
+|---|---|
+| **LAN without certificate** | The server stays on a trusted local network. Plain HTTP, no certificate to manage; limitation: the backup admin page answers 426 from other machines — administer backups from the server itself or via an SSH tunnel. |
+| **Free DDNS (duckdns.org) + Let's Encrypt** | Testing from the internet behind a home router. Enter your duckdns subdomain and token (free account at duckdns.org): the wizard installs the automatic IP updater (token stored root-only) and you open ports 80/443 on the router. Public certificate: nothing to trust on clients. |
+| **Personal domain + Let's Encrypt** | A real deployment. The DNS record must already point to the public IP and ports 80/443 must be forwarded. Same public certificate, nothing to trust on clients. |
+
+If you also tick **"Configure the firewall"**, ufw keeps SSH, allows 80/443 and
+closes the application port: after installation nothing reaches the application
+except the proxy.
+
+### 4. Completed
+
+![Installation completed: final message with the real URL](../assets/readme/Screenshot27.png)
+
+The last page shows every step with its result and the **real address of the
+application** — for example `http://employee-scheduling.local` in LAN mode, or
+`https://mioserver.duckdns.org` with DDNS. Open it and register: **the first
+account becomes the administrator**.
 
 ---
 
@@ -248,8 +320,10 @@ journalctl -u employee-scheduling -f      # live log
 systemctl restart employee-scheduling     # restart
 ```
 
-The application answers on `http://<server-address>:8080`, or on the port chosen
-with `--port`. **The first account that registers becomes the administrator.**
+The application answers on the address printed at the end of the installation —
+plain `http://<server-address>:8080` without the proxy, or the site address of
+the chosen exposure scenario (`http://employee-scheduling.local`, `https://…`,
+etc.). **The first account that registers becomes the administrator.**
 
 ### Where the data actually lives
 
@@ -409,9 +483,12 @@ database in use. On reinstall, the application finds everything as it was.
 
 ## Security
 
-The traffic is **plain HTTP, not encrypted**: fine on a trusted local network.
-If the application must be reachable from outside, put it behind a reverse proxy
-with a certificate — nginx or Caddy — and do not expose the port directly.
+Without the proxy steps, the traffic is **plain HTTP, not encrypted**: fine on a
+trusted local network. If the application must be reachable from outside, use
+the wizard's *HTTPS with Caddy* + *Exposure* steps (or a reverse proxy with a
+certificate — nginx or Caddy — by hand) and do not expose the port directly.
+With the proxy, the application listens on loopback only: nothing reaches it
+except the proxy, and the backup admin API stays protected.
 
 The file `/etc/employee-scheduling.env` contains the database password, the
 session key, and the backup token. It is `640 root:employee-scheduling` and must
