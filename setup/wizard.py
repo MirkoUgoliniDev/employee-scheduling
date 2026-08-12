@@ -70,6 +70,14 @@ def parse_args(argv=None):
     parser.add_argument("--smtp-from", default="")
     parser.add_argument("--demo-data", action="store_const", const=True, default=None,
                         help="load the sample dataset on first startup")
+    parser.add_argument("--proxy", action="store_true",
+                        help="put the app behind a Caddy HTTPS reverse proxy")
+    parser.add_argument("--proxy-hostname", default="employee-scheduling.local",
+                        help="proxy hostname (default: employee-scheduling.local; "
+                             "a name ending in .local uses the internal CA, any other "
+                             "name requests a Let's Encrypt certificate)")
+    parser.add_argument("--firewall", action="store_true",
+                        help="configure ufw: keep SSH, allow 80/443, deny the app port")
     parser.add_argument("--yes", "-y", action="store_true",
                         help="do not ask for confirmation (for automation)")
     return parser.parse_args(argv)
@@ -121,6 +129,9 @@ def config_from_args(args) -> dict:
         "smtp_from": args.smtp_from,
         "demo_data": (args.demo_data if args.demo_data is not None
                       else existing.get("demo_data", False)),
+        "proxy_enabled": args.proxy,
+        "proxy_hostname": args.proxy_hostname,
+        "firewall_enabled": args.firewall,
     }
 
 

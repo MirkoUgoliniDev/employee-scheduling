@@ -171,6 +171,15 @@ PAGE = """<!doctype html>
    <div id="smtp_result" class="note"></div>
    <div class="note">Without SMTP, registration codes are written only to the service log.</div>
    <label><input id="demo_data" type="checkbox">Install sample data</label>
+   <hr style="border-color:#2a2f3d">
+   <label><input id="proxy_enabled" type="checkbox">HTTPS with Caddy (reverse proxy)</label>
+   <div class="note">The app becomes reachable only via <b>https://&lt;hostname&gt;</b> and listens on
+     localhost only. A name ending in <b>.local</b> uses Caddy's internal CA (LAN testing — the
+     client must trust it); any other name requests a Let's Encrypt certificate (ports 80/443
+     must be reachable from the internet).</div>
+   <label>Proxy hostname</label>
+   <input id="proxy_hostname" value="employee-scheduling.local">
+   <label><input id="firewall_enabled" type="checkbox">Configure the firewall (ufw: keep SSH, allow 80/443, close the app port)</label>
   <button id="go">Install</button>
   <button id="dry" style="background:#39405a">Simulation only</button>
   <pre id="log">Waiting…</pre>
@@ -220,7 +229,10 @@ function start(dry){
       smtp_user:document.getElementById("smtp_user").value,
       smtp_pass:document.getElementById("smtp_pass").value,
       smtp_from:document.getElementById("smtp_from").value,
-      demo_data:document.getElementById("demo_data").checked})})
+      demo_data:document.getElementById("demo_data").checked,
+      proxy_enabled:document.getElementById("proxy_enabled").checked,
+      proxy_hostname:document.getElementById("proxy_hostname").value,
+      firewall_enabled:document.getElementById("firewall_enabled").checked})})
    .then(r=>r.json()).then(d=>{ if(d.error){ append("Error: "+d.error);
       document.getElementById("go").disabled=false; document.getElementById("dry").disabled=false; }});
 }
@@ -335,10 +347,13 @@ def run_webui(steps, runner, sysinfo, config, port: int,
             # regardless of which button they press.
             runner.dry_run = forced_dry_run or bool(payload.get("dry_run"))
             for key in ("engine", "port", "jar", "data_dir", "smtp_host",
-                        "smtp_port", "smtp_user", "smtp_pass", "smtp_from"):
+                        "smtp_port", "smtp_user", "smtp_pass", "smtp_from",
+                        "proxy_hostname"):
                 if payload.get(key) not in (None, ""):
                     config[key] = payload[key]
             config["demo_data"] = bool(payload.get("demo_data"))
+            config["proxy_enabled"] = bool(payload.get("proxy_enabled"))
+            config["firewall_enabled"] = bool(payload.get("firewall_enabled"))
             # Reset step states: otherwise a second run would show the previous
             # run's green checks and obscure the current run's progress.
             for step in steps:

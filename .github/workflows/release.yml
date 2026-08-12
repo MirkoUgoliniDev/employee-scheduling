@@ -57,6 +57,8 @@ jobs:
             release/raspberry-installer/scripts/test-smtp.py
           install -m 755 scripts/start-web-setup.sh \
             release/raspberry-installer/scripts/start-web-setup.sh
+          install -m 755 scripts/setup-caddy.sh \
+            release/raspberry-installer/scripts/setup-caddy.sh
           printf '%s\n' "$GITHUB_REF_NAME" > release/raspberry-installer/release-version.txt
           cp -R setup release/raspberry-installer/setup
           find release/raspberry-installer/setup -type d -name __pycache__ -prune -exec rm -rf {} +
