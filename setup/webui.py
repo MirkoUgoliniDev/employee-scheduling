@@ -369,9 +369,17 @@ def run_webui(steps, runner, sysinfo, config, port: int,
             # forever. Every later start would report "installation already in
             # progress," with buttons disabled until the wizard was killed.
             _state.update(running=False, finished=True, ok=ok)
-            _broadcast({"type": "end", "ok": ok, "dry": runner.dry_run,
-                        "url": f"http://{ip}:{config.get('port')}"
-                               if ok and not runner.dry_run else ""})
+            final_url = ""
+            if ok and not runner.dry_run:
+                # The closing message must tell the truth about how to reach the
+                # application: with the Caddy step enabled, plain HTTP is closed
+                # (firewall and loopback binding) and only the proxy hostname works.
+                if config.get("proxy_enabled"):
+                    hostname = str(config.get("proxy_hostname") or "employee-scheduling.local")
+                    final_url = f"https://{hostname}"
+                else:
+                    final_url = f"http://{ip}:{config.get('port')}"
+            _broadcast({"type": "end", "ok": ok, "dry": runner.dry_run, "url": final_url})
             if ok and not runner.dry_run:
                 # Leave enough time for the final SSE event to reach the page,
                 # then remove the privileged temporary server automatically.
