@@ -32,6 +32,18 @@ server shuts down automatically once installation finishes. From the page you
 can test SMTP delivery before installing and choose whether to load the sample
 data.
 
+**Optional steps, both off by default:**
+
+- **HTTPS with Caddy (reverse proxy)** — installs Caddy, writes the site block,
+  switches the app to listen on loopback only and restarts both services. A
+  hostname ending in `.local` uses Caddy's internal CA (LAN testing: the client
+  must trust `/var/lib/caddy/.local/caddy/pki/authorities/local/root.crt`); any
+  other name requests a Let's Encrypt certificate, so ports 80/443 must be
+  reachable from the internet. This is the production (cloud) shape: nothing
+  reaches the app except the proxy, and the backup admin API stays protected.
+- **Firewall (ufw)** — keeps SSH, allows 80/443, denies the application port.
+  Leave it off on hosts with an external firewall or security group.
+
 The JAR is kept in `/var/cache/employee-scheduling-installer` under the Release
 number: closing and reopening the wizard does not download it again. Use
 `sudo ./scripts/start-web-setup.sh --refresh` only to force a fresh download.

@@ -21,6 +21,9 @@ UNIT_FILE = Path("/etc/systemd/system/employee-scheduling.service")
 LOG_FILE = Path("/var/log/employee-scheduling-setup.log")
 LOCK_FILE = Path("/var/run/employee-scheduling-setup.lock")
 
+# ── Optional reverse proxy (Caddy) ──────────────────────────────────────────
+CADDYFILE = Path("/etc/caddy/Caddyfile")
+
 # ── Database ─────────────────────────────────────────────────────────────────
 DB_NAME = "employee_scheduling"
 DB_USER = "employee_scheduling"
