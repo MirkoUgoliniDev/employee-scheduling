@@ -17,6 +17,7 @@ SERVICE_USER="employee-scheduling"
 INSTALL_DIR="/opt/employee-scheduling"
 ENV_FILE="/etc/employee-scheduling.env"
 DATA_DIR="/var/lib/employee-scheduling"
+APP_PORT="8080"          # overwritten from QUARKUS_HTTP_PORT when the env file exists
 DB_NAME="employee_scheduling"
 DB_USER="employee_scheduling"
 CACHE_DIR="/var/cache/employee-scheduling-installer"
@@ -70,6 +71,8 @@ fi
 if [ -f "$ENV_FILE" ]; then
     FOUND_DIR="$(grep -E '^APP_DATA_DIR=' "$ENV_FILE" | cut -d= -f2- | tr -d '"' || true)"
     [ -n "$FOUND_DIR" ] && DATA_DIR="$FOUND_DIR"
+    FOUND_PORT="$(grep -E '^QUARKUS_HTTP_PORT=' "$ENV_FILE" | cut -d= -f2- | tr -d '"' || true)"
+    [ -n "$FOUND_PORT" ] && APP_PORT="$FOUND_PORT"
 fi
 
 # Last barrier before rm -rf. A hand-edited configuration file or misread path
@@ -174,6 +177,19 @@ if id "$SERVICE_USER" >/dev/null 2>&1; then
     fi
 else
     info "No service user to remove."
+fi
+
+# ── Firewall ─────────────────────────────────────────────────────────────────
+# ufw is configuration of the machine, not of the application: never modify it
+# automatically. Report what the installer may have added so the administrator
+# can decide. The reinstall wizard opens and closes its own port by itself.
+if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q 'Status: active'; then
+    step "Firewall"
+    info "ufw is active; the rules possibly added by the installer are left as they are:"
+    info "  - deny ${APP_PORT}/tcp   (stale now that the application is gone)"
+    info "  - allow 80,443/tcp       (shared with other services; keep them)"
+    info "Remove the stale rule with: sudo ufw delete deny ${APP_PORT}/tcp"
+    info "The reinstall wizard opens and closes its own setup port automatically."
 fi
 
 echo ""

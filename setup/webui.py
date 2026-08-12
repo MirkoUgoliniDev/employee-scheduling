@@ -173,12 +173,24 @@ PAGE = """<!doctype html>
    <label><input id="demo_data" type="checkbox">Install sample data</label>
    <hr style="border-color:#2a2f3d">
    <label><input id="proxy_enabled" type="checkbox">HTTPS with Caddy (reverse proxy)</label>
-   <div class="note">The app becomes reachable only via <b>https://&lt;hostname&gt;</b> and listens on
-     localhost only. A name ending in <b>.local</b> uses Caddy's internal CA (LAN testing — the
-     client must trust it); any other name requests a Let's Encrypt certificate (ports 80/443
-     must be reachable from the internet).</div>
-   <label>Proxy hostname</label>
+   <div class="note">Installs Caddy and makes the app reachable only through it (loopback).
+     The next step chooses the exposure scenario.</div>
+   <label>Exposure scenario</label>
+   <select id="exposure">
+     <option value="local">LAN without certificate (HTTP; backup admin limited to the server)</option>
+     <option value="ddns">Internet via free DDNS (duckdns.org) + Let's Encrypt</option>
+     <option value="domain">Internet via my own domain + Let's Encrypt</option>
+   </select>
+   <label>Hostname (LAN or domain)</label>
    <input id="proxy_hostname" value="employee-scheduling.local">
+   <div id="ddns_fields" style="display:none">
+    <div class="row">
+     <div><label>duckdns subdomain</label><input id="ddns_subdomain" placeholder="mioserver"></div>
+     <div><label>duckdns token</label><input id="ddns_token" type="password"></div>
+    </div>
+    <div class="note">Free account at duckdns.org. The step installs the automatic IP updater
+      (the token is stored in a root-only file) and you open ports 80/443 on the router.</div>
+   </div>
    <label><input id="firewall_enabled" type="checkbox">Configure the firewall (ufw: keep SSH, allow 80/443, close the app port)</label>
   <button id="go">Install</button>
   <button id="dry" style="background:#39405a">Simulation only</button>
@@ -190,6 +202,10 @@ const TOKEN = __TOKEN__;
 const endpoint = (path)=>path + "?token=" + encodeURIComponent(TOKEN);
 document.getElementById("engine").value=__ENGINE__;
 document.getElementById("demo_data").checked=__DEMO__;
+document.getElementById("exposure").value=__EXPOSURE__;
+const ddnsToggle=()=>{document.getElementById("ddns_fields").style.display=
+  document.getElementById("exposure").value==="ddns"?"block":"none";};
+document.getElementById("exposure").onchange=ddnsToggle; ddnsToggle();
 const ICON = {PENDING:"○",RUNNING:"◎",DONE:"✓",FAILED:"✗",SKIPPED:"⊘"};
 function draw(){
   document.getElementById("steps").innerHTML = STEPS.map((s,i)=>
@@ -232,6 +248,9 @@ function start(dry){
       demo_data:document.getElementById("demo_data").checked,
       proxy_enabled:document.getElementById("proxy_enabled").checked,
       proxy_hostname:document.getElementById("proxy_hostname").value,
+      exposure:document.getElementById("exposure").value,
+      ddns_subdomain:document.getElementById("ddns_subdomain").value,
+      ddns_token:document.getElementById("ddns_token").value,
       firewall_enabled:document.getElementById("firewall_enabled").checked})})
    .then(r=>r.json()).then(d=>{ if(d.error){ append("Error: "+d.error);
       document.getElementById("go").disabled=false; document.getElementById("dry").disabled=false; }});
@@ -348,12 +367,14 @@ def run_webui(steps, runner, sysinfo, config, port: int,
             runner.dry_run = forced_dry_run or bool(payload.get("dry_run"))
             for key in ("engine", "port", "jar", "data_dir", "smtp_host",
                         "smtp_port", "smtp_user", "smtp_pass", "smtp_from",
-                        "proxy_hostname"):
+                        "proxy_hostname", "ddns_subdomain", "ddns_token"):
                 if payload.get(key) not in (None, ""):
                     config[key] = payload[key]
             config["demo_data"] = bool(payload.get("demo_data"))
             config["proxy_enabled"] = bool(payload.get("proxy_enabled"))
             config["firewall_enabled"] = bool(payload.get("firewall_enabled"))
+            if payload.get("exposure") in ("local", "ddns", "domain"):
+                config["exposure_mode"] = payload["exposure"]
             # Reset step states: otherwise a second run would show the previous
             # run's green checks and obscure the current run's progress.
             for step in steps:
@@ -372,11 +393,18 @@ def run_webui(steps, runner, sysinfo, config, port: int,
             final_url = ""
             if ok and not runner.dry_run:
                 # The closing message must tell the truth about how to reach the
-                # application: with the Caddy step enabled, plain HTTP is closed
-                # (firewall and loopback binding) and only the proxy hostname works.
+                # application: with the proxy enabled, plain HTTP on the app port
+                # is closed (firewall and loopback binding) and only the site
+                # block of the chosen exposure scenario works.
+                mode = config.get("exposure_mode", "local")
                 if config.get("proxy_enabled"):
-                    hostname = str(config.get("proxy_hostname") or "employee-scheduling.local")
-                    final_url = f"https://{hostname}"
+                    if mode == "ddns":
+                        sub = str(config.get("ddns_subdomain") or "").strip()
+                        final_url = f"https://{sub}.duckdns.org" if sub else "https://<duckdns subdomain>.duckdns.org"
+                    elif mode == "domain":
+                        final_url = f"https://{config.get('proxy_hostname') or '<dominio>'}"
+                    else:
+                        final_url = f"http://{config.get('proxy_hostname') or 'employee-scheduling.local'}"
                 else:
                     final_url = f"http://{ip}:{config.get('port')}"
             _broadcast({"type": "end", "ok": ok, "dry": runner.dry_run, "url": final_url})
@@ -499,6 +527,7 @@ def run_webui(steps, runner, sysinfo, config, port: int,
                             .replace("__TOKEN__", json.dumps(token))
                             .replace("__ENGINE__", json.dumps(config.get("engine", "postgresql")))
                             .replace("__DEMO__", json.dumps(bool(config.get("demo_data"))))
+                            .replace("__EXPOSURE__", json.dumps(config.get("exposure_mode", "local")))
                             .replace("__VER__", WIZARD_VERSION)
                             .replace("__HOST__", f"{sysinfo.model} · {sysinfo.os_name}")
                             .replace("__PORT__", str(config.get("port", 8080)))

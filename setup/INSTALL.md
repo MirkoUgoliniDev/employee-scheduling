@@ -32,15 +32,23 @@ server shuts down automatically once installation finishes. From the page you
 can test SMTP delivery before installing and choose whether to load the sample
 data.
 
-**Optional steps, both off by default:**
+**Optional steps, off by default:**
 
-- **HTTPS with Caddy (reverse proxy)** — installs Caddy, writes the site block,
-  switches the app to listen on loopback only and restarts both services. A
-  hostname ending in `.local` uses Caddy's internal CA (LAN testing: the client
-  must trust `/var/lib/caddy/.local/caddy/pki/authorities/local/root.crt`); any
-  other name requests a Let's Encrypt certificate, so ports 80/443 must be
-  reachable from the internet. This is the production (cloud) shape: nothing
-  reaches the app except the proxy, and the backup admin API stays protected.
+- **HTTPS with Caddy (reverse proxy)** — installs Caddy and switches the app to
+  listen on loopback only: from that moment nothing reaches the app except the
+  proxy, and the backup admin API stays protected.
+- **Exposure** (follows the proxy step; its own choice of scenario):
+  - *LAN without certificate* — plain HTTP on the network, no TLS. Limitations:
+    traffic in the clear, and the backup admin page answers 426 from other
+    machines by design — administer backups from the server itself or through
+    an SSH tunnel.
+  - *Free DDNS (duckdns.org) + Let's Encrypt* — for internet testing behind a
+    home router. Requires a duckdns subdomain and token; the step installs the
+    automatic IP updater (token in a root-only file) and you open ports 80/443
+    on the router. The certificate is public: no client-side trust needed.
+  - *Personal domain + Let's Encrypt* — the DNS record must already point to
+    the public IP and ports 80/443 must be forwarded. Same public certificate,
+    no client-side trust needed.
 - **Firewall (ufw)** — keeps SSH, allows 80/443, denies the application port.
   Leave it off on hosts with an external firewall or security group.
 

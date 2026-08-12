@@ -9,6 +9,7 @@ verification comes last because it is meaningful only after service startup.
 from steps.app_user import AppUserStep
 from steps.database import DatabaseStep
 from steps.env_config import EnvConfigStep
+from steps.exposure import ExposureStep
 from steps.firewall import FirewallStep
 from steps.install_app import InstallAppStep
 from steps.packages import JavaStep
@@ -28,6 +29,7 @@ def build_steps():
         EnvConfigStep(),
         SystemdStep(),
         ProxySetupStep(),
+        ExposureStep(),
         FirewallStep(),
         VerifyStep(),
     ]

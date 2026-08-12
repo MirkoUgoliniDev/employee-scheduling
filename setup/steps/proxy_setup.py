@@ -1,20 +1,17 @@
-"""Optional step: put the application behind a Caddy HTTPS reverse proxy.
+"""Optional step: put the application behind a Caddy reverse proxy.
 
 The application itself speaks plain HTTP; on a LAN this is fine, on a server
 exposed to the internet it is not (credentials in clear, and the backup admin
-API refuses remote plain-HTTP by design). This step installs Caddy, writes the
-site block, switches the application to listen on loopback only and restarts
-both services — the exact shape used on a cloud host.
-
-TLS mode is derived from the hostname: a name ending in ``.local`` gets an
-internal Caddy CA (LAN testing; the client must trust the CA), any other name
-requests a Let's Encrypt certificate (the machine must be reachable on ports
-80/443 from the internet).
+API refuses remote plain-HTTP by design). This step installs Caddy and switches
+the application to listen on loopback only — the application becomes reachable
+only through the proxy. The SITE BLOCK (which hostname, with or without TLS) is
+written by the following step, Exposure, which chooses the scenario: LAN
+without certificate, free DDNS for testing, or a personal domain.
 """
 
 from pathlib import Path
 
-from lib.constants import CADDYFILE, ENV_FILE, SERVICE_NAME
+from lib.constants import ENV_FILE, SERVICE_NAME
 from lib.step_base import Step
 
 #: Cloudsmith's Caddy repository (same source used by setup-caddy.sh).
@@ -23,11 +20,6 @@ CADDY_SOURCES = "/etc/apt/sources.list.d/caddy-stable.list"
 CADDY_REPO = ("deb [signed-by=" + CADDY_KEY
               + "] https://dl.cloudsmith.io/public/caddy/stable/deb/"
                 "debian any-version main")
-
-#: Where Caddy stores its internal CA, printed when one was generated.
-INTERNAL_CA = "/var/lib/caddy/.local/caddy/pki/authorities/local/root.crt"
-
-DEFAULT_HOSTNAME = "employee-scheduling.local"
 
 
 class ProxySetupStep(Step):
@@ -39,40 +31,11 @@ class ProxySetupStep(Step):
         if not config.get("proxy_enabled"):
             return self.skip("HTTPS proxy not requested")
 
-        hostname = str(config.get("proxy_hostname") or DEFAULT_HOSTNAME).strip().strip(".")
-        if not hostname:
-            return self.fail("Empty proxy hostname.")
-        port = int(config.get("port", 8080))
-        tls_internal = hostname.endswith(".local")
-        if not tls_internal and "." not in hostname:
-            return self.fail(f"Invalid proxy hostname: {hostname}",
-                             "Use a name ending in .local for the internal CA, "
-                             "or a full public domain for Let's Encrypt.")
-
         if not runner.dry_run:
             if not self._install_caddy(runner, sysinfo):
                 return self.fail("Caddy installation failed.",
                                  "Check the network connection and the configured repositories "
                                  "(details in the log).")
-
-        # Site block: the app listens on loopback only, the proxy terminates TLS.
-        site = [f"{hostname} {{"]
-        if tls_internal:
-            site.append("    tls internal")
-        site += [f"    reverse_proxy 127.0.0.1:{port}", "}"]
-        if runner.dry_run:
-            runner.log(f"    [dry-run] would write {CADDYFILE}:")
-            for line in site:
-                runner.log("      " + line)
-        else:
-            try:
-                Path(CADDYFILE).write_text("\n".join(site) + "\n", encoding="utf-8")
-            except OSError as exc:
-                return self.fail(f"Cannot write {CADDYFILE}: {exc}")
-
-        ok, err = runner.run(["caddy", "validate", "--config", str(CADDYFILE)])
-        if not ok:
-            return self.fail(f"Caddy rejected the configuration: {err.strip()}")
 
         # Application: loopback only, and the TLS requirement back to its
         # default (the proxy makes the connection loopback, which passes the
@@ -89,10 +52,8 @@ class ProxySetupStep(Step):
             return self.fail(f"{SERVICE_NAME} failed to restart: {err.strip()}",
                              "Check the service with: journalctl -u " + SERVICE_NAME)
 
-        message = f"https://{hostname} → 127.0.0.1:{port}"
-        if tls_internal:
-            message += f"; trust the Caddy CA on clients: {INTERNAL_CA}"
-        return self.done(message)
+        return self.done("Caddy installed, app on loopback only; "
+                         "the exposure scenario is configured by the next step")
 
     # ── Internals ────────────────────────────────────────────────────────────
 

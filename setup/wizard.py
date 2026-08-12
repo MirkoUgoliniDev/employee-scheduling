@@ -71,11 +71,19 @@ def parse_args(argv=None):
     parser.add_argument("--demo-data", action="store_const", const=True, default=None,
                         help="load the sample dataset on first startup")
     parser.add_argument("--proxy", action="store_true",
-                        help="put the app behind a Caddy HTTPS reverse proxy")
+                        help="put the app behind a Caddy reverse proxy")
     parser.add_argument("--proxy-hostname", default="employee-scheduling.local",
-                        help="proxy hostname (default: employee-scheduling.local; "
-                             "a name ending in .local uses the internal CA, any other "
-                             "name requests a Let's Encrypt certificate)")
+                        help="hostname used by the 'local' and 'domain' exposure modes "
+                             "(default: employee-scheduling.local)")
+    parser.add_argument("--exposure", choices=("local", "ddns", "domain"), default="local",
+                        help="how the app is reached once Caddy is installed: local = LAN "
+                             "without certificate; ddns = free duckdns.org subdomain with "
+                             "Let's Encrypt (test behind a home router); domain = personal "
+                             "domain with Let's Encrypt (default: local)")
+    parser.add_argument("--ddns-subdomain", default="",
+                        help="duckdns subdomain (exposure mode ddns), e.g. mioserver")
+    parser.add_argument("--ddns-token", default="",
+                        help="duckdns token (exposure mode ddns); stored root-only on the server")
     parser.add_argument("--firewall", action="store_true",
                         help="configure ufw: keep SSH, allow 80/443, deny the app port")
     parser.add_argument("--yes", "-y", action="store_true",
@@ -131,6 +139,9 @@ def config_from_args(args) -> dict:
                       else existing.get("demo_data", False)),
         "proxy_enabled": args.proxy,
         "proxy_hostname": args.proxy_hostname,
+        "exposure_mode": args.exposure,
+        "ddns_subdomain": args.ddns_subdomain,
+        "ddns_token": args.ddns_token,
         "firewall_enabled": args.firewall,
     }
 

@@ -58,7 +58,9 @@ fi
 install -d -m 755 -o root -g root "$CACHE_DIR"
 JAR="$CACHE_DIR/${PACKAGE_VERSION}-${ASSET}"
 TEMP_JAR="${JAR}.part.$$"
-trap 'rm -f -- "$TEMP_JAR"' EXIT INT TERM
+#: ufw rule added by this wizard (removed again on exit).
+UFW_OPENED=""
+trap 'rm -f -- "$TEMP_JAR"; if [ -n "$UFW_OPENED" ]; then ufw delete allow "$UFW_OPENED" >/dev/null 2>&1 || true; fi' EXIT INT TERM
 
 if [ "$REFRESH" != "yes" ] && [ -s "$JAR" ]; then
     printf 'Using cached %s application package (%s).\n' "$ENGINE" "$PACKAGE_VERSION"
@@ -76,6 +78,18 @@ else
     mv -f -- "$TEMP_JAR" "$JAR"
 fi
 [ -s "$JAR" ] || die "The downloaded application package is empty."
+
+# A strict firewall must not make the setup page unreachable — especially on a
+# reinstall, where the previous installation's ufw may deny everything except
+# SSH and the proxy ports. Open the wizard port for the duration of the setup
+# and close it again when the wizard exits (also on Ctrl-C or failure).
+if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q 'Status: active'; then
+    if ! ufw status 2>/dev/null | grep -Eq "^${WEB_PORT}/tcp"; then
+        ufw allow "${WEB_PORT}/tcp" >/dev/null
+        UFW_OPENED="${WEB_PORT}/tcp"
+        printf 'Firewall: opened port %s for the setup page; closed again when the wizard exits.\n' "$WEB_PORT"
+    fi
+fi
 
 python3 "$ROOT/setup/wizard.py" --web --web-host "$WEB_HOST" \
     --web-port "$WEB_PORT" --engine "$ENGINE" --jar "$JAR"
