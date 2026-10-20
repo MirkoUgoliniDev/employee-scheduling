@@ -50,6 +50,27 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
     private record EmployeeDay(Employee employee, java.time.LocalDate day) {}
     private record EmployeeWeek(Employee employee, int year, int week) {}
     private record Week(int year, int week) {}
+    /**
+     * @brief Week key of a shift: the ISO week of its <b>start</b> date.
+     *
+     * @details Weekly convention, deliberate and shared by every weekly constraint
+     *          (Maximum weekly hours, Weekly shift range, Minimum days off per week):
+     *          a shift belongs <b>entirely</b> to the ISO week in which it starts, even
+     *          when it ends in the following week. It is never split at Monday 00:00.
+     *          <ul>
+     *          <li>Example: Sun 18 Oct 2026 22:00 → Mon 19 Oct 06:00 counts its full
+     *              8 hours in week 42 (the Sunday), and zero in week 43. With a second
+     *              shift Mon 19 Oct 18:00 → Tue 20 Oct 02:00, week 43 totals 8 hours, not
+     *              the 14 a calendar-overlap reading would give.</li>
+     *          <li>Why: one key for all three rules means a shift is counted in one week
+     *              for every rule, and the head nurse sees the same grouping everywhere.
+     *              Splitting only the hours would make the three constraints disagree
+     *              on the same night shift. It also matches ward practice, where a night
+     *              shift is attributed to the day it starts.</li>
+     *          <li>Documented in {@code docs/ARCHITECTURE.md} and in the README after a
+     *              user report (October 2026) that read the code as calendar overlap.</li>
+     *          </ul>
+     */
     private static EmployeeWeek employeeWeek(Shift shift) {
         var date = shift.getStart().toLocalDate();
         return new EmployeeWeek(shift.getEmployee(), date.get(WeekFields.ISO.weekBasedYear()), date.get(WeekFields.ISO.weekOfWeekBasedYear()));
@@ -362,6 +383,12 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .asConstraint("Balance employee hours");
     }
 
+    /**
+     * @brief Hard: the minutes of an employee's shifts in one ISO week must not exceed the cap.
+     * @details The week of a shift is the ISO week of its start date, whole shift, never split
+     *          at the week boundary: see {@link #employeeWeek(Shift)} for the convention and
+     *          the worked example.
+     */
     Constraint weeklyHoursLimit(ConstraintFactory f) {
         // Boundary constraint: the minutes of context shifts count towards the ISO
         // week total (the hours already worked beyond the window edge do exist), but the

@@ -22,7 +22,7 @@ const HELP_IT: Record<string, string> = {
   context_days: "Giorni adiacenti alla finestra i cui turni già assegnati sono caricati come contesto bloccato (sovrapposizioni, riposo, ore e giorni consecutivi li vedono ma non li cambiano); 0 = solo finestra.",
   minimum_rest_hours: "Ore minime di riposo tra la fine di un turno e l'inizio del successivo dello stesso operatore (vincolo rigido).",
   max_shifts_per_day: "Numero massimo di turni per lo stesso operatore nello stesso giorno (1–5).",
-  max_weekly_hours: "Tetto di ore settimanali per operatore; 0 disabilita il limite.",
+  max_weekly_hours: "Tetto di ore settimanali per operatore; 0 disabilita il limite. Un turno conta per intero nella settimana ISO in cui inizia, anche se finisce in quella successiva.",
   min_weekly_shifts: "Turni minimi settimanali per operatore; 0 disabilita il minimo.",
   max_weekly_shifts: "Turni massimi settimanali per operatore; 0 disabilita il massimo.",
   max_consecutive_days: "Giorni lavorativi consecutivi massimi per operatore; 0 disabilita il limite.",

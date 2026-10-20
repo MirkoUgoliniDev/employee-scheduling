@@ -418,6 +418,22 @@ Eight hard constraints, thirteen soft ones, exactly as named in
 | | Balance employee hours · Balance employee shift assignments · Balance night shifts |
 | | Same location continuity |
 
+**Which week a shift belongs to.** Every weekly constraint — *Maximum weekly hours*, *Weekly
+shift range*, *Minimum days off per week* — uses the same key, `employeeWeek`: the **ISO week
+of the shift's start date**. A shift belongs entirely to the week in which it starts, even
+when it ends in the next one; it is never split at Monday 00:00. Concretely: a night shift
+from Sunday 18 October 2026 at 22:00 to Monday 19 at 06:00 counts its full 8 hours in week
+42, and nothing in week 43. Add a second shift on Monday 19 from 18:00 to Tuesday 20 at
+02:00 and week 43 totals 8 hours — not the 14 that a calendar-overlap reading would give.
+The convention is deliberate: one key for all three rules means a shift lands in one week
+for every rule, and the head nurse sees the same grouping everywhere; splitting only the
+hours would make the three constraints disagree on the same night shift. It also matches
+ward practice, where a night shift is attributed to the day it starts. Shifts adjacent to
+the solve window are loaded as pinned context (`context_days`), so a Sunday night from the
+previous window is still seen by the Monday week total. If a contract is worded as "hours
+worked within the calendar week", that would be a change to all three constraints together,
+not to the hours limit alone.
+
 Note where the line falls: a maximum of *weekly hours* is hard, a maximum of *consecutive
 days* is soft. The first is a legal limit, the second a preference that a short-staffed week
 may have to break — and a hard constraint there would return "no feasible solution" precisely
