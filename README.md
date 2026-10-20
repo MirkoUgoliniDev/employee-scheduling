@@ -35,7 +35,7 @@ from **Timefold Quickstarts** and has since been substantially extended — see
 
 | Capability | Details |
 |---|---|
-| **AI optimisation** | Timefold Solver with hard constraints (skills, availability, minimum rest) and soft constraints (preferences, workload balance) |
+| **AI optimisation** | Timefold Solver with hard constraints (skills, availability, minimum rest, weekly hours) and soft constraints (preferences, workload balance). Weekly rules count a shift in the ISO week it **starts** in, whole, never split at the week boundary — see [ARCHITECTURE](docs/ARCHITECTURE.md#the-constraints) |
 | **Dual database** | SQLite for single-machine use, PostgreSQL for multi-user servers, with separate Flyway migrations per engine |
 | **Multi-organisation** | Each organisation owns its locations, employees, specialists and **skills**; catalogues never mix and each can be renamed independently |
 | **Authentication** | Form-based auth, ADMIN and HEAD NURSE roles, optional e-mail registration with one-time passcode |
