@@ -38,6 +38,7 @@ import { useAppStore } from '../store/useAppStore'
 import { api } from '../api/client'
 import { generalSettingsApi } from '../api/generalSettings'
 import { useAuth } from '../auth/AuthContext'
+import { LANGUAGES } from '../i18n/languages'
 import toast from 'react-hot-toast'
 import { systemInfoApi } from '../api/systemInfo'
 import type { Structure } from '../types'
@@ -126,14 +127,6 @@ export default function Navbar() {
       .catch(() => {})
     return () => { cancelled = true }
   }, [currentStructure?.id, setShiftWindowMode, setAutoPopulateFromTemplate])
-
-  const LANGUAGES = [
-    { code: 'it', label: 'Italiano' },
-    { code: 'en', label: 'English' },
-    { code: 'fr', label: 'Français' },
-    { code: 'es', label: 'Español' },
-    { code: 'de', label: 'Deutsch' },
-  ]
 
   return (
     <>

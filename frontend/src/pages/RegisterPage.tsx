@@ -22,6 +22,8 @@ import { registerApi } from '../api/register'
 import { errorCode } from '../api/client'
 import { backendErrorText } from '../i18n/backendErrors'
 import { useAuth } from '../auth/AuthContext'
+import { useAppStore } from '../store/useAppStore'
+import { LANGUAGES } from '../i18n/languages'
 
 type Step = 'email' | 'otp' | 'profile' | 'done'
 
@@ -31,7 +33,9 @@ const USERNAME_RE = /^[A-Za-z0-9_.-]{3,64}$/
 const RESEND_SECONDS = 60
 
 export default function RegisterPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const language = useAppStore(s => s.language)
+  const setLanguage = useAppStore(s => s.setLanguage)
   const { refresh, login } = useAuth()
   const [step, setStep] = useState<Step>('email')
   const [firstUser, setFirstUser] = useState(false)
@@ -208,6 +212,26 @@ export default function RegisterPage() {
     <div className="d-flex justify-content-center align-items-center py-4" style={{ minHeight: '100vh', background: 'linear-gradient(180deg, var(--bs-primary-bg-subtle) 0%, var(--bs-body-bg) 100%)' }}>
       <Card className="shadow border-0" style={{ width: '100%', maxWidth: 440, borderRadius: '1rem' }}>
         <Card.Body className="p-4">
+
+          {/* No navbar before sign-in: the language selector lives on this screen so the
+              first-boot administrator setup does not have to be completed in a language the
+              operator does not read. */}
+          <div className="d-flex justify-content-end mb-2">
+            <Form.Select
+              size="sm"
+              className="w-auto"
+              aria-label={t('nav.language', 'Sprache')}
+              value={language}
+              onChange={e => {
+                setLanguage(e.target.value)
+                i18n.changeLanguage(e.target.value)
+              }}
+            >
+              {LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </Form.Select>
+          </div>
 
           {/* Header */}
           <div className="text-center mb-4">

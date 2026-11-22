@@ -18,9 +18,13 @@ import { faRightToBracket, faUser, faLock, faUserPlus } from '@fortawesome/free-
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
 import { InvalidCredentialsError, InactiveAccountError } from '../api/auth'
+import { useAppStore } from '../store/useAppStore'
+import { LANGUAGES } from '../i18n/languages'
 
 export default function LoginPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const language = useAppStore(s => s.language)
+  const setLanguage = useAppStore(s => s.setLanguage)
   const { login, refresh } = useAuth()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
@@ -56,7 +60,26 @@ export default function LoginPage() {
     <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <Card className="shadow-sm" style={{ width: '100%', maxWidth: 380 }}>
         <Card.Body className="p-4">
-          <h5 className="mb-1">{t('login.title', 'Accedi')}</h5>
+          {/* No navbar on this screen, so the language selector has to live here: without it the
+              login form is the first thing a user sees and they could not switch out of the
+              detected language before signing in. */}
+          <div className="d-flex align-items-start justify-content-between mb-1">
+            <h5 className="mb-0">{t('login.title', 'Accedi')}</h5>
+            <Form.Select
+              size="sm"
+              className="ms-2 w-auto"
+              aria-label={t('nav.language', 'Lingua')}
+              value={language}
+              onChange={e => {
+                setLanguage(e.target.value)
+                i18n.changeLanguage(e.target.value)
+              }}
+            >
+              {LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </Form.Select>
+          </div>
           <p className="text-muted small mb-4">
             {t('login.subtitle', 'Inserisci le credenziali per gestire i turni.')}
           </p>

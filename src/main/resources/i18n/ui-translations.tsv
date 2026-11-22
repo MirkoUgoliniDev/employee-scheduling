@@ -1148,3 +1148,4 @@ customers.errorSave	Errore salvataggio cliente	Salvataggio non riuscito.	Saving 
 customers.errorDelete	Errore eliminazione cliente	Impossibile eliminare il cliente (interventi ancora presenti?).	Could not delete the customer (assignments still exist?).	Impossible de supprimer le client (interventions encore présentes ?).	No se pudo eliminar el cliente (¿aún hay intervenciones?).	Kunde konnte nicht gelöscht werden (noch Einsätze vorhanden?).
 customers.confirmDelete	Conferma eliminazione cliente	Eliminare davvero questo cliente?	Really delete this customer?	Supprimer vraiment ce client ?	¿Eliminar realmente este cliente?	Diesen Kunden wirklich löschen?
 customers.errorLoad	Errore caricamento clienti	Errore nel caricamento.	Error while loading.	Erreur de chargement.	Error al cargar.	Fehler beim Laden.
+nav.language	Etichetta selettore lingua (schermate senza navbar)	Lingua	Language	Langue	Idioma	Sprache

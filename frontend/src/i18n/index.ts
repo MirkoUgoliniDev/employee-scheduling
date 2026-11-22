@@ -32,7 +32,7 @@ import { api } from '../api/client'
  *       forcing a new `/translations` fetch on the next load.
  */
 const CACHE_PREFIX = 'i18n_cache'
-const CACHE_KEY = `${CACHE_PREFIX}-v61`
+const CACHE_KEY = `${CACHE_PREFIX}-v62`
 /** @brief Cache TTL in milliseconds (10 minutes). */
 const CACHE_TTL = 10 * 60 * 1000
 

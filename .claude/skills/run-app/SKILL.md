@@ -8,7 +8,7 @@ description: Launch Employee Scheduling locally to see a change working in the r
 ## Full app on :8080 (backend serves the built frontend)
 
 ```
-mvn quarkus:dev
+mvn quarkus:dev -Dquarkus.profile=sqlite
 ```
 
 Quarkus serves the frontend from `src/main/resources/META-INF/resources/`, which is the
@@ -19,8 +19,14 @@ will be looking at the previous bundle:
 cd frontend && npm run build
 ```
 
-Default profile is SQLite, file `databases/employee_scheduling.db`. Flyway creates and
-migrates the schema at startup.
+**`-Dquarkus.profile=sqlite` is not optional.** `application.properties` sets
+`quarkus.flyway.active=false`, and only the `sqlite` (and `postgresql`) profile turns
+Flyway back on and points it at the right migration directory. Without the flag the app
+does start, Flyway never runs, and Hibernate schema validation dies with
+`missing table [assignment_requirements]` — which reads like a broken migration but is
+only a missing flag. The installers and `setup/INSTALL.md` always pass it.
+
+Database file: `databases/employee_scheduling.db`, migrated by Flyway at startup.
 
 `AppMain.main()` calls `LegacyDatabaseName` **before Quarkus starts**, renaming a
 pre-existing `large_data.db` to the current name. It must stay ahead of Flyway —

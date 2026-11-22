@@ -30,9 +30,20 @@ import java.util.Set;
 public class SpaRoutingFilter {
 
     private static final String INDEX_RESOURCE = "META-INF/resources/index.html";
-    private static final Set<String> CLIENT_ROUTES = Set.of(
+
+    /**
+     * @brief React Router paths that must fall through to {@code index.html}.
+     *
+     * @details Keep this in sync with the {@code <Route path=...>} table in
+     *          {@code frontend/src/App.tsx}: a route missing here answers 401 JSON (or 404) when
+     *          the user reloads the page or opens a bookmark, because RESTEasy handles the path
+     *          first when the same string is also a REST endpoint. {@code SpaClientRoutesTest}
+     *          fails the build when the two lists drift apart.
+     */
+    static final Set<String> CLIENT_ROUTES = Set.of(
             "/", "/login", "/register", "/shifts", "/employees", "/specialists", "/locations",
-            "/skills", "/dates", "/report", "/structures", "/labels", "/config");
+            "/customers", "/assignments",
+            "/skills", "/dates", "/report", "/structures", "/labels", "/config", "/users");
 
     /**
      * Registers a high-priority Vert.x filter: it runs BEFORE RESTEasy route handlers and the
