@@ -17,7 +17,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Badge, Button, Col, Form, Modal, Row, Spinner, Table } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPenToSquare, faPlus, faTrash, faWandMagicSparkles, faLock, faLockOpen, faRotateLeft, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarCheck, faCalendarXmark, faPenToSquare, faPlus, faTrash, faWandMagicSparkles, faLock, faLockOpen, faRotateLeft, faCheck } from '@fortawesome/free-solid-svg-icons'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
@@ -26,6 +26,9 @@ import { assignmentsApi, type AssignmentConflict, type AssignmentPayload, type C
 import { locationsApi, type Location } from '../api/locations'
 import { skillsApi, type Skill } from '../api/skills'
 import { shiftsApi } from '../api/shifts'
+import { assignmentSeriesApi } from '../api/assignmentSeries'
+import AssignmentSeriesPanel from '../components/AssignmentSeriesPanel'
+import { translateSeriesError } from '../utils/assignmentSeriesErrors'
 import { errorCode } from '../api/client'
 
 /** @brief Roles the backend accepts in a staffing requirement. */
@@ -275,6 +278,27 @@ export default function AssignmentsPage() {
     }
   }
 
+  /** Cancels or restores a single occurrence of a series, without touching the series itself. */
+  async function handleOccurrence(assignment: CustomerAssignment) {
+    const seriesId = assignment.seriesId
+    if (seriesId == null) return
+    try {
+      if (assignment.status === 'CANCELLED') {
+        await assignmentSeriesApi.clearException(seriesId, assignment.assignmentDate)
+        toast.success(t('assignments.series.restored', 'Termin wiederhergestellt.'))
+      } else {
+        if (!window.confirm(t('assignments.series.confirmCancel',
+          'Diesen Termin absagen? Die Serie bleibt unverändert.'))) return
+        await assignmentSeriesApi.cancelOccurrence(seriesId, assignment.assignmentDate)
+        toast.success(t('assignments.series.cancelled', 'Termin abgesagt.'))
+      }
+      setSolution(null)
+      load()
+    } catch (err) {
+      toast.error(translateSeriesError(errorCode(err), (k, f) => t(k, f)))
+    }
+  }
+
   async function handlePin(assignment: CustomerAssignment, pinned: boolean) {
     try {
       await assignmentsApi.pin(assignment.id, pinned, structureId)
@@ -378,6 +402,16 @@ export default function AssignmentsPage() {
         </Alert>
       )}
 
+      <AssignmentSeriesPanel
+        structureId={structureId}
+        customers={customers}
+        locations={locations}
+        skills={skills}
+        from={from}
+        to={to}
+        onGenerated={load}
+      />
+
       {loading ? (
         <div className="text-center py-5"><Spinner animation="border" /></div>
       ) : assignments.length === 0 ? (
@@ -434,6 +468,11 @@ export default function AssignmentsPage() {
                       {statusLabel(a.status)}
                     </Badge>
                     {a.fixedTime && <Badge bg="info" text="dark" className="ms-1">{t('assignments.fixedTime', 'Fixzeit')}</Badge>}
+                    {a.seriesId != null && (
+                      <Badge bg="light" text="dark" className="ms-1">
+                        {t('assignments.series.badge', 'Serie')}
+                      </Badge>
+                    )}
                   </td>
                   <td className="text-nowrap">
                     <Button size="sm" variant="outline-secondary" className="me-1" onClick={() => openEdit(a)}
@@ -445,6 +484,15 @@ export default function AssignmentsPage() {
                       title={pinned ? t('assignments.unlock', 'Entsperren') : t('assignments.lock', 'Sperren')}>
                       <FontAwesomeIcon icon={pinned ? faLock : faLockOpen} />
                     </Button>
+                    {a.seriesId != null && (
+                      <Button size="sm" variant="outline-warning" className="me-1"
+                        onClick={() => handleOccurrence(a)}
+                        title={a.status === 'CANCELLED'
+                          ? t('assignments.series.restore', 'Termin wiederherstellen')
+                          : t('assignments.series.cancel', 'Termin absagen')}>
+                        <FontAwesomeIcon icon={a.status === 'CANCELLED' ? faCalendarCheck : faCalendarXmark} />
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline-danger" onClick={() => handleDelete(a)}
                       title={t('assignments.delete', 'Löschen')}>
                       <FontAwesomeIcon icon={faTrash} />
