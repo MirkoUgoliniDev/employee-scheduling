@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <!-- A single favicon.ico file containing 16, 32, and 48 pixel variants. The default
@@ -12,9 +12,46 @@
     <meta name="theme-color" content="#12141a" />
     <!-- Deliberately not localized: this is the product name shown in the taskbar and bookmarks. -->
     <title>Employee Scheduling</title>
+    <!--
+      Inline on purpose. The stylesheet travels inside the JS bundle, so before — and, after a
+      redeploy, instead of — a module load the page would paint plain white with no hint that
+      anything was happening. The colour repeats --bg from index.css and the theme-color above.
+      The spinner carries no text, so it needs no translation and survives a failed i18n load.
+    -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #12141a;
+      }
+      #boot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      #boot > span {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #3a3f4b;
+        border-top-color: #4f8cff;
+        border-radius: 50%;
+        animation: boot-spin 0.8s linear infinite;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot > span {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="boot" aria-hidden="true"><span></span></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -113,6 +113,24 @@ export async function initI18n(lang = 'it') {
 }
 
 /**
+ * @brief Mirrors the active UI language onto the {@code <html lang>} attribute.
+ *
+ * @details Assistive technology, hyphenation and browser translation all read this
+ *          attribute: a German interface inside {@code <html lang="it">} is announced as
+ *          Italian. Registered once on the i18next instance, so every path that changes the
+ *          language — `initI18n`, the language switch in the store, and
+ *          `refreshTranslations` — keeps it in sync. Debug codes such as {@code cimode} are
+ *          not languages and are skipped.
+ */
+function syncDocumentLanguage(lng: string) {
+  if (typeof document === 'undefined') return
+  const code = lng.split('-')[0]
+  if (/^[a-z]{2,3}$/.test(code)) document.documentElement.lang = code
+}
+
+i18n.on('languageChanged', syncDocumentLanguage)
+
+/**
  * @brief Reloads translations from the backend and updates i18next at runtime.
  * @details Used after saving dynamic translations (e.g. skill names):
  * bypasses and rewrites the localStorage cache, then replaces resource bundles
