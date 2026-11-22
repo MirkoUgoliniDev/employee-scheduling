@@ -71,7 +71,9 @@ public class AssignmentSeriesResource {
         if (location == null || location.structureId != structureId) {
             return ApiErrors.badRequest("ASSIGNMENT_LOCATION_UNKNOWN");
         }
-        if (location.customerId != null && location.customerId != customer.id) {
+        // By value: both ids are Integer, and `!=` on two boxes compares references, so a
+        // location would only match its customer while both ids stayed inside the JVM's cache.
+        if (location.customerId != null && !location.customerId.equals(customer.id)) {
             return ApiErrors.badRequest("ASSIGNMENT_LOCATION_CUSTOMER_MISMATCH");
         }
         if (parseTime(payload.startTime) == null) {

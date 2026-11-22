@@ -100,7 +100,9 @@ public class AssignmentResource {
         }
         // A location that belongs to another customer must not receive this customer's visit:
         // that is a data error the planner has to resolve, not something to guess around.
-        if (location.customerId != null && location.customerId != customer.id) {
+        // By value: both ids are Integer, so `!=` would compare references and only agree inside
+        // the JVM's box cache (-128..127) — above that every visit would be rejected as a mismatch.
+        if (location.customerId != null && !location.customerId.equals(customer.id)) {
             return ApiErrors.badRequest("ASSIGNMENT_LOCATION_CUSTOMER_MISMATCH");
         }
         if (assignment.getRequirements() == null || assignment.getRequirements().isEmpty()) {
