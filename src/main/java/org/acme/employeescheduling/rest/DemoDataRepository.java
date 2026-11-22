@@ -58,6 +58,7 @@ import org.acme.employeescheduling.dto.SpecialistAffinity;
 import org.acme.employeescheduling.persistence.AffinityEntity;
 import org.acme.employeescheduling.persistence.EmployeeDateEntity;
 import org.acme.employeescheduling.persistence.EmployeeEntity;
+import org.acme.employeescheduling.persistence.EmployeeLocationEntity;
 import org.acme.employeescheduling.persistence.EmployeeSkillEntity;
 import org.acme.employeescheduling.persistence.LocationEntity;
 import org.acme.employeescheduling.persistence.LocationSkillEntity;
@@ -115,7 +116,7 @@ public class DemoDataRepository {
 
 	private static final Logger logger = Logger.getLogger(DemoDataRepository.class.getName());
 	private static final DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	private static final int SQLITE_IN_CHUNK = 900;
+	static final int SQLITE_IN_CHUNK = 900;
 
 	// -----------------------------------------------------------------------
 	// Translation cache
@@ -172,7 +173,7 @@ public class DemoDataRepository {
 		ensureSchemaInitialized();
 	}
 
-	private static <T> List<T> loadInChunks(Set<Integer> ids, Function<List<Integer>, List<T>> loader) {
+	static <T> List<T> loadInChunks(Set<Integer> ids, Function<List<Integer>, List<T>> loader) {
 		if (ids == null || ids.isEmpty()) return new ArrayList<>();
 		List<Integer> values = new ArrayList<>(ids);
 		List<T> result = new ArrayList<>();
@@ -583,6 +584,8 @@ public class DemoDataRepository {
 			shift.setEmployeeId(entity.employeeId);
 			shift.setPinned(entity.pinned);
 			shift.setVersion(entity.version);
+			shift.setAssignmentId(entity.assignmentId);
+			shift.setRequiredRole(entity.requiredRole);
 			shifts.add(shift);
 		}
 		return shifts;
@@ -1091,6 +1094,9 @@ public class DemoDataRepository {
 					new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 			employee.setEmail(entity.email);
 			employee.setActive(entity.active);
+			employee.setRole(entity.role);
+			employee.setContractedWeeklyHours(entity.contractedWeeklyHours);
+			employee.setEmploymentType(entity.employmentType);
 			employees.put(entity.id, employee);
 		}
 		if (employees.isEmpty()) return new ArrayList<>();
@@ -1120,6 +1126,16 @@ public class DemoDataRepository {
 		for (Employee employee : employees.values())
 			employee.setSkills(copySkillsWithUsage(catalog,
 					used.getOrDefault(employee.getId(), Collections.emptySet())));
+		// Location eligibility: an employee without rows is unrestricted (see Employee#getEligibleLocationIds).
+		Map<Integer, Set<Integer>> eligibleLocations = new HashMap<>();
+		for (EmployeeLocationEntity link : loadInChunks(employeeIds,
+				chunk -> EmployeeLocationEntity.<EmployeeLocationEntity>list("employeeId in ?1", chunk))) {
+			eligibleLocations.computeIfAbsent(link.employeeId, ignored -> new HashSet<>()).add(link.locationId);
+		}
+		for (Map.Entry<Integer, Set<Integer>> entry : eligibleLocations.entrySet()) {
+			Employee employee = employees.get(entry.getKey());
+			if (employee != null) employee.setEligibleLocationIds(entry.getValue());
+		}
 		return new ArrayList<>(employees.values());
 	}
 

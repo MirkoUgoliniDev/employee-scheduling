@@ -16,6 +16,11 @@ import jakarta.persistence.Table;
 @Table(name = "shift_skills")
 public class ShiftSkillEntity extends PanacheEntityBase {
 
+    /** Required skill type (mandatory for the shift). */
+    public static final int TYPE_REQUIRED = 1;
+    /** Optional skill type (preferred). */
+    public static final int TYPE_OPTIONAL = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

@@ -31,6 +31,8 @@ import {
   faUserGear,
   faPowerOff,
   faHouse,
+  faAddressCard,
+  faClipboardList,
 } from '@fortawesome/free-solid-svg-icons'
 import { useAppStore } from '../store/useAppStore'
 import { api } from '../api/client'
@@ -74,6 +76,8 @@ export default function Navbar() {
   const LINKS = [
     { to: '/shifts',    label: t('nav.shifts', 'Gestione Turni'), icon: faCalendarDays },
     { to: '/locations', label: t('nav.locations', 'Sedi'), icon: faLocationDot },
+    { to: '/customers', label: t('nav.customers', 'Kunden'), icon: faAddressCard },
+    { to: '/assignments', label: t('nav.assignments', 'Kundeneinsätze'), icon: faClipboardList },
     { to: '/employees', label: t('nav.employees', 'Operatori'), icon: faUsers },
     { to: '/dates',     label: t('nav.dates', 'Preferenze date Operatori'), icon: faCalendarCheck },
     { to: '/specialists', label: t('nav.specialists', 'Specialisti'), icon: faUserDoctor },

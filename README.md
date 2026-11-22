@@ -271,6 +271,7 @@ The README is the shop window; each document below answers one question, for one
 | Document | Answers |
 |---|---|
 | [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) | *How do I use it?* — the main workflow, twenty-two screenshots from sign-in to a published roster |
+| [`docs/CUSTOMER-SCHEDULING.md`](docs/CUSTOMER-SCHEDULING.md) | *How does customer-centric planning work?* — the customer assignment as the planning object, its mapping onto shifts, the churn rules, and what is still open |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | *Why is it built this way?* — the single artifact, two database engines, per-engine Flyway sets, the Timefold planning model, declined trade-offs |
 | [`docs/INSTALLATION-WINDOWS.md`](docs/INSTALLATION-WINDOWS.md) | *How do I install it on Windows?* — MSI, jpackage, manual build |
 | [`docs/INSTALLATION-LINUX.md`](docs/INSTALLATION-LINUX.md) | *How do I install it on Linux?* — the one-line script, the systemd unit by hand, backups, uninstalling |

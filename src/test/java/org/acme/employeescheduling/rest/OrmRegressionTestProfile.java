@@ -47,14 +47,19 @@ public class OrmRegressionTestProfile implements QuarkusTestProfile {
              Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE locations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, "
                     + "l_order INTEGER, code TEXT, structure_id INTEGER NOT NULL DEFAULT 1, active INTEGER NOT NULL DEFAULT 1, "
-                    + "specialist_id INTEGER)");
+                    // V9 columns: the fixture stands in for a migrated database, and the entity
+                    // always lists them in its INSERT, so they must exist here too.
+                    + "specialist_id INTEGER, customer_id INTEGER, external INTEGER NOT NULL DEFAULT 0)");
             statement.execute("CREATE TABLE shifts (id INTEGER PRIMARY KEY AUTOINCREMENT, location_id INTEGER NOT NULL, "
-                    + "start_time TEXT NOT NULL, end_time TEXT NOT NULL, employee_id INTEGER, pinned INTEGER NOT NULL DEFAULT 0)");
+                    + "start_time TEXT NOT NULL, end_time TEXT NOT NULL, employee_id INTEGER, pinned INTEGER NOT NULL DEFAULT 0, "
+                    + "assignment_id INTEGER, required_role TEXT NOT NULL DEFAULT '')");
             statement.execute("CREATE TABLE skills (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, "
                     + "skill_order INTEGER, active INTEGER NOT NULL DEFAULT 1)");
             statement.execute("CREATE TABLE employees (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, "
                     + "first_name TEXT NOT NULL, last_name TEXT NOT NULL, structure_id INTEGER NOT NULL DEFAULT 1, "
-                    + "active INTEGER NOT NULL DEFAULT 1, email TEXT NOT NULL DEFAULT '')");
+                    + "active INTEGER NOT NULL DEFAULT 1, email TEXT NOT NULL DEFAULT '', "
+                    + "role TEXT NOT NULL DEFAULT 'MEDICAL_ASSISTANT', contracted_weekly_hours REAL NOT NULL DEFAULT 40, "
+                    + "employment_type TEXT NOT NULL DEFAULT 'FULL_TIME')");
             statement.execute("CREATE TABLE location_skills (id INTEGER PRIMARY KEY AUTOINCREMENT, location_id INTEGER NOT NULL, "
                     + "skill_id INTEGER NOT NULL, skill_type_id INTEGER NOT NULL)");
             statement.execute("CREATE TABLE skill_type (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT)");
@@ -68,6 +73,9 @@ public class OrmRegressionTestProfile implements QuarkusTestProfile {
                     + "skill_id INTEGER NOT NULL)");
             statement.execute("CREATE TABLE employee_dates (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_id INTEGER NOT NULL, "
                     + "date_start TEXT NOT NULL, date_end TEXT NOT NULL, date_type_id INTEGER NOT NULL)");
+            // V9 table read by loadEmployeesOrm; an employee with no row is unrestricted.
+            statement.execute("CREATE TABLE employee_locations (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "employee_id INTEGER NOT NULL, location_id INTEGER NOT NULL, UNIQUE (employee_id, location_id))");
             statement.execute("INSERT INTO skills (id,name,skill_order,active) VALUES (101,'Legacy FK skill',101,1)");
             statement.execute("INSERT INTO shifts (id,location_id,start_time,end_time,employee_id,pinned) "
                     + "VALUES (201,999999,'1999-01-01 08:00:00','1999-01-01 09:00:00',NULL,0)");

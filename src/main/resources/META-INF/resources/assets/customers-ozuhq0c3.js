@@ -1,0 +1,1 @@
+import{t as e}from"./client-_-9yatZE.js";var t={list:t=>e.get(`/customers?structureId=${t}`),get:t=>e.get(`/customers/${t}`),create:(t,n)=>e.post(`/customers?structureId=${n}`,t),update:(t,n)=>e.put(`/customers/${t}`,n),remove:t=>e.delete(`/customers/${t}`)};export{t};

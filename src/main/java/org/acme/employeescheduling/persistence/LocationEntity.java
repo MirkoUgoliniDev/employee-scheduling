@@ -52,6 +52,15 @@ public class LocationEntity extends PanacheEntityBase {
     @Column(name = "specialist_id")
     public Integer specialistId;
 
+    /** Owning customer (V9); a location may belong to at most one customer. */
+    @Column(name = "customer_id")
+    public Integer customerId;
+
+    /** true for locations outside the premises (house visits, external practices). */
+    @JdbcTypeCode(SqlTypes.INTEGER)
+    @Column(name = "external", nullable = false)
+    public boolean external = false;
+
     /** @brief Converts to the REST DTO (without skill lists; the caller populates them). */
     public Location toDto() {
         Location dto = new Location();

@@ -1044,3 +1044,107 @@ msg.err.safetyBackupBusy	Errore backup di sicurezza: backup in corso	Operazione 
 backup.confirmRetentionTitle	Titolo conferma riduzione rotazione	Conferma rotazione	Confirm rotation	Confirmer la rotation	Confirmar la rotación	Rotation bestätigen
 backup.confirmRetentionMsg	Messaggio conferma riduzione rotazione	Stai riducendo la conservazione o il numero massimo di backup: alla prossima rotazione i file oltre i nuovi limiti verranno eliminati definitivamente. Continuare?	You are lowering the retention or the maximum number of backups: at the next rotation, files beyond the new limits will be permanently deleted. Continue?	Vous réduisez la durée de conservation ou le nombre maximal de sauvegardes : à la prochaine rotation, les fichiers dépassant les nouvelles limites seront supprimés définitivement. Continuer ?	Estás reduciendo el período de conservación o el número máximo de copias: en la próxima rotación, los archivos que superen los nuevos límites se eliminarán definitivamente. ¿Continuar?	Sie verringern die Aufbewahrungsdauer oder die maximale Anzahl der Backups: Bei der nächsten Rotation werden Dateien über den neuen Grenzen endgültig gelöscht. Fortfahren?
 label.new	Etichetta nuova riga	Nuovo	New	Nouveau	Nuevo	Neu
+nav.customers	Voce di menu clienti	Clienti	Customers	Clients	Clientes	Kunden
+nav.assignments	Voce di menu interventi clienti	Interventi clienti	Customer assignments	Interventions clients	Intervenciones de clientes	Kundeneinsätze
+assignments.title	Titolo pagina interventi clienti	Interventi clienti	Customer assignments	Interventions clients	Intervenciones de clientes	Kundeneinsätze
+assignments.newAssignment	Pulsante nuovo intervento	Nuovo intervento	New assignment	Nouvelle intervention	Nueva intervención	Neuer Einsatz
+assignments.stopSolve	Pulsante ferma ottimizzazione	Ferma ottimizzazione	Stop optimisation	Arrêter l'optimisation	Detener la optimización	Optimierung stoppen
+assignments.solve	Pulsante avvia ottimizzazione	Ottimizza	Optimise	Optimiser	Optimizar	Optimieren
+assignments.approve	Pulsante applica piano	Applica piano	Apply plan	Appliquer le plan	Aplicar plan	Plan übernehmen
+assignments.discard	Pulsante scarta proposta	Scarta	Discard	Écarter	Descartar	Verwerfen
+assignments.previewNotice	Avviso proposta non ancora salvata	Proposta dell'ottimizzazione: non ancora salvata.	Optimisation proposal: not saved yet.	Proposition d'optimisation : pas encore enregistrée.	Propuesta de optimización: aún no guardada.	Vorschlag der Optimierung – noch nicht gespeichert.
+assignments.plannedOpen	Posti aperti nella proposta	Posti aperti nella proposta:	Open positions in the proposal:	Postes ouverts dans la proposition :	Puestos abiertos en la propuesta:	Offene Positionen im Vorschlag:
+assignments.conflicts	Conflitti negli interventi bloccati	Conflitti negli interventi bloccati:	Conflicts in locked assignments:	Conflits sur les interventions verrouillées :	Conflictos en intervenciones bloqueadas:	Konflikte gesperrter Einsätze:
+assignments.openPositions	Posti aperti nel periodo	Posti aperti:	Open positions:	Postes ouverts :	Puestos abiertos:	Offene Positionen:
+assignments.empty	Nessun intervento nel periodo	Nessun intervento in questo periodo.	No assignments in this period.	Aucune intervention sur cette période.	No hay intervenciones en este periodo.	Keine Einsätze in diesem Zeitraum.
+assignments.date	Colonna data	Data	Date	Date	Fecha	Datum
+assignments.customer	Colonna cliente	Cliente	Customer	Client	Cliente	Kunde
+assignments.location	Colonna sede	Sede	Location	Site	Sede	Ort
+assignments.service	Colonna prestazione	Prestazione	Service	Prestation	Servicio	Leistung
+assignments.window	Colonna orario	Orario	Time	Horaire	Horario	Zeit
+assignments.team	Colonna squadra	Squadra	Team	Équipe	Equipo	Team
+assignments.statusLabel	Colonna stato	Stato	Status	Statut	Estado	Status
+assignments.actions	Colonna azioni	Azioni	Actions	Actions	Acciones	Aktionen
+assignments.noPositions	Nessun posto materializzato	Nessun posto	No positions	Aucun poste	Sin puestos	Keine Positionen
+assignments.planned	Marcatore proposta solver	pianificato	planned	planifié	planificado	geplant
+assignments.fixedTime	Orario fisso	Orario fisso	Fixed time	Horaire fixe	Horario fijo	Fixzeit
+assignments.edit	Pulsante modifica	Modifica	Edit	Modifier	Editar	Bearbeiten
+assignments.unlock	Pulsante sblocca	Sblocca	Unlock	Déverrouiller	Desbloquear	Entsperren
+assignments.lock	Pulsante blocca	Blocca	Lock	Verrouiller	Bloquear	Sperren
+assignments.delete	Pulsante elimina	Elimina	Delete	Supprimer	Eliminar	Löschen
+assignments.select	Voce vuota delle tendine	– seleziona –	– select –	– sélectionner –	– seleccionar –	– auswählen –
+assignments.titleLabel	Etichetta descrizione intervento	Descrizione	Title	Description	Descripción	Bezeichnung
+assignments.start	Etichetta ora di inizio	Inizio	Start	Début	Inicio	Beginn
+assignments.duration	Etichetta durata in minuti	Durata (minuti)	Duration (minutes)	Durée (minutes)	Duración (minutos)	Dauer (Minuten)
+assignments.priority	Etichetta priorità	Priorità	Priority	Priorité	Prioridad	Priorität
+assignments.priorityHigh	Priorità alta	Alta	High	Haute	Alta	Hoch
+assignments.priorityNormal	Priorità normale	Normale	Normal	Normale	Normal	Normal
+assignments.priorityLow	Priorità bassa	Bassa	Low	Basse	Baja	Niedrig
+assignments.requirements	Etichetta composizione squadra	Composizione della squadra	Team composition	Composition de l'équipe	Composición del equipo	Teamzusammensetzung
+assignments.addRequirement	Pulsante aggiungi requisito	Requisito	Requirement	Exigence	Requisito	Anforderung
+assignments.anyQualification	Nessuna qualifica aggiuntiva	Nessuna qualifica aggiuntiva	No additional qualification	Aucune qualification supplémentaire	Sin cualificación adicional	Keine Zusatzqualifikation
+assignments.notes	Etichetta note	Note	Notes	Remarques	Notas	Hinweise
+assignments.rolePhysician	Ruolo medico	Medico	Physician	Médecin	Médico	Arzt/Ärztin
+assignments.roleAssistant	Ruolo assistente medico	Assistente medico	Medical assistant	Assistant médical	Asistente médico	MFA
+assignments.open	Posto non coperto	Aperto	Open	Ouvert	Abierto	Offen
+assignments.status.FIXED	Stato intervento fisso	Fisso	Fixed	Fixe	Fijo	Fix
+assignments.status.FLEXIBLE	Stato intervento flessibile	Flessibile	Flexible	Flexible	Flexible	Flexibel
+assignments.status.RECURRING	Stato intervento ricorrente	Ricorrente	Recurring	Récurrent	Recurrente	Wiederkehrend
+assignments.status.RESCHEDULED	Stato intervento riprogrammato	Riprogrammato	Rescheduled	Reprogrammé	Reprogramado	Umgeplant
+assignments.status.CANCELLED	Stato intervento annullato	Annullato	Cancelled	Annulé	Cancelado	Abgesagt
+assignments.status.COMPLETED	Stato intervento completato	Completato	Completed	Terminé	Completado	Abgeschlossen
+assignments.conflict.ABSENCE	Conflitto per assenza	Assenza	Absence	Absence	Ausencia	Abwesenheit
+assignments.conflict.ROLE	Conflitto per ruolo errato	Ruolo errato	Wrong role	Rôle incorrect	Rol incorrecto	Falsche Rolle
+assignments.conflict.LOCATION	Conflitto per sede non ammessa	Sede non ammessa	Location not allowed	Site non autorisé	Sede no permitida	Ort nicht erlaubt
+assignments.conflict.SKILL	Conflitto per qualifica mancante	Qualifica mancante	Missing qualification	Qualification manquante	Cualificación faltante	Qualifikation fehlt
+assignments.errorLoad	Errore caricamento interventi	Errore nel caricamento.	Error while loading.	Erreur de chargement.	Error al cargar.	Fehler beim Laden.
+assignments.solveDone	Ottimizzazione completata	Ottimizzazione completata. Verificare e applicare il piano.	Optimisation finished. Review and apply the plan.	Optimisation terminée. Vérifiez et appliquez le plan.	Optimización completada. Revise y aplique el plan.	Optimierung abgeschlossen. Plan prüfen und übernehmen.
+assignments.errorPolling	Errore stato solver	Errore durante l'interrogazione dello stato del solver.	Error while polling the solver status.	Erreur lors de l'interrogation de l'état du solveur.	Error al consultar el estado del solver.	Fehler beim Abruf des Solver-Status.
+assignments.errorSolve	Errore avvio ottimizzazione	Impossibile avviare l'ottimizzazione.	Could not start the optimisation.	Impossible de démarrer l'optimisation.	No se pudo iniciar la optimización.	Optimierung konnte nicht gestartet werden.
+assignments.saved	Piano applicato	Piano applicato.	Plan applied.	Plan appliqué.	Plan aplicado.	Plan übernommen.
+assignments.changed	Interventi cambiati durante l'ottimizzazione	Gli interventi sono stati modificati durante l'ottimizzazione: nulla è stato salvato.	The assignments changed during optimisation: nothing was saved.	Les interventions ont changé pendant l'optimisation : rien n'a été enregistré.	Las intervenciones cambiaron durante la optimización: no se guardó nada.	Die Einsätze wurden während der Optimierung geändert. Nichts wurde gespeichert.
+assignments.errorSave	Errore applicazione piano	Impossibile applicare il piano.	Could not apply the plan.	Impossible d'appliquer le plan.	No se pudo aplicar el plan.	Plan konnte nicht übernommen werden.
+assignments.savedAssignment	Intervento salvato	Intervento salvato.	Assignment saved.	Intervention enregistrée.	Intervención guardada.	Einsatz gespeichert.
+assignments.errorDelete	Errore eliminazione intervento	Impossibile eliminare l'intervento.	Could not delete the assignment.	Impossible de supprimer l'intervention.	No se pudo eliminar la intervención.	Einsatz konnte nicht gelöscht werden.
+assignments.errorPin	Errore modifica blocco	Impossibile modificare il blocco.	Could not change the lock.	Impossible de modifier le verrouillage.	No se pudo cambiar el bloqueo.	Sperre konnte nicht geändert werden.
+assignments.confirmDelete	Conferma eliminazione intervento	Eliminare davvero questo intervento?	Really delete this assignment?	Supprimer vraiment cette intervention ?	¿Eliminar realmente esta intervención?	Diesen Einsatz wirklich löschen?
+assignments.errorTitle	Validazione titolo mancante	Il titolo è obbligatorio.	Title is required.	Le titre est obligatoire.	El título es obligatorio.	Bezeichnung ist erforderlich.
+assignments.errorDate	Validazione data non valida	La data non è valida.	The date is not valid.	La date n'est pas valide.	La fecha no es válida.	Datum ist ungültig.
+assignments.errorStart	Validazione ora di inizio non valida	L'ora di inizio non è valida.	The start time is not valid.	L'heure de début n'est pas valide.	La hora de inicio no es válida.	Beginn ist ungültig.
+assignments.errorDuration	Validazione durata non valida	La durata non è valida.	The duration is not valid.	La durée n'est pas valide.	La duración no es válida.	Dauer ist ungültig.
+assignments.errorStatus	Validazione stato non valido	Lo stato non è valido.	The status is not valid.	Le statut n'est pas valide.	El estado no es válido.	Status ist ungültig.
+assignments.errorCustomer	Validazione cliente non trovato	Cliente non trovato.	Customer not found.	Client introuvable.	Cliente no encontrado.	Kunde nicht gefunden.
+assignments.errorLocation	Validazione sede non trovata	Sede non trovata.	Location not found.	Site introuvable.	Sede no encontrada.	Ort nicht gefunden.
+assignments.errorLocationCustomer	Validazione sede di altro cliente	La sede non appartiene a questo cliente.	The location does not belong to this customer.	Le site n'appartient pas à ce client.	La sede no pertenece a este cliente.	Der Ort gehört nicht zu diesem Kunden.
+assignments.errorRequirement	Validazione requisito mancante	Serve almeno un requisito.	At least one requirement is needed.	Au moins une exigence est nécessaire.	Se necesita al menos un requisito.	Mindestens eine Anforderung ist nötig.
+assignments.errorRole	Validazione ruolo non valido	Il ruolo non è valido.	The role is not valid.	Le rôle n'est pas valide.	El rol no es válido.	Rolle ist ungültig.
+assignments.errorHeadcount	Validazione numero non valido	Il numero non è valido.	The headcount is not valid.	Le nombre n'est pas valide.	El número no es válido.	Anzahl ist ungültig.
+assignments.errorSkill	Validazione qualifica non trovata	Qualifica non trovata.	Qualification not found.	Qualification introuvable.	Cualificación no encontrada.	Qualifikation nicht gefunden.
+assignments.errorTooMany	Validazione troppi posti	Troppi posti per un intervento (max 40).	Too many positions for one assignment (max 40).	Trop de postes pour une intervention (max 40).	Demasiados puestos para una intervención (máx. 40).	Zu viele Positionen für einen Einsatz (max. 40).
+assignments.errorGeneric	Errore generico salvataggio intervento	Salvataggio non riuscito.	Saving failed.	Échec de l'enregistrement.	Error al guardar.	Speichern fehlgeschlagen.
+customers.title	Titolo pagina clienti	Clienti	Customers	Clients	Clientes	Kunden
+customers.new	Pulsante nuovo cliente	Nuovo cliente	New customer	Nouveau client	Nuevo cliente	Neuer Kunde
+customers.edit	Titolo modifica cliente	Modifica cliente	Edit customer	Modifier le client	Editar cliente	Kunde bearbeiten
+customers.code	Etichetta codice cliente	Codice	Code	Code	Código	Kürzel
+customers.name	Etichetta nome cliente	Nome	Name	Nom	Nombre	Name
+customers.address	Etichetta indirizzo	Indirizzo	Address	Adresse	Dirección	Adresse
+customers.phone	Etichetta telefono	Telefono	Phone	Téléphone	Teléfono	Telefon
+customers.defaultStart	Orario abituale	Orario abituale	Usual start time	Heure habituelle	Hora habitual	Übliche Beginnzeit
+customers.defaultDuration	Durata abituale in minuti	Durata abituale (minuti)	Usual duration (minutes)	Durée habituelle (minutes)	Duración habitual (minutos)	Übliche Dauer (Minuten)
+customers.qualification	Etichetta qualifica	Qualifica	Qualification	Qualification	Cualificación	Qualifikation
+customers.noQualification	Nessuna qualifica predefinita	Nessuna	None	Aucune	Ninguna	Keine
+customers.recurrence	Etichetta cadenza	Cadenza	Recurrence	Récurrence	Recurrencia	Rhythmus
+customers.recurrenceHint	Suggerimento cadenza	ad es. ogni 2° lunedì	e.g. every 2nd Monday	p. ex. chaque 2e lundi	p. ej. cada 2.º lunes	z. B. jeden 2. Montag
+customers.restrictions	Etichetta restrizioni	Restrizioni	Restrictions	Restrictions	Restricciones	Einschränkungen
+customers.locations	Etichetta sedi del cliente	Sedi	Locations	Sites	Sedes	Orte
+customers.locationsHint	Suggerimento selezione multipla	Selezione multipla con Ctrl/Cmd.	Multiple selection with Ctrl/Cmd.	Sélection multiple avec Ctrl/Cmd.	Selección múltiple con Ctrl/Cmd.	Mehrfachauswahl mit Strg/Cmd.
+customers.active	Cliente attivo	Attivo	Active	Actif	Activo	Aktiv
+customers.inactive	Cliente inattivo	Inattivo	Inactive	Inactif	Inactivo	Inaktiv
+customers.actions	Colonna azioni clienti	Azioni	Actions	Actions	Acciones	Aktionen
+customers.defaults	Colonna impostazioni predefinite	Impostazioni predefinite	Defaults	Valeurs par défaut	Valores por defecto	Vorgaben
+customers.empty	Nessun cliente presente	Nessun cliente creato.	No customers yet.	Aucun client enregistré.	Aún no hay clientes.	Noch keine Kunden angelegt.
+customers.saved	Cliente salvato	Cliente salvato.	Customer saved.	Client enregistré.	Cliente guardado.	Kunde gespeichert.
+customers.errorSave	Errore salvataggio cliente	Salvataggio non riuscito.	Saving failed.	Échec de l'enregistrement.	Error al guardar.	Speichern fehlgeschlagen.
+customers.errorDelete	Errore eliminazione cliente	Impossibile eliminare il cliente (interventi ancora presenti?).	Could not delete the customer (assignments still exist?).	Impossible de supprimer le client (interventions encore présentes ?).	No se pudo eliminar el cliente (¿aún hay intervenciones?).	Kunde konnte nicht gelöscht werden (noch Einsätze vorhanden?).
+customers.confirmDelete	Conferma eliminazione cliente	Eliminare davvero questo cliente?	Really delete this customer?	Supprimer vraiment ce client ?	¿Eliminar realmente este cliente?	Diesen Kunden wirklich löschen?
+customers.errorLoad	Errore caricamento clienti	Errore nel caricamento.	Error while loading.	Erreur de chargement.	Error al cargar.	Fehler beim Laden.

@@ -75,6 +75,23 @@ public class Shift {
     /** @brief DB-stored employee ID (for persistence across sessions). */
     private Integer employeeId;
 
+    /**
+     * @brief Owning customer assignment (customer-centric scheduling), or null.
+     * @details A shift that belongs to an assignment is one concrete "position" of the required
+     *          team: the assignment "1 anaesthetist + 2 MFAs" materialises as three shifts that
+     *          share this ID. The solver treats them as ordinary shifts, which is why the
+     *          customer layer needed no second planner.
+     */
+    private Integer assignmentId;
+
+    /**
+     * @brief Required role of a materialised assignment position ({@code PHYSICIAN} or
+     *        {@code MEDICAL_ASSISTANT}); empty for a standalone shift.
+     * @details Kept as a String, not an enum, so an unknown value in a stored row degrades to a
+     *          non-matching requirement instead of breaking deserialization of the whole schedule.
+     */
+    private String requiredRole;
+
     /** @brief Timefold planning pin: when true, solver does NOT change the employee field. */
     @PlanningPin
     private boolean pinned;
@@ -332,6 +349,24 @@ public class Shift {
 
     public void setEmployeeId(Integer employeeId) {
         this.employeeId = employeeId;
+    }
+
+    /** @brief Owning customer assignment, or null for a standalone shift. */
+    public Integer getAssignmentId() {
+        return assignmentId;
+    }
+
+    public void setAssignmentId(Integer assignmentId) {
+        this.assignmentId = assignmentId;
+    }
+
+    /** @brief Required role of a materialised position; empty (never null) for standalone shifts. */
+    public String getRequiredRole() {
+        return requiredRole == null ? "" : requiredRole;
+    }
+
+    public void setRequiredRole(String requiredRole) {
+        this.requiredRole = requiredRole == null ? "" : requiredRole;
     }
 
     public boolean isPinned() {

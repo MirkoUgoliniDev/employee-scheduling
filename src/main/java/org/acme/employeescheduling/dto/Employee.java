@@ -90,6 +90,29 @@ public class Employee {
     private Set<Integer> incompatibleSpecialistIds = Set.of();
 
     /**
+     * @brief {@code PHYSICIAN} or {@code MEDICAL_ASSISTANT} (customer-centric scheduling).
+     * @details Compared against {@code shifts.required_role} by the "Wrong role" hard constraint.
+     */
+    @JsonProperty("role")
+    private String role = "MEDICAL_ASSISTANT";
+
+    /** Contracted weekly hours: the fairness reference, not a hard cap. */
+    @JsonProperty("contractedWeeklyHours")
+    private double contractedWeeklyHours = 40;
+
+    /** {@code FULL_TIME}, {@code PART_TIME}, {@code MINIJOB} or {@code HONORARY}. */
+    @JsonProperty("employmentType")
+    private String employmentType = "FULL_TIME";
+
+    /**
+     * @brief Locations this employee may work at.
+     * @details Empty means <b>unrestricted</b>: every installation created before the
+     *          {@code employee_locations} table existed keeps working unchanged.
+     */
+    @JsonProperty("eligibleLocationIds")
+    private Set<Integer> eligibleLocationIds = Set.of();
+
+    /**
      * @brief Default no-argument constructor.
      *
      * @details Required by Jackson for JSON deserialization.
@@ -133,6 +156,42 @@ public class Employee {
     /** @brief Sets "incompatible" specialists (null becomes an empty set). */
     public void setIncompatibleSpecialistIds(Set<Integer> ids) {
         this.incompatibleSpecialistIds = ids == null ? Set.of() : ids;
+    }
+
+    /** @brief {@code PHYSICIAN} or {@code MEDICAL_ASSISTANT} (never null). */
+    public String getRole() {
+        return role == null ? "" : role;
+    }
+
+    public void setRole(String role) {
+        this.role = role == null ? "" : role;
+    }
+
+    /** @brief Contracted weekly hours (fairness reference). */
+    public double getContractedWeeklyHours() {
+        return contractedWeeklyHours;
+    }
+
+    public void setContractedWeeklyHours(double contractedWeeklyHours) {
+        this.contractedWeeklyHours = contractedWeeklyHours;
+    }
+
+    /** @brief {@code FULL_TIME}, {@code PART_TIME}, {@code MINIJOB} or {@code HONORARY}. */
+    public String getEmploymentType() {
+        return employmentType == null ? "" : employmentType;
+    }
+
+    public void setEmploymentType(String employmentType) {
+        this.employmentType = employmentType == null ? "" : employmentType;
+    }
+
+    /** @brief Locations this employee may work at (empty means unrestricted). */
+    public Set<Integer> getEligibleLocationIds() {
+        return eligibleLocationIds;
+    }
+
+    public void setEligibleLocationIds(Set<Integer> ids) {
+        this.eligibleLocationIds = ids == null ? Set.of() : ids;
     }
 
     /**

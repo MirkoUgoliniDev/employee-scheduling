@@ -117,6 +117,8 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
         return new Constraint[] {
                 requiredSkill(constraintFactory),
+                requiredRole(constraintFactory),
+                locationEligibility(constraintFactory),
                 noOverlappingShifts(constraintFactory),
                 atLeast10HoursBetweenTwoShifts(constraintFactory),
                 oneShiftPerDay(constraintFactory),
@@ -157,6 +159,50 @@ public class EmployeeSchedulingConstraintProvider implements ConstraintProvider 
                 .filter(shift -> shift.getEmployee() != null && !shift.isContext() && isMissingRequiredSkill(shift))
                 .penalize(HardSoftBigDecimalScore.ONE_HARD, EmployeeSchedulingConstraintProvider::durationMinutes)
                 .asConstraint("Missing required skill");
+    }
+
+    /**
+     * @brief Hard constraint: penalizes a position staffed with the wrong role.
+     *
+     * @details Customer assignments require a specific role per position (one anaesthetist plus
+     *          two MFAs, for example). Without this constraint the solver may legally fill a
+     *          physician slot with a medical assistant, because the required skill alone does not
+     *          forbid it. Penalized in minutes for the same reason as {@link #requiredSkill}: an
+     *          unqualified position must always cost more than leaving it visibly unfilled, so
+     *          "unfilled position" wins the tie instead of disappearing behind a wrong assignment.
+     *
+     * @param constraintFactory the factory used to create constraint streams
+     * @return the "Wrong role" constraint
+     */
+    Constraint requiredRole(ConstraintFactory constraintFactory) {
+        // Context shifts are excluded for the reason given in requiredSkill(): their violations
+        // are pre-existing facts outside the planning window and would make every solve infeasible.
+        return constraintFactory.forEach(Shift.class)
+                .filter(shift -> shift.getEmployee() != null && !shift.isContext()
+                        && !shift.getRequiredRole().isEmpty()
+                        && !shift.getRequiredRole().equals(shift.getEmployee().getRole()))
+                .penalize(HardSoftBigDecimalScore.ONE_HARD, EmployeeSchedulingConstraintProvider::durationMinutes)
+                .asConstraint("Wrong role");
+    }
+
+    /**
+     * @brief Hard constraint: penalizes work at a location the employee is not eligible for.
+     *
+     * @details An empty eligibility set means <b>unrestricted</b>. That default is deliberate:
+     *          installations created before {@code employee_locations} existed carry no rows, and
+     *          reading "no rows" as "no location allowed" would make every such plan infeasible
+     *          the moment the constraint ships.
+     *
+     * @param constraintFactory the factory used to create constraint streams
+     * @return the "Location not allowed" constraint
+     */
+    Constraint locationEligibility(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Shift.class)
+                .filter(shift -> shift.getEmployee() != null && !shift.isContext()
+                        && !shift.getEmployee().getEligibleLocationIds().isEmpty()
+                        && !shift.getEmployee().getEligibleLocationIds().contains(shift.getLocation_id()))
+                .penalize(HardSoftBigDecimalScore.ONE_HARD, EmployeeSchedulingConstraintProvider::durationMinutes)
+                .asConstraint("Location not allowed");
     }
 
     /** @brief IDs of only the skills actually flagged as `used` (null-safe). */

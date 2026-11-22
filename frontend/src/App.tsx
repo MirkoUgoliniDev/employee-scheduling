@@ -17,6 +17,8 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
 const ShiftsPage = lazy(() => import('./pages/ShiftsPage'))
+const CustomersPage = lazy(() => import('./pages/CustomersPage'))
+const AssignmentsPage = lazy(() => import('./pages/AssignmentsPage'))
 const HomePage = lazy(() => import('./pages/HomePage'))
 const EmployeesPage = lazy(() => import('./pages/EmployeesPage'))
 const SpecialistsPage = lazy(() => import('./pages/SpecialistsPage'))
@@ -76,6 +78,8 @@ function App() {
                 <Route path="/employees" element={<EmployeesPage />} />
                 <Route path="/specialists" element={<SpecialistsPage />} />
                 <Route path="/locations" element={<LocationsPage />} />
+                <Route path="/customers" element={<CustomersPage />} />
+                <Route path="/assignments" element={<AssignmentsPage />} />
                 <Route path="/skills" element={<Navigate to="/config?section=skills" replace />} />
                 <Route path="/dates" element={<DatesPage />} />
                 <Route path="/report" element={<ReportPage />} />

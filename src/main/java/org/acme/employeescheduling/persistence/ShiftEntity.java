@@ -40,6 +40,14 @@ public class ShiftEntity extends PanacheEntityBase {
     @Column(name = "employee_id")
     public Integer employeeId;
 
+    /** Owning customer assignment (V9); null for a standalone shift. */
+    @Column(name = "assignment_id")
+    public Integer assignmentId;
+
+    /** Required role of a materialised assignment position; empty for a standalone shift. */
+    @Column(name = "required_role", nullable = false)
+    public String requiredRole = "";
+
     /** INTEGER 0/1 in the DB (SQLite convention) — see SkillEntity. */
     @JdbcTypeCode(SqlTypes.INTEGER)
     @Column(name = "pinned", nullable = false)

@@ -42,6 +42,8 @@ export default defineConfig({
       '/j_security_check': 'http://localhost:8080',
       '/users': 'http://localhost:8080',
       '/specialists': 'http://localhost:8080',
+      '/customers': 'http://localhost:8080',
+      '/assignments': 'http://localhost:8080',
       '/email': 'http://localhost:8080',
     },
   },

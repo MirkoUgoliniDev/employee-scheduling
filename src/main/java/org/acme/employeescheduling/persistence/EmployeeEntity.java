@@ -47,4 +47,16 @@ public class EmployeeEntity extends PanacheEntityBase {
 
     @Column(name = "email", nullable = false)
     public String email = "";
+
+    /** {@code PHYSICIAN} or {@code MEDICAL_ASSISTANT} — see {@code shifts.required_role}. */
+    @Column(name = "role", nullable = false)
+    public String role = "MEDICAL_ASSISTANT";
+
+    /** Contracted weekly hours: the reference for fair distribution, not a hard cap. */
+    @Column(name = "contracted_weekly_hours", nullable = false)
+    public double contractedWeeklyHours = 40;
+
+    /** {@code FULL_TIME}, {@code PART_TIME}, {@code MINIJOB} or {@code HONORARY}. */
+    @Column(name = "employment_type", nullable = false)
+    public String employmentType = "FULL_TIME";
 }
