@@ -29,7 +29,8 @@ class SpaFallbackResourceTest {
                     .statusCode(200)
                     .contentType("text/html")
                     .header("Cache-Control", containsString("no-cache"))
-                    .body(containsString("<div id=\"root\"></div>"));
+                    // The mount node holds the boot spinner, so assert the node, not that it is empty.
+                    .body(containsString("<div id=\"root\""));
         }
     }
 
